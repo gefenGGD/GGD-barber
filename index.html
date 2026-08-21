@@ -714,7 +714,7 @@ async function loadSlots(){
     hours.break_end,
     Number(hours.slot_duration || 30)
   );
-const availableSlots = slots.filter(time => !bookedSet.has(time));
+const availableSlots = slots.filter(time => !bookedSet.has(String(time).slice(0,5)));
 
   box.innerHTML = "";
 
