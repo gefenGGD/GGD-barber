@@ -414,9 +414,9 @@ async function loadServices(){
   try{
 
     const data = await supabaseFetch(
-      "/rest/v1/services?select=id,name,description,price,duration_minutes,active&active=eq.true&order=id"
-    );
-
+  "/rest/v1/rpc/get_active_services",
+  { method: "POST" }
+);
     /*
       במקרה שנוצרו כפילויות בטבלה,
       נציג כל שירות פעם אחת בלבד.
