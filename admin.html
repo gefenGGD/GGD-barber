@@ -365,7 +365,9 @@ async function request(path, options={}){
 
   return data;
 }
-
+async function supabaseFetch(path, options = {}) {
+  return request(path, options);
+}
 
 /* =========================
    LOGIN
