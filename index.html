@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GGD Barber – קביעת תור</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#0b0b0b;color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+.container{max-width:520px;margin:auto;padding:18px}
+.brand{text-align:center;padding:18px 0 24px}
+.logo{font-size:30px;font-weight:800;letter-spacing:6px}
+.sub{color:#888;font-size:11px;letter-spacing:3px;margin-top:3px}
+.card{
+  background:#151515;border:1px solid #292929;border-radius:18px;
+  padding:18px;margin-bottom:14px;
+}
+h2{font-size:20px;margin:0 0 14px}
+.services{display:grid;gap:10px}
+.service{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px;border:1px solid #303030;border-radius:15px;
+  cursor:pointer;transition:.15s;
+}
+.service.selected{border-color:#fff;background:#202020}
+.service small{display:block;color:#888;margin-top:5px}
+.price{font-weight:700;white-space:nowrap}
+.dates{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px}
+.date{
+  min-width:78px;padding:12px 8px;border:1px solid #303030;
+  border-radius:13px;text-align:center;cursor:pointer
+}
+.date .day{font-size:12px;color:#999;margin-bottom:5px}
+.date.selected{background:#fff;color:#000;border-color:#fff}
+.date.selected .day{color:#555}
+.times{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.time{
+  padding:13px 5px;text-align:center;border:1px solid #303030;
+  border-radius:11px;cursor:pointer
+}
+.time.selected{background:#fff;color:#000;border-color:#fff}
+.time.disabled{color:#555;background:#101010;cursor:not-allowed;text-decoration:line-through}
+input{
+  width:100%;padding:15px;margin-top:9px;border:1px solid #333;
+  border-radius:11px;background:#101010;color:#fff;font-size:16px;
+  outline:none
+}
+input:focus{border-color:#fff}
+button{
+  width:100%;padding:16px;border:0;border-radius:12px;
+  background:#fff;color:#000;font-size:17px;font-weight:700;cursor:pointer
+}
+button:disabled{opacity:.45;cursor:not-allowed}
+.status{text-align:center;color:#999;min-height:22px;margin:12px 0}
+.error{color:#ff7070}
+.success{display:none;text-align:center}
+.success .check{font-size:45px}
+.summary{color:#bbb;line-height:1.8}
+.nav{
+  position:sticky;bottom:12px;background:#181818;border:1px solid #333;
+  border-radius:18px;padding:10px;text-align:center;color:#aaa;font-size:13px
+}
+.hidden{display:none!important}
+.loading{color:#888;text-align:center;padding:10px}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="brand">
+    <div class="logo">GGD</div>
+    <div class="sub">BARBER · BOOKING</div>
+  </div>
+
+  <div id="booking">
+
+    <div class="card">
+      <h2>בחר שירות</h2>
+      <div class="services" id="services"></div>
+    </div>
+
+    <div class="card">
+      <h2>בחר תאריך</h2>
+      <div class="dates" id="dates"></div>
+    </div>
+
+    <div class="card">
+      <h2>בחר שעה</h2>
+      <div id="timeStatus" class="loading">טוען שעות...</div>
+      <div class="times" id="times"></div>
+    </div>
+
+    <div class="card">
+      <h2>פרטים</h2>
+      <input id="name" type="text" placeholder="שם מלא" autocomplete="name">
+      <input id="phone" type="tel" placeholder="מספר טלפון" autocomplete="tel">
+    </div>
+
+    <div id="status" class="status"></div>
+    <button id="book" disabled>קביעת תור</button>
+  </div>
+
+  <div id="success" class="card success">
+    <div class="check">✓</div>
+    <h2>התור נקבע בהצלחה!</h2>
+    <div id="successText" class="summary"></div>
+    <button onclick="location.reload()">קביעת תור נוסף</button>
+  </div>
+
+  <div class="nav">✂️ GGD Barber · קביעת תור</div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
+
+const SERVICES = [
+  {name:"תספורת", price:70, desc:"Fade / Classic"},
+  {name:"תספורת + זקן", price:90, desc:"Full service"},
+  {name:"סידור זקן", price:40, desc:"Beard trim"}
+];
+
+const WORKING_HOURS = {
+  0:{open:"10:00",close:"18:30"}, // א
+  1:{open:"10:00",close:"18:30"}, // ב
+  2:{open:"10:00",close:"18:30"}, // ג
+  3:{open:"10:00",close:"18:30"}, // ד
+  4:{open:"10:00",close:"19:00"}, // ה
+  5:{open:"09:00",close:"12:30"}, // ו
+  6:null                           // שבת
+};
+
+const BREAK_START = "13:00";
+const BREAK_END   = "14:00";
+const SLOT_MINUTES = 30;
+
+let service = SERVICES[0];
+let selectedDate = null;
+let selectedTime = null;
+
+function iso(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function pretty(d){
+  return d.toLocaleDateString("he-IL",{weekday:"long",day:"numeric",month:"long"});
+}
+function minutes(t){
+  const [h,m]=t.split(":").map(Number);
+  return h*60+m;
+}
+function hhmm(n){
+  return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+}
+
+async function rpc(name, body){
+  const r = await fetch(SUPABASE_URL+"/rest/v1/rpc/"+name,{
+    method:"POST",
+    headers:{
+      "apikey":SUPABASE_KEY,
+      "Authorization":"Bearer "+SUPABASE_KEY,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify(body)
+  });
+  const text=await r.text();
+  let data;
+  try{data=text?JSON.parse(text):null}catch{data=text}
+  if(!r.ok) throw new Error(typeof data==="string"?data:(data?.message||"Supabase error"));
+  return data;
+}
+
+function setupServices(){
+  const box=document.getElementById("services");
+  box.innerHTML="";
+  SERVICES.forEach((s,i)=>{
+    const el=document.createElement("div");
+    el.className="service"+(i===0?" selected":"");
+    el.innerHTML=`<div><strong>${s.name}</strong><small>${s.desc}</small></div><div class="price">₪${s.price}</div>`;
+    el.onclick=()=>{
+      service=s;
+      document.querySelectorAll(".service").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      updateButton();
+    };
+    box.appendChild(el);
+  });
+}
+
+function setupDates(){
+  const box=document.getElementById("dates");
+  box.innerHTML="";
+  const today=new Date();
+  today.setHours(0,0,0,0);
+
+  let added=0;
+  for(let i=0;i<30 && added<14;i++){
+    const d=new Date(today);
+    d.setDate(today.getDate()+i);
+    if(!WORKING_HOURS[d.getDay()]) continue;
+
+    const el=document.createElement("div");
+    el.className="date";
+    el.innerHTML=`<div class="day">${d.toLocaleDateString("he-IL",{weekday:"short"})}</div><strong>${d.getDate()}/${d.getMonth()+1}</strong>`;
+    el.onclick=()=>{
+      selectedDate=d;
+      selectedTime=null;
+      document.querySelectorAll(".date").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      loadSlots();
+      updateButton();
+    };
+    box.appendChild(el);
+
+    if(!selectedDate){
+      selectedDate=d;
+      el.classList.add("selected");
+    }
+    added++;
+  }
+  loadSlots();
+}
+
+function getSlotsForDate(d){
+  const hours=WORKING_HOURS[d.getDay()];
+  if(!hours) return [];
+  const out=[];
+  for(let m=minutes(hours.open); m<minutes(hours.close); m+=SLOT_MINUTES){
+    const end=m+SLOT_MINUTES;
+    if(end>minutes(hours.close)) continue;
+
+    // Friday ends before the break anyway. Other days: block 13:00-14:00.
+    if(m>=minutes(BREAK_START) && m<minutes(BREAK_END)) continue;
+    if(m<minutes(BREAK_START) && end>minutes(BREAK_START)) continue;
+
+    out.push(hhmm(m));
+  }
+  return out;
+}
+
+async function loadSlots(){
+  const box=document.getElementById("times");
+  const status=document.getElementById("timeStatus");
+  box.innerHTML="";
+  selectedTime=null;
+  updateButton();
+
+  if(!selectedDate){status.textContent="בחר תאריך";return;}
+
+  status.textContent="בודק שעות פנויות...";
+  const slots=getSlotsForDate(selectedDate);
+
+  try{
+    const data=await rpc("get_booked_slots",{p_date:iso(selectedDate)});
+    const rows=Array.isArray(data)?data:[];
+    const booked=new Set(rows.map(x=>{
+      if(typeof x==="string") return x.slice(0,5);
+      return String(x.time||x.slot_time||x.p_time||"").slice(0,5);
+    }).filter(Boolean));
+
+    status.textContent=slots.length?"":"אין שעות זמינות";
+    slots.forEach(t=>{
+      const el=document.createElement("div");
+      const taken=booked.has(t);
+      el.className="time"+(taken?" disabled":"");
+      el.textContent=taken?"תפוס":t;
+      if(!taken){
+        el.onclick=()=>{
+          selectedTime=t;
+          document.querySelectorAll(".time").forEach(x=>x.classList.remove("selected"));
+          el.classList.add("selected");
+          updateButton();
+        };
+      }
+      box.appendChild(el);
+    });
+  }catch(err){
+    console.error(err);
+    status.textContent="לא הצלחנו לטעון את השעות. נסה לרענן.";
+    status.className="status error";
+  }
+}
+
+function updateButton(){
+  const name=document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+  document.getElementById("book").disabled=!(service&&selectedDate&&selectedTime&&name&&phone);
+}
+
+document.getElementById("name").addEventListener("input",updateButton);
+document.getElementById("phone").addEventListener("input",updateButton);
+
+document.getElementById("book").onclick=async()=>{
+  const btn=document.getElementById("book");
+  const status=document.getElementById("status");
+  const name=document.getElementById("name").value.trim();
+  const phone=document.getElementById("phone").value.trim();
+
+  btn.disabled=true;
+  btn.textContent="קובע תור...";
+  status.textContent="";
+
+  try{
+    const data=await rpc("create_booking",{
+      p_name:name,
+      p_phone:phone,
+      p_service:service.name,
+      p_date:iso(selectedDate),
+      p_time:selectedTime+":00"
+    });
+
+    if(!data?.success){
+      status.textContent=data?.message||"לא ניתן לקבוע את התור.";
+      status.className="status error";
+      await loadSlots();
+      return;
+    }
+
+    document.getElementById("booking").style.display="none";
+    document.getElementById("success").style.display="block";
+    document.getElementById("successText").innerHTML=
+      `<strong>${name}</strong><br>
+       ${service.name} · ₪${service.price}<br>
+       ${pretty(selectedDate)}<br>
+       שעה: ${selectedTime}<br><br>
+       ${phone}`;
+  }catch(err){
+    console.error(err);
+    status.textContent="אירעה שגיאה בקביעת התור. נסה שוב.";
+    status.className="status error";
+  }finally{
+    btn.disabled=false;
+    btn.textContent="קביעת תור";
+    updateButton();
+  }
+};
+
+setupServices();
+setupDates();
+updateButton();
+</script>
+</body>
+</html>
