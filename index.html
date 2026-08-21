@@ -927,7 +927,14 @@ async function bookAppointment(){
 
     }
 
-
+localStorage.setItem("myBooking", JSON.stringify({
+  name: name,
+  service: selectedService.name,
+  date: selectedDate,
+  time: selectedTime,
+  price: selectedService.price,
+  phone: phone
+}));
     document
       .getElementById("booking")
       .classList.add("hidden");
@@ -1101,18 +1108,48 @@ async function init(){
 
 init();
 function showMyBooking(){
-    const booking = document.getElementById("success");
 
-    if(booking){
-        booking.classList.remove("hidden");
+    const saved = localStorage.getItem("myBooking");
 
-        booking.scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-        });
-    }else{
+    if(!saved){
         alert("אין כרגע תור שמור");
+        return;
     }
+
+    const data = JSON.parse(saved);
+
+    const success = document.getElementById("success");
+
+    if(!success){
+        alert("לא נמצא אזור התור");
+        return;
+    }
+
+    success.classList.remove("hidden");
+
+    document.getElementById("successText").innerHTML = `
+        <strong>${escapeHtml(data.name)}</strong>
+        <br><br>
+
+        ${escapeHtml(data.service)}
+        <br><br>
+
+        ${formatDate(data.date)}
+        <br><br>
+
+        שעה: <strong>${escapeHtml(data.time)}</strong>
+        <br><br>
+
+        מחיר: ₪${Number(data.price).toFixed(0)}
+        <br><br>
+
+        הטלפון שלך: ${escapeHtml(data.phone)}
+    `;
+
+    success.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
 }
 </script>
 
