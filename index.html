@@ -1112,13 +1112,10 @@ function escapeHtml(value){
 
 async function init(){
 
-  await Promise.all([
-    loadServices(),
-    loadWorkingHours()
-  ]);
+    loadServices();
+    loadWorkingHours();
 
 }
-
 init();
 function showMyBooking(){
   const saved = localStorage.getItem("myBooking");
