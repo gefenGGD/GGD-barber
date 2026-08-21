@@ -1112,6 +1112,23 @@ function escapeHtml(value){
 
 async function init(){
 
+    const servicesBox = document.getElementById("services");
+    const datesBox = document.getElementById("dates");
+
+    servicesBox.innerHTML =
+        '<div class="status">בודק חיבור לשירותים...</div>';
+
+    datesBox.innerHTML =
+        '<div class="status">בודק חיבור לתאריכים...</div>';
+
+    setTimeout(() => {
+        servicesBox.innerHTML =
+            '<div class="status error">הטעינה של השירותים נתקעה.</div>';
+
+        datesBox.innerHTML =
+            '<div class="status error">הטעינה של התאריכים נתקעה.</div>';
+    }, 12000);
+
     loadServices();
     loadWorkingHours();
 
