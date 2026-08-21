@@ -1014,7 +1014,158 @@ if(
     "ggd_access_token"
   )
 ){
+/* =========================
+   SERVICE MANAGEMENT
+========================= */
 
+async function loadServiceManager(){
+
+  const old = document.getElementById("service-manager");
+  if(old) old.remove();
+
+  const wrap = document.createElement("div");
+  wrap.id = "service-manager";
+
+  wrap.style.cssText = `
+    margin:30px auto;
+    max-width:700px;
+    padding:20px;
+    background:#151515;
+    border:1px solid #333;
+    border-radius:18px;
+    direction:rtl;
+    color:white;
+  `;
+
+  wrap.innerHTML = `
+    <h2 style="margin-top:0">💈 ניהול שירותים</h2>
+    <div id="service-list">טוען שירותים...</div>
+  `;
+
+  document.body.appendChild(wrap);
+
+  try{
+
+    const services = await supabaseFetch(
+      "/rest/v1/services?select=id,name,description,price,duration_minutes,active&order=id"
+    );
+
+    const list = document.getElementById("service-list");
+    list.innerHTML = "";
+
+    services.forEach(service => {
+
+      const item = document.createElement("div");
+
+      item.style.cssText = `
+        background:#202020;
+        border-radius:14px;
+        padding:15px;
+        margin:12px 0;
+      `;
+
+      item.innerHTML = `
+        <input
+          value="${escapeHtml(service.name || "")}"
+          data-field="name"
+          style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0"
+        >
+
+        <input
+          value="${service.price ?? ""}"
+          data-field="price"
+          type="number"
+          style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0"
+        >
+
+        <input
+          value="${service.duration_minutes ?? ""}"
+          data-field="duration_minutes"
+          type="number"
+          placeholder="משך בדקות"
+          style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0"
+        >
+
+        <button
+          style="
+            width:100%;
+            padding:12px;
+            border:0;
+            border-radius:10px;
+            background:white;
+            color:black;
+            font-weight:bold;
+          "
+        >
+          💾 שמור
+        </button>
+      `;
+
+      const button = item.querySelector("button");
+
+      button.onclick = async () => {
+
+        button.disabled = true;
+        button.textContent = "שומר...";
+
+        try{
+
+          const name = item.querySelector('[data-field="name"]').value;
+          const price = Number(item.querySelector('[data-field="price"]').value);
+          const duration = Number(
+            item.querySelector('[data-field="duration_minutes"]').value
+          );
+
+          await supabaseFetch(
+            `/rest/v1/services?id=eq.${service.id}`,
+            {
+              method:"PATCH",
+              headers:{
+                "Content-Type":"application/json",
+                "Prefer":"return=minimal"
+              },
+              body:JSON.stringify({
+                name:name,
+                price:price,
+                duration_minutes:duration
+              })
+            }
+          );
+
+          button.textContent = "✅ נשמר!";
+          
+          setTimeout(() => {
+            button.textContent = "💾 שמור";
+            button.disabled = false;
+          },1500);
+
+        }catch(error){
+
+          console.error(error);
+          button.textContent = "❌ שגיאה";
+          button.disabled = false;
+
+          alert("שגיאה בשמירת השירות");
+        }
+      };
+
+      list.appendChild(item);
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById("service-list").innerHTML =
+      `<div style="color:#ff5555">❌ לא הצלחנו לטעון את השירותים</div>`;
+  }
+}
+
+
+/* הפעלה אחרי טעינת האדמין */
+setTimeout(() => {
+  loadServiceManager();
+}, 1000);
   showAdmin();
 
 }
