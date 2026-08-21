@@ -1163,10 +1163,11 @@ async function loadServiceManager(){
 
 
 /* הפעלה אחרי טעינת האדמין */
+showAdmin();
+
 setTimeout(() => {
   loadServiceManager();
 }, 1000);
-  showAdmin();
 
 }
 
