@@ -3,71 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>GGD Barber - קביעת תור</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
-  background:#0b0b0b;
+  background:#090909;
   color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 
 .container{
   max-width:520px;
   margin:auto;
-  padding:20px;
+  padding:22px 16px 100px;
 }
 
 .brand{
   text-align:center;
-  padding:25px 0;
+  padding:28px 0 32px;
 }
 
 .logo{
   font-size:42px;
   font-weight:900;
-  letter-spacing:8px;
+  letter-spacing:12px;
 }
 
-.subtitle{
+.sub{
   color:#999;
-  font-size:12px;
-  letter-spacing:3px;
-  margin-top:5px;
+  font-size:13px;
+  letter-spacing:4px;
+  margin-top:8px;
 }
 
 .card{
   background:#151515;
   border:1px solid #292929;
-  border-radius:20px;
+  border-radius:24px;
   padding:20px;
-  margin-bottom:18px;
+  margin-bottom:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
 
 h2{
-  font-size:20px;
-  margin:0 0 15px;
+  margin:0 0 18px;
+  font-size:22px;
 }
 
 .services{
-  display:flex;
-  flex-direction:column;
+  display:grid;
   gap:10px;
 }
 
 .service{
-  background:#111;
+  background:#191919;
   border:1px solid #303030;
-  border-radius:15px;
-  padding:18px;
+  border-radius:16px;
+  padding:16px;
   cursor:pointer;
-  transition:.2s;
+  transition:.15s;
 }
 
 .service:hover{
@@ -81,58 +78,64 @@ h2{
 }
 
 .service-name{
-  font-size:18px;
-  font-weight:bold;
+  font-size:17px;
+  font-weight:700;
 }
 
-.service-info{
-  display:flex;
-  justify-content:space-between;
-  margin-top:7px;
+.service-description{
   color:#999;
-  font-size:14px;
+  font-size:13px;
+  margin-top:5px;
 }
 
-.service.selected .service-info{
+.service.selected .service-description{
   color:#555;
 }
 
+.price{
+  font-weight:800;
+  font-size:17px;
+  margin-top:8px;
+}
+
 .dates{
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
   gap:8px;
-  overflow-x:auto;
-  padding-bottom:5px;
 }
 
 .date{
-  min-width:75px;
-  padding:12px 8px;
-  border:1px solid #333;
-  border-radius:13px;
+  background:#191919;
+  border:1px solid #303030;
+  border-radius:14px;
+  padding:13px 7px;
   text-align:center;
   cursor:pointer;
-  background:#111;
 }
 
 .date.selected{
   background:#fff;
   color:#000;
-  border-color:#fff;
 }
 
-.date-day{
-  font-size:12px;
+.date.disabled{
+  opacity:.3;
+  cursor:not-allowed;
+}
+
+.day{
+  font-size:13px;
   color:#999;
-  margin-bottom:5px;
 }
 
-.date.selected .date-day{
+.date.selected .day{
   color:#555;
 }
 
 .date-number{
-  font-size:18px;
-  font-weight:bold;
+  font-size:19px;
+  font-weight:800;
+  margin-top:3px;
 }
 
 .times{
@@ -142,18 +145,17 @@ h2{
 }
 
 .time{
-  padding:14px 5px;
+  padding:13px 5px;
   text-align:center;
-  border:1px solid #333;
+  border:1px solid #303030;
   border-radius:12px;
-  background:#111;
+  background:#191919;
   cursor:pointer;
 }
 
 .time.selected{
   background:#fff;
   color:#000;
-  border-color:#fff;
 }
 
 .time.disabled{
@@ -168,25 +170,25 @@ input{
   margin-top:10px;
   border-radius:12px;
   border:1px solid #333;
-  background:#0f0f0f;
+  background:#101010;
   color:#fff;
   font-size:16px;
   outline:none;
 }
 
 input:focus{
-  border-color:#777;
+  border-color:#888;
 }
 
 button{
   width:100%;
-  padding:17px;
+  padding:16px;
   border:0;
   border-radius:14px;
   background:#fff;
   color:#000;
   font-size:17px;
-  font-weight:bold;
+  font-weight:800;
   cursor:pointer;
 }
 
@@ -198,13 +200,12 @@ button:disabled{
 .status{
   text-align:center;
   color:#999;
-  font-size:14px;
   margin-top:12px;
-  min-height:20px;
+  line-height:1.5;
 }
 
 .error{
-  color:#ff7777;
+  color:#ff6b6b;
 }
 
 .success{
@@ -212,51 +213,54 @@ button:disabled{
 }
 
 .success-icon{
-  font-size:50px;
+  font-size:45px;
   margin-bottom:10px;
 }
 
 .summary{
-  line-height:1.8;
-  color:#ccc;
+  background:#101010;
+  border-radius:15px;
+  padding:15px;
+  margin:15px 0;
+  line-height:1.9;
 }
 
 .nav{
-  position:sticky;
+  position:fixed;
   bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(490px,calc(100% - 24px));
   background:#181818;
-  border:1px solid #333;
-  border-radius:20px;
-  padding:13px;
-  display:flex;
-  justify-content:space-around;
-  margin-top:20px;
+  border:1px solid #303030;
+  border-radius:22px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  padding:10px;
+  z-index:20;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
 }
 
 .nav span{
+  text-align:center;
   color:#aaa;
   font-size:12px;
-  text-align:center;
 }
 
-.nav span:first-child{
-  color:#fff;
+.nav b{
+  display:block;
+  font-size:20px;
+  margin-bottom:3px;
 }
 
 .hidden{
-  display:none;
+  display:none!important;
 }
 
 .loading{
+  color:#888;
   text-align:center;
-  color:#999;
-  padding:15px;
-}
-
-@media(max-width:380px){
-  .times{
-    grid-template-columns:repeat(2,1fr);
-  }
+  padding:20px;
 }
 </style>
 </head>
@@ -267,114 +271,94 @@ button:disabled{
 
   <div class="brand">
     <div class="logo">GGD</div>
-    <div class="subtitle">BARBER • BOOKING</div>
+    <div class="sub">BARBER • BOOKING</div>
   </div>
 
-  <!-- BOOKING -->
   <div id="booking">
 
     <div class="card">
       <h2>בחר שירות</h2>
-
       <div id="services" class="services">
         <div class="loading">טוען שירותים...</div>
       </div>
     </div>
 
-
     <div class="card">
       <h2>בחר תאריך</h2>
-
       <div id="dates" class="dates">
         <div class="loading">טוען תאריכים...</div>
       </div>
     </div>
 
-
     <div class="card">
       <h2>בחר שעה</h2>
-
       <div id="times" class="times">
         <div class="loading">בחר תאריך...</div>
       </div>
-
       <div id="timeStatus" class="status"></div>
     </div>
-
 
     <div class="card">
       <h2>פרטים</h2>
 
-      <input
-        id="name"
-        type="text"
-        placeholder="שם מלא"
-        autocomplete="name"
-      >
+      <input id="name" type="text" placeholder="שם מלא">
 
-      <input
-        id="phone"
-        type="tel"
-        placeholder="מספר טלפון"
-        autocomplete="tel"
-      >
-    </div>
+      <input id="phone" type="tel" placeholder="מספר טלפון">
 
-
-    <div class="card">
-      <h2>סיכום</h2>
-
-      <div id="summary" class="summary">
-        בחר שירות, תאריך ושעה
+      <div style="margin-top:15px">
+        <button id="book" disabled>קביעת תור</button>
       </div>
-
-      <br>
-
-      <button id="book" disabled>
-        קביעת תור
-      </button>
 
       <div id="status" class="status"></div>
     </div>
 
   </div>
 
-
-  <!-- SUCCESS -->
   <div id="success" class="card success hidden">
-
     <div class="success-icon">✓</div>
-
     <h2>התור נקבע בהצלחה!</h2>
 
     <div id="successText" class="summary"></div>
 
-    <br>
-
-    <button onclick="location.reload()">
-      קביעת תור נוסף
-    </button>
-
+    <button onclick="location.reload()">קביעת תור נוסף</button>
   </div>
 
+</div>
 
-  <div class="nav">
-    <span>📍<br>מיקום</span>
-    <span>📅<br>התור שלי</span>
-    <span>💈<br>קביעת תור</span>
-  </div>
+<div class="nav">
+  <span>
+    <b>📍</b>
+    מיקום
+  </span>
 
+  <span>
+    <b>📅</b>
+    התור שלי
+  </span>
+
+  <span>
+    <b>💈</b>
+    קביעת תור
+  </span>
 </div>
 
 
 <script>
 
+/* =========================
+   SUPABASE
+========================= */
+
 const SUPABASE_URL =
 "https://cgvyizfjizbnevueasbj.supabase.co";
 
 const SUPABASE_KEY =
-"sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
+"sb_publishable_kQ51sDDPA1FaXH0szLBlYw_H2U9qrQ9";
 
+
+/* =========================
+   VARIABLES
+========================= */
 
 let services = [];
 let workingHours = [];
@@ -384,40 +368,44 @@ let selectedDate = null;
 let selectedTime = null;
 
 
-/* ------------------------------------------------ */
-/* SUPABASE REQUEST */
-/* ------------------------------------------------ */
+/* =========================
+   SUPABASE REQUEST
+========================= */
 
-async function rpc(functionName, body){
+async function supabaseFetch(path, options = {}){
 
   const response = await fetch(
-    SUPABASE_URL + "/rest/v1/rpc/" + functionName,
+    SUPABASE_URL + path,
     {
-      method:"POST",
-
+      ...options,
       headers:{
         "apikey":SUPABASE_KEY,
         "Authorization":"Bearer " + SUPABASE_KEY,
-        "Content-Type":"application/json"
-      },
-
-      body:JSON.stringify(body)
+        "Content-Type":"application/json",
+        ...(options.headers || {})
+      }
     }
   );
 
-  const text = await response.text();
+  if(!response.ok){
 
-  try{
-    return JSON.parse(text);
-  }catch{
-    return null;
+    const text = await response.text();
+
+    throw new Error(
+      "Supabase error: " +
+      response.status +
+      " " +
+      text
+    );
   }
+
+  return response.json();
 }
 
 
-/* ------------------------------------------------ */
-/* LOAD SERVICES */
-/* ------------------------------------------------ */
+/* =========================
+   LOAD SERVICES
+========================= */
 
 async function loadServices(){
 
@@ -425,26 +413,37 @@ async function loadServices(){
 
   try{
 
-    const response = await fetch(
-      SUPABASE_URL +
-      "/rest/v1/services?select=id,name,description,price,duration_minutes&active=eq.true&order=id",
-      {
-        headers:{
-          "apikey":SUPABASE_KEY,
-          "Authorization":"Bearer " + SUPABASE_KEY
-        }
-      }
+    const data = await supabaseFetch(
+      "/rest/v1/services?select=id,name,description,price,duration_minutes,active&active=eq.true&order=id"
     );
 
-    if(!response.ok){
-      throw new Error("services error");
+    /*
+      במקרה שנוצרו כפילויות בטבלה,
+      נציג כל שירות פעם אחת בלבד.
+    */
+
+    const unique = [];
+
+    const names = new Set();
+
+    for(const service of data){
+
+      if(!names.has(service.name)){
+
+        names.add(service.name);
+        unique.push(service);
+
+      }
+
     }
 
-    services = await response.json();
+    services = unique;
 
     if(!services.length){
+
       box.innerHTML =
-        '<div class="loading">אין שירותים זמינים</div>';
+        '<div class="status error">לא נמצאו שירותים</div>';
+
       return;
     }
 
@@ -452,49 +451,44 @@ async function loadServices(){
 
     services.forEach(service => {
 
-      const div = document.createElement("div");
+      const el = document.createElement("div");
 
-      div.className = "service";
+      el.className = "service";
 
-      div.innerHTML = `
+      el.innerHTML = `
         <div class="service-name">
           ${escapeHtml(service.name)}
         </div>
 
-        <div class="service-info">
-          <span>
-            ${escapeHtml(service.description || "")}
-          </span>
+        <div class="service-description">
+          ${escapeHtml(service.description || "")}
+        </div>
 
-          <span>
-            ₪${service.price}
-            •
-            ${service.duration_minutes} דק׳
-          </span>
+        <div class="price">
+          ₪${Number(service.price).toFixed(0)}
         </div>
       `;
 
-      div.addEventListener("click", () => {
+      el.onclick = () => {
 
         document
           .querySelectorAll(".service")
           .forEach(x => x.classList.remove("selected"));
 
-        div.classList.add("selected");
+        el.classList.add("selected");
 
         selectedService = service;
-
         selectedTime = null;
 
-        updateSummary();
+        updateBookButton();
 
         if(selectedDate){
           loadSlots();
         }
 
-      });
+      };
 
-      box.appendChild(div);
+      box.appendChild(el);
 
     });
 
@@ -503,54 +497,41 @@ async function loadServices(){
     console.error(error);
 
     box.innerHTML =
-      '<div class="loading error">לא הצלחנו לטעון את השירותים</div>';
-
+      '<div class="status error">לא הצלחנו לטעון את השירותים</div>';
   }
-
 }
 
 
-/* ------------------------------------------------ */
-/* LOAD WORKING HOURS */
-/* ------------------------------------------------ */
+/* =========================
+   LOAD WORKING HOURS
+========================= */
 
 async function loadWorkingHours(){
 
   try{
 
-    const response = await fetch(
-      SUPABASE_URL +
-      "/rest/v1/working_hours?select=day_of_week,day_name,is_open,open_time,close_time,break_start,break_end,slot_duration&order=day_of_week",
-      {
-        headers:{
-          "apikey":SUPABASE_KEY,
-          "Authorization":"Bearer " + SUPABASE_KEY
-        }
-      }
+    workingHours = await supabaseFetch(
+      "/rest/v1/working_hours?select=day_of_week,day_name,is_open,open_time,close_time,break_start,break_end,slot_duration&is_open=eq.true&order=day_of_week"
     );
 
-    if(!response.ok){
-      throw new Error("working hours error");
-    }
-
-    workingHours = await response.json();
+    renderDates();
 
   }catch(error){
 
     console.error(error);
 
-    workingHours = [];
+    document.getElementById("dates").innerHTML =
+      '<div class="status error">לא הצלחנו לטעון את שעות העבודה</div>';
 
   }
-
 }
 
 
-/* ------------------------------------------------ */
-/* DATES */
-/* ------------------------------------------------ */
+/* =========================
+   DATES
+========================= */
 
-function setupDates(){
+function renderDates(){
 
   const box = document.getElementById("dates");
 
@@ -560,11 +541,15 @@ function setupDates(){
 
   today.setHours(0,0,0,0);
 
-  for(let i=0;i<30;i++){
+  /*
+    מציג 21 ימים קדימה
+  */
+
+  for(let i=0;i<21;i++){
 
     const date = new Date(today);
 
-    date.setDate(today.getDate()+i);
+    date.setDate(today.getDate() + i);
 
     const dayOfWeek = date.getDay();
 
@@ -573,68 +558,92 @@ function setupDates(){
     );
 
     if(!hours || !hours.is_open){
+
       continue;
     }
 
-    const div = document.createElement("div");
+    const el = document.createElement("div");
 
-    div.className = "date";
+    el.className = "date";
 
     const dayNames = [
-      "א׳",
-      "ב׳",
-      "ג׳",
-      "ד׳",
-      "ה׳",
-      "ו׳",
-      "ש׳"
+      "ראשון",
+      "שני",
+      "שלישי",
+      "רביעי",
+      "חמישי",
+      "שישי",
+      "שבת"
     ];
 
-    div.innerHTML = `
-      <div class="date-day">
+    el.innerHTML = `
+      <div class="day">
         ${dayNames[dayOfWeek]}
       </div>
 
       <div class="date-number">
-        ${date.getDate()}
+        ${date.getDate()}/${date.getMonth()+1}
       </div>
     `;
 
-    div.addEventListener("click", () => {
+    el.onclick = () => {
 
       document
         .querySelectorAll(".date")
         .forEach(x => x.classList.remove("selected"));
 
-      div.classList.add("selected");
+      el.classList.add("selected");
 
-      selectedDate = new Date(date);
-
+      selectedDate = date;
       selectedTime = null;
 
-      updateSummary();
-
+      updateBookButton();
       loadSlots();
 
-    });
+    };
 
-    box.appendChild(div);
-
-  }
-
-  if(!box.children.length){
-
-    box.innerHTML =
-      '<div class="loading">אין ימים זמינים</div>';
+    box.appendChild(el);
 
   }
 
 }
 
 
-/* ------------------------------------------------ */
-/* TIME SLOTS */
-/* ------------------------------------------------ */
+/* =========================
+   LOAD BOOKED SLOTS
+========================= */
+
+async function getBookedSlots(date){
+
+  const dateString = isoDate(date);
+
+  try{
+
+    const data = await supabaseFetch(
+      "/rest/v1/rpc/get_booked_slots",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          p_date:dateString
+        })
+      }
+    );
+
+    return Array.isArray(data) ? data : [];
+
+  }catch(error){
+
+    console.error(error);
+
+    return [];
+
+  }
+}
+
+
+/* =========================
+   CREATE TIME SLOTS
+========================= */
 
 async function loadSlots(){
 
@@ -650,10 +659,9 @@ async function loadSlots(){
   if(!selectedDate){
 
     box.innerHTML =
-      '<div class="loading">בחר תאריך...</div>';
+      '<div class="status">בחר תאריך</div>';
 
     return;
-
   }
 
   const dayOfWeek = selectedDate.getDay();
@@ -662,173 +670,151 @@ async function loadSlots(){
     x => Number(x.day_of_week) === dayOfWeek
   );
 
-  if(!hours || !hours.is_open){
+  if(!hours){
 
     box.innerHTML =
-      '<div class="loading">המספרה סגורה ביום הזה</div>';
+      '<div class="status">אין שעות עבודה ביום הזה</div>';
 
     return;
-
   }
 
+  const booked = await getBookedSlots(selectedDate);
 
-  const dateString = iso(selectedDate);
+  const bookedSet = new Set();
 
-  let booked = [];
+  booked.forEach(item => {
 
-  try{
+    if(typeof item === "string"){
 
-    const data = await rpc(
-      "get_booked_slots",
-      {
-        p_date:dateString
-      }
-    );
+      bookedSet.add(item.slice(0,5));
 
-    if(Array.isArray(data)){
-      booked = data.map(x => x.booking_time);
+    }else if(item && item.time){
+
+      bookedSet.add(String(item.time).slice(0,5));
+
+    }else if(item && item.booked_time){
+
+      bookedSet.add(String(item.booked_time).slice(0,5));
+
     }
 
-  }catch(error){
+  });
 
-    console.error(error);
 
-  }
+  const slots = generateSlots(
+    hours.open_time,
+    hours.close_time,
+    hours.break_start,
+    hours.break_end,
+    Number(hours.slot_duration || 30)
+  );
 
 
   box.innerHTML = "";
 
-  const duration =
-    selectedService?.duration_minutes || 30;
+  if(!slots.length){
+
+    box.innerHTML =
+      '<div class="status">אין שעות זמינות</div>';
+
+    return;
+  }
 
 
-  let currentMinutes =
-    timeToMinutes(hours.open_time);
+  slots.forEach(time => {
 
-  const closeMinutes =
-    timeToMinutes(hours.close_time);
+    const el = document.createElement("div");
 
-  const breakStart =
-    hours.break_start
-      ? timeToMinutes(hours.break_start)
-      : null;
+    const isBooked = bookedSet.has(time);
 
-  const breakEnd =
-    hours.break_end
-      ? timeToMinutes(hours.break_end)
-      : null;
+    el.className =
+      "time" + (isBooked ? " disabled" : "");
+
+    el.textContent =
+      isBooked ? "תפוס" : time;
 
 
-  while(currentMinutes + duration <= closeMinutes){
+    if(!isBooked){
 
-    const timeString =
-      minutesToTime(currentMinutes);
-
-    const div =
-      document.createElement("div");
-
-    div.className = "time";
-
-    div.textContent = timeString;
-
-
-    let disabled = false;
-
-
-    /* BREAK */
-
-    if(
-      breakStart !== null &&
-      breakEnd !== null &&
-      currentMinutes < breakEnd &&
-      currentMinutes + duration > breakStart
-    ){
-      disabled = true;
-    }
-
-
-    /* BOOKED */
-
-    for(const bookedTime of booked){
-
-      const bookedStart =
-        timeToMinutes(bookedTime);
-
-      const bookedEnd =
-        bookedStart + 30;
-
-      if(
-        currentMinutes < bookedEnd &&
-        currentMinutes + duration > bookedStart
-      ){
-        disabled = true;
-        break;
-      }
-
-    }
-
-
-    /* PAST TIME TODAY */
-
-    if(isToday(selectedDate)){
-
-      const now = new Date();
-
-      const nowMinutes =
-        now.getHours()*60 + now.getMinutes();
-
-      if(currentMinutes <= nowMinutes){
-        disabled = true;
-      }
-
-    }
-
-
-    if(disabled){
-
-      div.classList.add("disabled");
-
-    }else{
-
-      div.addEventListener("click", () => {
+      el.onclick = () => {
 
         document
           .querySelectorAll(".time")
-          .forEach(x =>
-            x.classList.remove("selected")
-          );
+          .forEach(x => x.classList.remove("selected"));
 
-        div.classList.add("selected");
+        el.classList.add("selected");
 
-        selectedTime = timeString;
+        selectedTime = time;
 
-        updateSummary();
+        updateBookButton();
 
-      });
+      };
 
     }
 
+    box.appendChild(el);
 
-    box.appendChild(div);
-
-    currentMinutes += duration;
-
-  }
-
-
-  if(!box.children.length){
-
-    box.innerHTML =
-      '<div class="loading">אין שעות זמינות</div>';
-
-  }
+  });
 
 }
 
 
-/* ------------------------------------------------ */
-/* BOOKING */
-/* ------------------------------------------------ */
+/* =========================
+   GENERATE SLOTS
+========================= */
+
+function generateSlots(
+  openTime,
+  closeTime,
+  breakStart,
+  breakEnd,
+  duration
+){
+
+  const result = [];
+
+  let current = timeToMinutes(openTime);
+
+  const close = timeToMinutes(closeTime);
+
+  const breakFrom =
+    breakStart ? timeToMinutes(breakStart) : null;
+
+  const breakTo =
+    breakEnd ? timeToMinutes(breakEnd) : null;
+
+
+  while(current + duration <= close){
+
+    const end = current + duration;
+
+    /*
+      לא מאפשר תור שחופף להפסקה
+    */
+
+    const overlapsBreak =
+      breakFrom !== null &&
+      breakTo !== null &&
+      current < breakTo &&
+      end > breakFrom;
+
+    if(!overlapsBreak){
+
+      result.push(minutesToTime(current));
+
+    }
+
+    current += duration;
+
+  }
+
+  return result;
+}
+
+
+/* =========================
+   BOOK
+========================= */
 
 document
   .getElementById("book")
@@ -837,118 +823,97 @@ document
 
 async function bookAppointment(){
 
+  const button =
+    document.getElementById("book");
+
+  const status =
+    document.getElementById("status");
+
   const name =
     document.getElementById("name").value.trim();
 
   const phone =
     document.getElementById("phone").value.trim();
 
-  const status =
-    document.getElementById("status");
 
-  const button =
-    document.getElementById("book");
-
-
-  if(!selectedService){
+  if(!selectedService ||
+     !selectedDate ||
+     !selectedTime){
 
     status.textContent =
-      "בחר שירות";
+      "בחר שירות, תאריך ושעה";
 
     status.className =
       "status error";
 
     return;
-
   }
 
 
-  if(!selectedDate){
+  if(!name){
 
     status.textContent =
-      "בחר תאריך";
+      "נא להזין שם";
 
     status.className =
       "status error";
 
     return;
-
   }
 
 
-  if(!selectedTime){
+  if(!phone){
 
     status.textContent =
-      "בחר שעה";
+      "נא להזין מספר טלפון";
 
     status.className =
       "status error";
 
     return;
-
-  }
-
-
-  if(name.length < 2){
-
-    status.textContent =
-      "הכנס שם מלא";
-
-    status.className =
-      "status error";
-
-    return;
-
-  }
-
-
-  if(phone.length < 9){
-
-    status.textContent =
-      "הכנס מספר טלפון תקין";
-
-    status.className =
-      "status error";
-
-    return;
-
   }
 
 
   button.disabled = true;
-
-  button.textContent =
-    "קובע תור...";
+  button.textContent = "קובע תור...";
 
   status.textContent = "";
 
 
   try{
 
-    const data = await rpc(
-      "book_slot",
+    const result = await supabaseFetch(
+      "/rest/v1/rpc/book_slot",
       {
-        p_service_id:selectedService.id,
-        p_name:name,
-        p_phone:phone,
-        p_date:iso(selectedDate),
-        p_time:selectedTime + ":00"
+        method:"POST",
+
+        body:JSON.stringify({
+
+          p_service_id:selectedService.id,
+
+          p_name:name,
+
+          p_phone:phone,
+
+          p_date:isoDate(selectedDate),
+
+          p_time:selectedTime + ":00"
+
+        })
       }
     );
 
 
-    if(!data || !data.success){
+    /*
+      הפונקציה שלנו מחזירה JSON
+      עם success/message
+    */
 
-      status.textContent =
-        data?.message ||
-        "לא הצלחנו לקבוע את התור";
+    if(result && result.success === false){
 
-      status.className =
-        "status error";
-
-      await loadSlots();
-
-      return;
+      throw new Error(
+        result.message || "לא ניתן לקבוע את התור"
+      );
 
     }
 
@@ -957,9 +922,11 @@ async function bookAppointment(){
       .getElementById("booking")
       .classList.add("hidden");
 
-    document
-      .getElementById("success")
-      .classList.remove("hidden");
+
+    const success =
+      document.getElementById("success");
+
+    success.classList.remove("hidden");
 
 
     document
@@ -978,11 +945,15 @@ async function bookAppointment(){
 
         <br>
 
-        שעה ${selectedTime}
+        שעה: <strong>${selectedTime}</strong>
 
         <br>
 
-        ₪${selectedService.price}
+        מחיר: ₪${Number(selectedService.price).toFixed(0)}
+
+        <br><br>
+
+        הטלפון שלך: ${escapeHtml(phone)}
 
       `;
 
@@ -992,94 +963,57 @@ async function bookAppointment(){
     console.error(error);
 
     status.textContent =
-      "אירעה שגיאה. נסה שוב.";
+      error.message ||
+      "אירעה שגיאה בקביעת התור";
 
     status.className =
       "status error";
 
-  }finally{
-
     button.disabled = false;
+    button.textContent = "קביעת תור";
 
-    button.textContent =
-      "קביעת תור";
+    /*
+      מרעננים את השעות במקרה
+      שמישהו תפס את השעה לפנינו.
+    */
+
+    await loadSlots();
 
   }
 
 }
 
 
-/* ------------------------------------------------ */
-/* SUMMARY */
-/* ------------------------------------------------ */
+/* =========================
+   BUTTON STATE
+========================= */
 
-function updateSummary(){
-
-  const box =
-    document.getElementById("summary");
+function updateBookButton(){
 
   const button =
     document.getElementById("book");
 
-
-  if(
+  button.disabled =
     !selectedService ||
     !selectedDate ||
-    !selectedTime
-  ){
-
-    box.textContent =
-      "בחר שירות, תאריך ושעה";
-
-    button.disabled = true;
-
-    return;
-
-  }
-
-
-  box.innerHTML = `
-
-    <strong>${escapeHtml(selectedService.name)}</strong>
-
-    <br>
-
-    ${formatDate(selectedDate)}
-
-    <br>
-
-    שעה ${selectedTime}
-
-    <br>
-
-    ${selectedService.duration_minutes} דקות
-
-    <br>
-
-    <strong>₪${selectedService.price}</strong>
-
-  `;
-
-
-  button.disabled = false;
+    !selectedTime;
 
 }
 
 
-/* ------------------------------------------------ */
-/* HELPERS */
-/* ------------------------------------------------ */
+/* =========================
+   HELPERS
+========================= */
 
-function iso(date){
+function isoDate(date){
 
-  const y =
-    date.getFullYear();
+  const y = date.getFullYear();
 
-  const m =
-    String(date.getMonth()+1).padStart(2,"0");
+  const m = String(date.getMonth()+1)
+    .padStart(2,"0");
 
-  const d =
-    String(date.getDate()).padStart(2,"0");
+  const d = String(date.getDate())
+    .padStart(2,"0");
 
   return `${y}-${m}-${d}`;
 
@@ -1100,26 +1034,15 @@ function formatDate(date){
 }
 
 
-function isToday(date){
-
-  const today = new Date();
-
-  return iso(today) === iso(date);
-
-}
-
-
-function timeToMinutes(time){
-
-  if(!time){
-    return 0;
-  }
+function timeToMinutes(value){
 
   const parts =
-    String(time).substring(0,5).split(":");
+    String(value).slice(0,5).split(":");
 
-  return Number(parts[0])*60 +
-         Number(parts[1]);
+  return (
+    Number(parts[0]) * 60 +
+    Number(parts[1])
+  );
 
 }
 
@@ -1127,48 +1050,46 @@ function timeToMinutes(time){
 function minutesToTime(minutes){
 
   const h =
-    Math.floor(minutes/60);
+    Math.floor(minutes / 60);
 
   const m =
     minutes % 60;
 
-  return String(h).padStart(2,"0") +
-         ":" +
-         String(m).padStart(2,"0");
+  return (
+    String(h).padStart(2,"0") +
+    ":" +
+    String(m).padStart(2,"0")
+  );
 
 }
 
 
 function escapeHtml(value){
 
-  return String(value)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
 }
 
 
-/* ------------------------------------------------ */
-/* START */
-/* ------------------------------------------------ */
+/* =========================
+   START
+========================= */
 
-async function start(){
+async function init(){
 
-  await loadServices();
-
-  await loadWorkingHours();
-
-  setupDates();
-
-  updateSummary();
+  await Promise.all([
+    loadServices(),
+    loadWorkingHours()
+  ]);
 
 }
 
-
-start();
+init();
 
 </script>
 
