@@ -1103,7 +1103,9 @@ init();
 function showMyBooking(){
     const booking = document.getElementById("success");
 
-    if(booking && !booking.classList.contains("hidden")){
+    if(booking){
+        booking.classList.remove("hidden");
+
         booking.scrollIntoView({
             behavior:"smooth",
             block:"start"
