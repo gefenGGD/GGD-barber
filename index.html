@@ -1101,17 +1101,20 @@ async function init(){
 
 init();
 function showMyBooking(){
-  const booking = document.querySelector('.booking');
+    const booking = document.getElementById("booking");
 
-  if(booking){
-    booking.scrollIntoView({
-      behavior:'smooth',
-      block:'start'
-    });
-  }else{
-    alert("אין כרגע תור שמור");
-  }
+    if(booking){
+        booking.classList.remove("hidden");
+
+        booking.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+    }else{
+        alert("אין כרגע תור שמור");
+    }
 }
+
 </script>
 
 </body>
