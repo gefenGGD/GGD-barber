@@ -1038,18 +1038,17 @@ function isoDate(date){
 
 
 function formatDate(date){
+    const d = new Date(date);
 
-  return date.toLocaleDateString(
-    "he-IL",
-    {
-      weekday:"long",
-      day:"numeric",
-      month:"long"
-    }
-  );
-
+    return d.toLocaleDateString(
+        "he-IL",
+        {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+        }
+    );
 }
-
 
 function timeToMinutes(value){
 
