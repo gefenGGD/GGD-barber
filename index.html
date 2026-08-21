@@ -1147,10 +1147,12 @@ function showMyBooking(){
     הטלפון שלך: ${escapeHtml(data.phone || "")}
   `;
 
-  success.scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
+setTimeout(() => {
+    success.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}, 100);
 }
 </script>
 
