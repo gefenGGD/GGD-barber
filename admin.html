@@ -1157,7 +1157,7 @@ async function loadServiceManager(){
     console.error(error);
 
     document.getElementById("service-list").innerHTML =
-      `<div style="color:#ff5555">❌ לא הצלחנו לטעון את השירותים</div>`;
+`<div style="color:#ff5555">❌ ${escapeHtml(error.message || String(error))}</div>`;
   }
 }
 
