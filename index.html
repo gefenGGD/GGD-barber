@@ -1108,48 +1108,49 @@ async function init(){
 
 init();
 function showMyBooking(){
+  const saved = localStorage.getItem("myBooking");
 
-    const saved = localStorage.getItem("myBooking");
+  if(!saved){
+    alert("אין כרגע תור שמור");
+    return;
+  }
 
-    if(!saved){
-        alert("אין כרגע תור שמור");
-        return;
-    }
+  let data;
 
-    const data = JSON.parse(saved);
+  try{
+    data = JSON.parse(saved);
+  }catch(e){
+    alert("לא ניתן לקרוא את פרטי התור");
+    return;
+  }
 
-    const success = document.getElementById("success");
+  const success = document.getElementById("success");
 
-    if(!success){
-        alert("לא נמצא אזור התור");
-        return;
-    }
+  if(!success){
+    alert("לא נמצא אזור התור");
+    return;
+  }
 
-    success.classList.remove("hidden");
+  success.classList.remove("hidden");
 
-    document.getElementById("successText").innerHTML = `
-        <strong>${escapeHtml(data.name)}</strong>
-        <br><br>
+  document.getElementById("successText").innerHTML = `
+    <strong>${escapeHtml(data.name || "")}</strong>
+    <br><br>
+    ${escapeHtml(data.service || "")}
+    <br><br>
+    ${formatDate(data.date)}
+    <br><br>
+    שעה: <strong>${escapeHtml(data.time || "")}</strong>
+    <br><br>
+    מחיר: ₪${Number(data.price || 0).toFixed(0)}
+    <br><br>
+    הטלפון שלך: ${escapeHtml(data.phone || "")}
+  `;
 
-        ${escapeHtml(data.service)}
-        <br><br>
-
-        ${formatDate(data.date)}
-        <br><br>
-
-        שעה: <strong>${escapeHtml(data.time)}</strong>
-        <br><br>
-
-        מחיר: ₪${Number(data.price).toFixed(0)}
-        <br><br>
-
-        הטלפון שלך: ${escapeHtml(data.phone)}
-    `;
-
-    success.scrollIntoView({
-        behavior:"smooth",
-        block:"start"
-    });
+  success.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
 }
 </script>
 
