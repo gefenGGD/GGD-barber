@@ -415,8 +415,15 @@ async function loadServices(){
 
     const data = await supabaseFetch(
   "/rest/v1/rpc/get_active_services",
-  { method: "POST" }
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({})
+  }
 );
+
     /*
       במקרה שנוצרו כפילויות בטבלה,
       נציג כל שירות פעם אחת בלבד.
