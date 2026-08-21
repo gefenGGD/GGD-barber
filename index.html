@@ -502,6 +502,7 @@ async function loadServices(){
   }catch(error){
 
     console.error(error);
+alert(error.message);
 
     box.innerHTML =
       '<div class="status error">לא הצלחנו לטעון את השירותים</div>';
