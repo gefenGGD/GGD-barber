@@ -1116,23 +1116,27 @@ async function init(){
     const datesBox = document.getElementById("dates");
 
     servicesBox.innerHTML =
-        '<div class="status">בודק חיבור לשירותים...</div>';
+        '<div class="status">בודק שירותים...</div>';
 
     datesBox.innerHTML =
-        '<div class="status">בודק חיבור לתאריכים...</div>';
+        '<div class="status">בודק תאריכים...</div>';
 
-    setTimeout(() => {
+    try {
+        await Promise.all([
+            loadServices(),
+            loadWorkingHours()
+        ]);
+    } catch(error) {
+        console.error(error);
+
         servicesBox.innerHTML =
-            '<div class="status error">הטעינה של השירותים נתקעה.</div>';
+            '<div class="status error">לא הצלחנו לטעון את השירותים</div>';
 
         datesBox.innerHTML =
-            '<div class="status error">הטעינה של התאריכים נתקעה.</div>';
-    }, 12000);
-
-    loadServices();
-    loadWorkingHours();
-
+            '<div class="status error">לא הצלחנו לטעון את התאריכים</div>';
+    }
 }
+
 init();
 function showMyBooking(){
   const saved = localStorage.getItem("myBooking");
