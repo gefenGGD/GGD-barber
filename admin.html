@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>GGD Admin</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -18,150 +15,203 @@ body{
   font-family:Arial,sans-serif;
 }
 
-header{
-  padding:25px 20px;
-  border-bottom:1px solid #222;
-  background:#0d0d0d;
+.container{
+  width:min(900px,calc(100% - 30px));
+  margin:40px auto;
 }
 
 .logo{
-  font-size:30px;
-  font-weight:bold;
-  letter-spacing:8px;
+  text-align:center;
+  font-size:42px;
+  font-weight:900;
+  letter-spacing:10px;
+  margin-bottom:5px;
 }
 
 .subtitle{
+  text-align:center;
   color:#888;
-  margin-top:5px;
-  letter-spacing:3px;
-}
-
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
+  letter-spacing:4px;
+  margin-bottom:35px;
 }
 
 .card{
-  background:#141414;
-  border:1px solid #292929;
-  border-radius:18px;
+  background:#151515;
+  border:1px solid #2b2b2b;
+  border-radius:20px;
   padding:20px;
   margin-bottom:18px;
 }
 
-.card h2{
+h2{
   margin-top:0;
-  font-size:22px;
+}
+
+input{
+  width:100%;
+  padding:15px;
+  margin:7px 0;
+  border-radius:12px;
+  border:1px solid #333;
+  background:#0d0d0d;
+  color:#fff;
+  font-size:16px;
 }
 
 button{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
   background:#fff;
   color:#000;
-  border:0;
-  border-radius:10px;
-  padding:12px 18px;
   font-size:16px;
   font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:.85;
-}
-
-.refresh{
-  margin-bottom:20px;
-}
-
-.status{
-  padding:14px;
-  border-radius:10px;
-  background:#101010;
-  color:#aaa;
-  margin-bottom:15px;
-}
-
-.error{
-  color:#ff6262;
-}
-
-.success{
-  color:#61e294;
-}
-
-.item{
-  background:#0e0e0e;
-  border:1px solid #292929;
-  border-radius:12px;
-  padding:15px;
   margin-top:10px;
 }
 
-.item strong{
-  font-size:18px;
+button:disabled{
+  opacity:.5;
 }
 
-.small{
+.logout{
+  background:#222;
+  color:#fff;
+}
+
+.status{
+  margin-top:12px;
+  text-align:center;
+  color:#aaa;
+}
+
+.error{
+  color:#ff6868;
+}
+
+.success{
+  color:#6ee79b;
+}
+
+.booking{
+  background:#0e0e0e;
+  border:1px solid #2d2d2d;
+  border-radius:15px;
+  padding:16px;
+  margin-top:12px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:8px 0;
+  border-bottom:1px solid #252525;
+}
+
+.row:last-child{
+  border-bottom:0;
+}
+
+.label{
   color:#888;
-  margin-top:5px;
+}
+
+.value{
+  font-weight:bold;
+}
+
+.delete{
+  background:#9e2020;
+  color:#fff;
+}
+
+.hidden{
+  display:none;
 }
 
 .empty{
+  text-align:center;
   color:#777;
-  padding:15px 0;
+  padding:30px 0;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">GGD</div>
-  <div class="subtitle">BARBER • ADMIN</div>
-</header>
-
 <div class="container">
 
-  <button class="refresh" onclick="loadAll()">
-    🔄 רענן נתונים
-  </button>
+  <div class="logo">GGD</div>
+  <div class="subtitle">BARBER • ADMIN</div>
 
-  <div id="status" class="status">
-    מתחבר ל-Supabase...
+
+  <!-- LOGIN -->
+
+  <div id="loginCard" class="card">
+
+    <h2>🔐 כניסת מנהל</h2>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="אימייל"
+      autocomplete="email"
+    >
+
+    <input
+      id="password"
+      type="password"
+      placeholder="סיסמה"
+      autocomplete="current-password"
+    >
+
+    <button onclick="login()">
+      כניסה
+    </button>
+
+    <div id="loginStatus" class="status"></div>
+
   </div>
 
-  <!-- APPOINTMENTS -->
-  <div class="card">
-    <h2>📅 תורים</h2>
-    <div id="appointments">
-      טוען תורים...
-    </div>
-  </div>
 
-  <!-- SERVICES -->
-  <div class="card">
-    <h2>💈 שירותים</h2>
-    <div id="services">
-      טוען שירותים...
-    </div>
-  </div>
+  <!-- ADMIN -->
 
-  <!-- WORKING HOURS -->
-  <div class="card">
-    <h2>🕐 שעות עבודה</h2>
-    <div id="hours">
-      טוען שעות עבודה...
+  <div id="adminPanel" class="hidden">
+
+    <div class="card">
+
+      <h2>📅 ניהול תורים</h2>
+
+      <button onclick="loadBookings()">
+        🔄 רענן תורים
+      </button>
+
+      <button
+        class="logout"
+        onclick="logout()">
+        יציאה
+      </button>
+
+      <div id="bookingStatus" class="status">
+        טוען...
+      </div>
+
     </div>
+
+
+    <div id="bookings"></div>
+
   </div>
 
 </div>
 
+
 <script>
 
-/* =====================================================
+/* =========================
    SUPABASE
-===================================================== */
+========================= */
 
 const SUPABASE_URL =
 "https://cgvyizfjizbnevueasbj.supabase.co";
@@ -170,11 +220,11 @@ const SUPABASE_KEY =
 "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 
 
-/* =====================================================
+/* =========================
    SUPABASE REQUEST
-===================================================== */
+========================= */
 
-async function supabaseFetch(path, options = {}){
+async function request(path,options={}){
 
   const response = await fetch(
     SUPABASE_URL + path,
@@ -183,7 +233,6 @@ async function supabaseFetch(path, options = {}){
 
       headers:{
         "apikey":SUPABASE_KEY,
-        "Authorization":"Bearer " + SUPABASE_KEY,
         "Content-Type":"application/json",
         ...(options.headers || {})
       }
@@ -192,279 +241,354 @@ async function supabaseFetch(path, options = {}){
 
   const text = await response.text();
 
-  let data;
+  let data=null;
 
   try{
-    data = text ? JSON.parse(text) : null;
+    data=text ? JSON.parse(text) : null;
   }catch{
-    data = text;
+    data=text;
   }
 
   if(!response.ok){
 
     throw new Error(
-      "Supabase error: " +
-      response.status +
-      " " +
-      text
+      response.status + " " + text
     );
+
   }
 
   return data;
 }
 
 
-/* =====================================================
-   STATUS
-===================================================== */
+/* =========================
+   LOGIN
+========================= */
 
-function setStatus(text,type=""){
+async function login(){
 
-  const el=document.getElementById("status");
+  const email =
+    document.getElementById("email").value.trim();
 
-  el.textContent=text;
+  const password =
+    document.getElementById("password").value;
 
-  el.className="status "+type;
-}
+  const status =
+    document.getElementById("loginStatus");
 
 
-/* =====================================================
-   LOAD SERVICES
-===================================================== */
+  if(!email || !password){
 
-async function loadServices(){
+    status.textContent =
+      "נא למלא אימייל וסיסמה";
 
-  const box=document.getElementById("services");
+    status.className =
+      "status error";
+
+    return;
+  }
+
+
+  status.textContent =
+    "מתחבר...";
+
+  status.className =
+    "status";
+
 
   try{
 
-    const data=await supabaseFetch(
-      "/rest/v1/rpc/get_active_services",
+    const data = await request(
+      "/auth/v1/token?grant_type=password",
       {
         method:"POST",
-        body:JSON.stringify({})
+
+        body:JSON.stringify({
+          email:email,
+          password:password
+        })
       }
     );
 
-    if(!data || !data.length){
 
-      box.innerHTML=
-        '<div class="empty">אין שירותים פעילים</div>';
+    localStorage.setItem(
+      "ggd_access_token",
+      data.access_token
+    );
 
-      return;
-    }
+    localStorage.setItem(
+      "ggd_refresh_token",
+      data.refresh_token
+    );
 
-    box.innerHTML="";
 
-    data.forEach(service=>{
+    showAdmin();
 
-      const item=document.createElement("div");
-
-      item.className="item";
-
-      item.innerHTML=`
-        <strong>${escapeHtml(service.name || "")}</strong>
-        <div class="small">
-          ${escapeHtml(service.description || "")}
-        </div>
-        <div class="small">
-          מחיר: ₪${Number(service.price || 0).toFixed(0)}
-        </div>
-      `;
-
-      box.appendChild(item);
-
-    });
 
   }catch(error){
 
     console.error(error);
 
-    box.innerHTML=
-      '<div class="error">לא הצלחנו לטעון את השירותים</div>';
+    status.textContent =
+      "אימייל או סיסמה שגויים";
+
+    status.className =
+      "status error";
 
   }
 
 }
 
 
-/* =====================================================
-   LOAD APPOINTMENTS
-===================================================== */
+/* =========================
+   SHOW ADMIN
+========================= */
 
-async function loadAppointments(){
+function showAdmin(){
 
-  const box=document.getElementById("appointments");
+  document
+    .getElementById("loginCard")
+    .classList.add("hidden");
+
+  document
+    .getElementById("adminPanel")
+    .classList.remove("hidden");
+
+  loadBookings();
+
+}
+
+
+/* =========================
+   LOAD BOOKINGS
+========================= */
+
+async function loadBookings(){
+
+  const box =
+    document.getElementById("bookings");
+
+  const status =
+    document.getElementById("bookingStatus");
+
+
+  box.innerHTML="";
+
+  status.textContent =
+    "טוען תורים...";
+
+
+  const token =
+    localStorage.getItem("ggd_access_token");
+
+
+  if(!token){
+
+    logout();
+
+    return;
+  }
+
 
   try{
 
-    const data=await supabaseFetch(
-      "/rest/v1/appointments?select=*&order=date.asc,time.asc"
+    const data = await request(
+      "/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc",
+      {
+        headers:{
+          "Authorization":
+            "Bearer " + token
+        }
+      }
     );
+
 
     if(!data || !data.length){
 
-      box.innerHTML=
-        '<div class="empty">אין תורים כרגע</div>';
+      status.textContent =
+        "אין כרגע תורים";
+
+      box.innerHTML =
+        '<div class="card empty">אין תורים להצגה</div>';
 
       return;
     }
 
-    box.innerHTML="";
 
-    data.forEach(appointment=>{
+    status.textContent =
+      "נמצאו " + data.length + " תורים";
 
-      const item=document.createElement("div");
 
-      item.className="item";
+    data.forEach(booking=>{
 
-      item.innerHTML=`
+      const item =
+        document.createElement("div");
 
-        <strong>
-          ${escapeHtml(
-            appointment.full_name ||
-            appointment.name ||
-            "לקוח"
-          )}
-        </strong>
+      item.className =
+        "card booking";
 
-        <div class="small">
-          📅 ${escapeHtml(
-            appointment.date || ""
-          )}
+
+      item.innerHTML = `
+
+        <div class="row">
+          <span class="label">👤 לקוח</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.customer_name || ""
+            )}
+          </span>
         </div>
 
-        <div class="small">
-          🕐 ${escapeHtml(
-            appointment.time || ""
-          )}
+        <div class="row">
+          <span class="label">📞 טלפון</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.phone || ""
+            )}
+          </span>
         </div>
 
-        <div class="small">
-          📱 ${escapeHtml(
-            appointment.phone || ""
-          )}
+        <div class="row">
+          <span class="label">💈 שירות</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.service_name || ""
+            )}
+          </span>
         </div>
+
+        <div class="row">
+          <span class="label">📅 תאריך</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.booking_date || ""
+            )}
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="label">🕐 שעה</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.booking_time || ""
+            )}
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="label">⏱️ משך</span>
+          <span class="value">
+            ${escapeHtml(
+              booking.duration_minutes || 30
+            )} דקות
+          </span>
+        </div>
+
+        <button
+          class="delete"
+          onclick="deleteBooking(${booking.id})">
+          🗑️ מחק תור
+        </button>
 
       `;
+
 
       box.appendChild(item);
 
     });
 
+
   }catch(error){
 
     console.error(error);
 
-    box.innerHTML=
-      '<div class="error">לא הצלחנו לטעון את התורים</div>';
+    status.textContent =
+      "שגיאה בטעינת התורים";
+
+    status.className =
+      "status error";
+
+    box.innerHTML =
+      `<div class="card error">
+        ${escapeHtml(error.message)}
+      </div>`;
 
   }
 
 }
 
 
-/* =====================================================
-   LOAD WORKING HOURS
-===================================================== */
+/* =========================
+   DELETE BOOKING
+========================= */
 
-async function loadHours(){
+async function deleteBooking(id){
 
-  const box=document.getElementById("hours");
+  if(!confirm("למחוק את התור?")){
+    return;
+  }
+
+
+  const token =
+    localStorage.getItem("ggd_access_token");
+
 
   try{
 
-    const data=await supabaseFetch(
-      "/rest/v1/working_hours?select=*&order=day.asc"
+    await request(
+      "/rest/v1/bookings?id=eq." + id,
+      {
+        method:"DELETE",
+
+        headers:{
+          "Authorization":
+            "Bearer " + token
+        }
+      }
     );
 
-    if(!data || !data.length){
 
-      box.innerHTML=
-        '<div class="empty">לא נמצאו שעות עבודה</div>';
+    await loadBookings();
 
-      return;
-    }
-
-    box.innerHTML="";
-
-    data.forEach(hour=>{
-
-      const item=document.createElement("div");
-
-      item.className="item";
-
-      item.innerHTML=`
-
-        <strong>
-          ${escapeHtml(
-            hour.day_name ||
-            hour.day ||
-            ""
-          )}
-        </strong>
-
-        <div class="small">
-          ${escapeHtml(
-            hour.open_time ||
-            hour.start_time ||
-            ""
-          )}
-          -
-          ${escapeHtml(
-            hour.close_time ||
-            hour.end_time ||
-            ""
-          )}
-        </div>
-
-      `;
-
-      box.appendChild(item);
-
-    });
 
   }catch(error){
 
-    console.error(error);
-
-    box.innerHTML=
-      '<div class="error">לא הצלחנו לטעון את שעות העבודה</div>';
+    alert(
+      "לא הצלחנו למחוק את התור:\n" +
+      error.message
+    );
 
   }
 
 }
 
 
-/* =====================================================
-   LOAD EVERYTHING
-===================================================== */
+/* =========================
+   LOGOUT
+========================= */
 
-async function loadAll(){
+function logout(){
 
-  setStatus("טוען נתונים...");
-
-  await Promise.allSettled([
-    loadServices(),
-    loadAppointments(),
-    loadHours()
-  ]);
-
-  setStatus(
-    "הנתונים נטענו",
-    "success"
+  localStorage.removeItem(
+    "ggd_access_token"
   );
 
+  localStorage.removeItem(
+    "ggd_refresh_token"
+  );
+
+  location.reload();
+
 }
 
 
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
+/* =========================
+   HTML ESCAPE
+========================= */
 
 function escapeHtml(value){
 
-  return String(value)
+  return String(value ?? "")
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
@@ -474,11 +598,18 @@ function escapeHtml(value){
 }
 
 
-/* =====================================================
+/* =========================
    START
-===================================================== */
+========================= */
 
-loadAll();
+const savedToken =
+  localStorage.getItem("ggd_access_token");
+
+if(savedToken){
+
+  showAdmin();
+
+}
 
 </script>
 
