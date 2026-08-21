@@ -718,11 +718,11 @@ async function loadSlots(){
     hours.break_end,
     Number(hours.slot_duration || 30)
   );
-
+const availableSlots = slots.filter(time => !bookedSet.has(time));
 
   box.innerHTML = "";
 
-  if(!slots.length){
+  if(!availableSlots.length){
 
     box.innerHTML =
       '<div class="status">אין שעות זמינות</div>';
@@ -731,7 +731,7 @@ async function loadSlots(){
   }
 
 
-  slots.forEach(time => {
+   availableSlots.forEach(time => {
 
     const el = document.createElement("div");
 
