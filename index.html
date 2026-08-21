@@ -731,8 +731,8 @@ const availableSlots = slots.filter(time => !bookedSet.has(time));
   }
 
 
-availableSlots.filter(time => !bookedSet.has(time)).forEach(time => {
-
+availableSlots.forEach(time => {
+if (bookedSet.has(String(time).slice(0,5))) return;
     const el = document.createElement("div");
 
     const isBooked = bookedSet.has(time);
