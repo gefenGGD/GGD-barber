@@ -4,91 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GGD Admin</title>
-
 <style>
 *{box-sizing:border-box;}
-body{
-  margin:0;
-  background:#070707;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
-.container{
-  width:min(900px,calc(100% - 24px));
-  margin:25px auto;
-  padding-bottom:50px;
-}
-.logo{
-  text-align:center;
-  font-size:42px;
-  font-weight:900;
-  letter-spacing:10px;
-}
-.subtitle{
-  text-align:center;
-  color:#888;
-  letter-spacing:4px;
-  margin:5px 0 30px;
-}
-.card{
-  background:#151515;
-  border:1px solid #2c2c2c;
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:16px;
-}
+body{margin:0;background:#070707;color:#fff;font-family:Arial,sans-serif;}
+.container{width:min(900px,calc(100% - 24px));margin:25px auto;padding-bottom:50px;}
+.logo{text-align:center;font-size:42px;font-weight:900;letter-spacing:10px;}
+.subtitle{text-align:center;color:#888;letter-spacing:4px;margin:5px 0 30px;}
+.card{background:#151515;border:1px solid #2c2c2c;border-radius:20px;padding:20px;margin-bottom:16px;}
 h1,h2{margin-top:0;}
-button{
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:12px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  margin-top:8px;
-}
+button{width:100%;padding:14px;border:0;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px;}
 .refresh{background:#fff;color:#000;}
 .logout{background:#242424;color:#fff;}
 .delete{background:#9e2222;color:#fff;}
-input{
-  width:100%;
-  padding:14px;
-  margin:6px 0;
-  border-radius:12px;
-  border:1px solid #333;
-  background:#0c0c0c;
-  color:#fff;
-  font-size:16px;
-}
+input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;}
 .status{text-align:center;color:#aaa;margin-top:12px;}
 .error{color:#ff6666;}
 .success{color:#67e39a;}
 .hidden{display:none!important;}
-.filters{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  margin-bottom:15px;
-}
+.filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:15px;}
 .filter{background:#202020;color:#aaa;border:1px solid #333;}
 .filter.active{background:#fff;color:#000;}
-.booking, .waitlist-item{
-  background:#101010;
-  border:1px solid #303030;
-  border-radius:18px;
-  padding:18px;
-  margin-bottom:12px;
-}
+.booking, .waitlist-item{background:#101010;border:1px solid #303030;border-radius:18px;padding:18px;margin-bottom:12px;}
 .booking-date{font-size:20px;font-weight:bold;margin-bottom:12px;}
 .booking-time{font-size:30px;font-weight:900;margin-bottom:12px;}
-.row{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  padding:8px 0;
-  border-bottom:1px solid #252525;
-}
+.row{display:flex;justify-content:space-between;gap:15px;padding:8px 0;border-bottom:1px solid #252525;}
 .row:last-child{border-bottom:0;}
 .label{color:#888;}
 .value{font-weight:bold;text-align:left;}
@@ -96,15 +35,11 @@ input{
 .empty{text-align:center;color:#777;padding:35px 10px;}
 </style>
 </head>
-
 <body>
-
 <div class="container">
-
   <div class="logo">GGD</div>
   <div class="subtitle">BARBER • ADMIN</div>
 
-  <!-- LOGIN -->
   <div id="loginCard" class="card">
     <h2>🔐 כניסת מנהל</h2>
     <input id="email" type="email" placeholder="אימייל" autocomplete="email">
@@ -113,9 +48,7 @@ input{
     <div id="loginStatus" class="status"></div>
   </div>
 
-  <!-- ADMIN PANEL -->
   <div id="adminPanel" class="hidden">
-
     <div class="card">
       <h1>📅 ניהול תורים</h1>
       <div class="filters">
@@ -128,23 +61,18 @@ input{
       <button class="logout" onclick="logout()">יציאה</button>
       <div id="bookingStatus" class="status">טוען...</div>
     </div>
-
     <div id="bookings"></div>
 
-    <!-- WAITLIST MANAGER -->
     <div class="card" style="margin-top:30px;">
       <h2>📋 רשימת המתנה</h2>
       <div id="waitlistContainer">טוען רשימת המתנה...</div>
     </div>
 
-    <!-- SERVICE MANAGER -->
     <div class="card" style="margin-top:30px;">
       <h2>💈 ניהול שירותים</h2>
       <div id="service-list">טוען שירותים...</div>
     </div>
-
   </div>
-
 </div>
 
 <script>
@@ -157,34 +85,18 @@ let currentFilter = "today";
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("ggd_access_token");
-  const headers = {
-    "apikey": SUPABASE_KEY,
-    "Content-Type": "application/json",
-    ...(options.headers || {})
-  };
-
-  if (token) {
-    headers["Authorization"] = "Bearer " + token;
-  }
+  const headers = { "apikey": SUPABASE_KEY, "Content-Type": "application/json", ...(options.headers || {}) };
+  if (token) headers["Authorization"] = "Bearer " + token;
 
   const response = await fetch(SUPABASE_URL + path, { ...options, headers });
   const text = await response.text();
   let data = null;
-
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
-  }
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
 
   if (!response.ok) {
-    if (response.status === 401) {
-      logout();
-      throw new Error("פג תוקף ההתחברות, אנא התחבר מחדש.");
-    }
+    if (response.status === 401) { logout(); throw new Error("פג תוקף ההתחברות, אנא התחבר מחדש."); }
     throw new Error(response.status + " " + (data?.message || text));
   }
-
   return data;
 }
 
@@ -193,38 +105,23 @@ async function login() {
   const password = document.getElementById("password").value;
   const status = document.getElementById("loginStatus");
 
-  if (!email || !password) {
-    status.textContent = "נא למלא אימייל וסיסמה";
-    status.className = "status error";
-    return;
-  }
-
+  if (!email || !password) { status.textContent = "נא למלא אימייל וסיסמה"; status.className = "status error"; return; }
   status.textContent = "מתחבר...";
   status.className = "status";
 
   try {
     const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
       method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Content-Type": "application/json"
-      },
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error_description || data.message || "שגיאת התחברות");
-    }
+    if (!response.ok) throw new Error(data.error_description || data.message || "שגיאת התחברות");
 
     localStorage.setItem("ggd_access_token", data.access_token);
     localStorage.setItem("ggd_refresh_token", data.refresh_token);
-
     showAdmin();
-
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
     status.textContent = "אימייל או סיסמה שגויים";
     status.className = "status error";
   }
@@ -236,45 +133,35 @@ function showAdmin() {
   loadAllData();
 }
 
-async function loadAllData() {
-  await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager()]);
-}
+async function loadAllData() { await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager()]); }
 
 async function loadBookings() {
   const status = document.getElementById("bookingStatus");
   status.textContent = "טוען תורים...";
   status.className = "status";
-
   try {
     allBookings = await request("/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc");
     if (!Array.isArray(allBookings)) allBookings = [];
     renderBookings();
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
     status.textContent = "שגיאה בטעינת התורים";
     status.className = "status error";
-    document.getElementById("bookings").innerHTML = `<div class="card error">${escapeHtml(error.message)}</div>`;
+    document.getElementById("bookings").innerHTML = `<div class="card error">${escapeHtml(e.message)}</div>`;
   }
 }
 
 async function loadWaitlist() {
   const container = document.getElementById("waitlistContainer");
   try {
-    // פנייה נקייה ללא מיון מורכב שעלול להיכשל אם שדה ריק
-    allWaitlist = await request("/rest/v1/waitlist?select=*&order=created_at.desc");
+    allWaitlist = await request("/rest/v1/waitlist?select=*");
     if (!Array.isArray(allWaitlist)) allWaitlist = [];
-    
-    if (!allWaitlist.length) {
-      container.innerHTML = `<div class="empty">אין נרשמים ברשימת ההמתנה</div>`;
-      return;
-    }
+    if (!allWaitlist.length) { container.innerHTML = `<div class="empty">אין נרשמים ברשימת ההמתנה</div>`; return; }
 
     container.innerHTML = "";
     allWaitlist.forEach(item => {
       const div = document.createElement("div");
       div.className = "waitlist-item";
       const phone = String(item.phone || "");
-
       div.innerHTML = `
         <div class="booking-date">📅 ${formatDate(item.booking_date)}</div>
         <div class="booking-time">🕐 ${formatTime(item.booking_time)}</div>
@@ -284,83 +171,54 @@ async function loadWaitlist() {
       `;
       container.appendChild(div);
     });
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
     container.innerHTML = `<div class="error">שגיאה בטעינת רשימת ההמתנה</div>`;
   }
 }
 
 async function deleteWaitlist(id) {
   if (!confirm("להסיר את הלקוח מרשימת ההמתנה?")) return;
-  try {
-    await request("/rest/v1/waitlist?id=eq." + id, { method: "DELETE" });
-    await loadWaitlist();
-  } catch (error) {
-    alert("שגיאה במחיקה:\n" + error.message);
-  }
+  try { await request("/rest/v1/waitlist?id=eq." + id, { method: "DELETE" }); await loadWaitlist(); }
+  catch (e) { alert("שגיאה במחיקה:\n" + e.message); }
 }
 
 function setFilter(filter) {
   currentFilter = filter;
   ["todayBtn", "tomorrowBtn", "allBtn"].forEach(id => document.getElementById(id).classList.remove("active"));
-  
   if (filter === "today") document.getElementById("todayBtn").classList.add("active");
   if (filter === "tomorrow") document.getElementById("tomorrowBtn").classList.add("active");
   if (filter === "all") document.getElementById("allBtn").classList.add("active");
-
   renderBookings();
 }
 
 function localDateString(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
-
 function getToday() { return localDateString(new Date()); }
-function getTomorrow() {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  return localDateString(date);
-}
+function getTomorrow() { const d = new Date(); d.setDate(d.getDate() + 1); return localDateString(d); }
 
 function renderBookings() {
   const box = document.getElementById("bookings");
   const status = document.getElementById("bookingStatus");
   const search = document.getElementById("search").value.trim().toLowerCase();
-
   let filtered = [...allBookings];
 
-  if (currentFilter === "today") {
-    filtered = filtered.filter(b => b.booking_date === getToday());
-  } else if (currentFilter === "tomorrow") {
-    filtered = filtered.filter(b => b.booking_date === getTomorrow());
-  }
+  if (currentFilter === "today") filtered = filtered.filter(b => b.booking_date === getToday());
+  else if (currentFilter === "tomorrow") filtered = filtered.filter(b => b.booking_date === getTomorrow());
 
   if (search) {
-    filtered = filtered.filter(b => {
-      const name = String(b.customer_name || "").toLowerCase();
-      const phone = String(b.phone || "").toLowerCase();
-      return name.includes(search) || phone.includes(search);
-    });
+    filtered = filtered.filter(b => String(b.customer_name || "").toLowerCase().includes(search) || String(b.phone || "").toLowerCase().includes(search));
   }
 
   status.textContent = `${filtered.length} תורים`;
-
-  if (!filtered.length) {
-    box.innerHTML = `<div class="card empty">אין תורים להצגה</div>`;
-    return;
-  }
+  if (!filtered.length) { box.innerHTML = `<div class="card empty">אין תורים להצגה</div>`; return; }
 
   box.innerHTML = "";
-
   filtered.forEach(booking => {
     const div = document.createElement("div");
     div.className = "booking";
     const phone = String(booking.phone || "");
     const service = booking.service_name || booking.service || (booking.service_id ? "שירות #" + booking.service_id : "לא צוין");
-
     div.innerHTML = `
       <div class="booking-date">📅 ${formatDate(booking.booking_date)}</div>
       <div class="booking-time">🕐 ${formatTime(booking.booking_time)}</div>
@@ -376,26 +234,17 @@ function renderBookings() {
 
 async function deleteBooking(id) {
   if (!confirm("אתה בטוח שברצונך למחוק את התור?")) return;
-  try {
-    await request("/rest/v1/bookings?id=eq." + id, { method: "DELETE" });
-    await loadBookings();
-  } catch (error) {
-    alert("לא הצלחנו למחוק את התור:\n" + error.message);
-  }
+  try { await request("/rest/v1/bookings?id=eq." + id, { method: "DELETE" }); await loadBookings(); }
+  catch (e) { alert("לא הצלחנו למחוק את התור:\n" + e.message); }
 }
 
 async function loadServiceManager() {
   const list = document.getElementById("service-list");
   list.innerHTML = "טוען שירותים...";
-
   try {
     const services = await request("/rest/v1/services?select=id,name,description,price,duration_minutes,active&order=id");
     list.innerHTML = "";
-
-    if (!services.length) {
-      list.innerHTML = "אין שירותים זמינים";
-      return;
-    }
+    if (!services.length) { list.innerHTML = "אין שירותים זמינים"; return; }
 
     services.forEach(service => {
       const item = document.createElement("div");
@@ -406,58 +255,30 @@ async function loadServiceManager() {
         <input value="${service.duration_minutes ?? ""}" data-field="duration_minutes" type="number" placeholder="משך בדקות" style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0">
         <button style="width:100%;padding:12px;border:0;border-radius:10px;background:white;color:black;font-weight:bold;">💾 שמור</button>
       `;
-
       const button = item.querySelector("button");
       button.onclick = async () => {
-        button.disabled = true;
-        button.textContent = "שומר...";
-
+        button.disabled = true; button.textContent = "שומר...";
         try {
           const name = item.querySelector('[data-field="name"]').value;
           const price = Number(item.querySelector('[data-field="price"]').value);
           const duration = Number(item.querySelector('[data-field="duration_minutes"]').value);
-
           await request(`/rest/v1/services?id=eq.${service.id}`, {
             method: "PATCH",
             headers: { "Prefer": "return=minimal" },
             body: JSON.stringify({ name, price, duration_minutes: duration })
           });
-
           button.textContent = "✅ נשמר!";
-          setTimeout(() => {
-            button.textContent = "💾 שמור";
-            button.disabled = false;
-          }, 1500);
-        } catch (error) {
-          console.error(error);
-          button.textContent = "❌ שגיאה";
-          button.disabled = false;
-          alert("שגיאה בשמירת השירות");
-        }
+          setTimeout(() => { button.textContent = "💾 שמור"; button.disabled = false; }, 1500);
+        } catch (e) { button.textContent = "❌ שגיאה"; button.disabled = false; alert("שגיאה בשמירת השירות"); }
       };
-
       list.appendChild(item);
     });
-  } catch (error) {
-    console.error(error);
-    list.innerHTML = `<div style="color:#ff5555">❌ ${escapeHtml(error.message)}</div>`;
-  }
+  } catch (e) { list.innerHTML = `<div style="color:#ff5555">❌ ${escapeHtml(e.message)}</div>`; }
 }
 
-function formatDate(value) {
-  if (!value) return "";
-  const parts = String(value).split("-");
-  return parts.length !== 3 ? value : `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
-function formatTime(value) {
-  return !value ? "" : String(value).substring(0, 5);
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
+function formatDate(val) { if (!val) return ""; const p = String(val).split("-"); return p.length !== 3 ? val : `${p[2]}/${p[1]}/${p[0]}`; }
+function formatTime(val) { return !val ? "" : String(val).substring(0, 5); }
+function escapeHtml(val) { return String(val ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 function logout() {
   localStorage.removeItem("ggd_access_token");
   localStorage.removeItem("ggd_refresh_token");
@@ -465,16 +286,7 @@ function logout() {
   document.getElementById("loginCard").classList.remove("hidden");
 }
 
-// Startup check
-if (localStorage.getItem("ggd_access_token")) {
-  showAdmin();
-}
+if (localStorage.getItem("ggd_access_token")) showAdmin();
 </script>
-
 </body>
 </html>
-<script>
-window.onerror = function(msg, url, line) {
-  alert("שגיאה: " + msg + " (שורה: " + line + ")");
-};
-</script>
