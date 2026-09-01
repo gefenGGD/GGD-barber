@@ -7,38 +7,32 @@
 
 <style>
 *{box-sizing:border-box}
-
 body{
   margin:0;
   background:#090909;
   color:#fff;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
-
 .container{
   max-width:520px;
   margin:auto;
   padding:22px 16px 100px;
 }
-
 .brand{
   text-align:center;
   padding:28px 0 32px;
 }
-
 .logo{
   font-size:42px;
   font-weight:900;
   letter-spacing:12px;
 }
-
 .sub{
   color:#999;
   font-size:13px;
   letter-spacing:4px;
   margin-top:8px;
 }
-
 .card{
   background:#151515;
   border:1px solid #292929;
@@ -47,17 +41,14 @@ body{
   margin-bottom:16px;
   box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
-
 h2{
   margin:0 0 18px;
   font-size:22px;
 }
-
 .services{
   display:grid;
   gap:10px;
 }
-
 .service{
   background:#191919;
   border:1px solid #303030;
@@ -66,44 +57,21 @@ h2{
   cursor:pointer;
   transition:.15s;
 }
-
-.service:hover{
-  border-color:#777;
-}
-
+.service:hover{border-color:#777;}
 .service.selected{
   background:#fff;
   color:#000;
   border-color:#fff;
 }
-
-.service-name{
-  font-size:17px;
-  font-weight:700;
-}
-
-.service-description{
-  color:#999;
-  font-size:13px;
-  margin-top:5px;
-}
-
-.service.selected .service-description{
-  color:#555;
-}
-
-.price{
-  font-weight:800;
-  font-size:17px;
-  margin-top:8px;
-}
-
+.service-name{font-size:17px;font-weight:700;}
+.service-description{color:#999;font-size:13px;margin-top:5px;}
+.service.selected .service-description{color:#555;}
+.price{font-weight:800;font-size:17px;margin-top:8px;}
 .dates{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:8px;
 }
-
 .date{
   background:#191919;
   border:1px solid #303030;
@@ -112,38 +80,15 @@ h2{
   text-align:center;
   cursor:pointer;
 }
-
-.date.selected{
-  background:#fff;
-  color:#000;
-}
-
-.date.disabled{
-  opacity:.3;
-  cursor:not-allowed;
-}
-
-.day{
-  font-size:13px;
-  color:#999;
-}
-
-.date.selected .day{
-  color:#555;
-}
-
-.date-number{
-  font-size:19px;
-  font-weight:800;
-  margin-top:3px;
-}
-
+.date.selected{background:#fff;color:#000;}
+.day{font-size:13px;color:#999;}
+.date.selected .day{color:#555;}
+.date-number{font-size:19px;font-weight:800;margin-top:3px;}
 .times{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:8px;
 }
-
 .time{
   padding:13px 5px;
   text-align:center;
@@ -152,18 +97,7 @@ h2{
   background:#191919;
   cursor:pointer;
 }
-
-.time.selected{
-  background:#fff;
-  color:#000;
-}
-
-.time.disabled{
-  opacity:.3;
-  cursor:not-allowed;
-  text-decoration:line-through;
-}
-
+.time.selected{background:#fff;color:#000;}
 input{
   width:100%;
   padding:15px;
@@ -175,11 +109,7 @@ input{
   font-size:16px;
   outline:none;
 }
-
-input:focus{
-  border-color:#888;
-}
-
+input:focus{border-color:#888;}
 button{
   width:100%;
   padding:16px;
@@ -191,32 +121,11 @@ button{
   font-weight:800;
   cursor:pointer;
 }
-
-button:disabled{
-  opacity:.4;
-  cursor:not-allowed;
-}
-
-.status{
-  text-align:center;
-  color:#999;
-  margin-top:12px;
-  line-height:1.5;
-}
-
-.error{
-  color:#ff6b6b;
-}
-
-.success{
-  text-align:center;
-}
-
-.success-icon{
-  font-size:45px;
-  margin-bottom:10px;
-}
-
+button:disabled{opacity:.4;cursor:not-allowed;}
+.status{text-align:center;color:#999;margin-top:12px;line-height:1.5;}
+.error{color:#ff6b6b;}
+.success{text-align:center;}
+.success-icon{font-size:45px;margin-bottom:10px;}
 .summary{
   background:#101010;
   border-radius:15px;
@@ -224,7 +133,6 @@ button:disabled{
   margin:15px 0;
   line-height:1.9;
 }
-
 .nav{
   position:fixed;
   bottom:12px;
@@ -240,27 +148,36 @@ button:disabled{
   z-index:20;
   box-shadow:0 10px 30px rgba(0,0,0,.5);
 }
+.nav span{text-align:center;color:#aaa;font-size:12px;}
+.nav b{display:block;font-size:20px;margin-bottom:3px;}
+.hidden{display:none!important;}
+.loading{color:#888;text-align:center;padding:20px;}
 
-.nav span{
-  text-align:center;
-  color:#aaa;
-  font-size:12px;
+.modal-overlay{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:16px;
 }
-
-.nav b{
-  display:block;
-  font-size:20px;
-  margin-bottom:3px;
+.modal-card{
+  background:#181818;
+  border:1px solid #333;
+  border-radius:22px;
+  padding:24px;
+  width:100%;
+  max-width:400px;
 }
-
-.hidden{
-  display:none!important;
-}
-
-.loading{
-  color:#888;
-  text-align:center;
-  padding:20px;
+.waitlist-btn{
+  background:#222;
+  color:#ccc;
+  border:1px dashed #444;
+  margin-top:12px;
+  font-size:14px;
+  padding:12px;
 }
 </style>
 </head>
@@ -295,6 +212,7 @@ button:disabled{
       <div id="times" class="times">
         <div class="loading">בחר תאריך...</div>
       </div>
+      <button id="waitlistOpenBtn" class="waitlist-btn hidden" onclick="openWaitlistModal()">📋 השעה תפוסה? היכנס לרשימת המתנה</button>
       <div id="timeStatus" class="status"></div>
     </div>
 
@@ -312,100 +230,76 @@ button:disabled{
 
   <div id="success" class="card success hidden">
     <div class="success-icon">✓</div>
-    <h2>התור נקבע בהצלחה!</h2>
+    <h2 id="successTitle">התור נקבע בהצלחה!</h2>
     <div id="successText" class="summary"></div>
     <button onclick="location.reload()">קביעת תור נוסף</button>
   </div>
 
 </div>
 
+<!-- Waitlist Modal -->
+<div id="waitlistModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>📋 רשימת המתנה</h2>
+    <p id="waitlistInfo" style="color:#aaa; font-size:14px; margin-bottom:15px;"></p>
+    <select id="wlTime" style="width:100%; padding:14px; margin-bottom:10px; border-radius:12px; border:1px solid #333; background:#101010; color:#fff; font-size:16px;"></select>
+    <input id="wlName" type="text" placeholder="שם מלא">
+    <input id="wlPhone" type="tel" placeholder="מספר טלפון">
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button onclick="submitWaitlist()" style="background:#fff; color:#000;">אישור הרשמה</button>
+      <button onclick="closeWaitlistModal()" style="background:#333; color:#fff;">ביטול</button>
+    </div>
+    <div id="wlStatus" class="status"></div>
+  </div>
+</div>
+
 <div class="nav">
   <button onclick="window.open('https://maps.google.com/?q=GGD+Barber','_blank')">
-    <b>📍</b>
-    מיקום
+    <b>📍</b> מיקום
   </button>
   <button onclick="showMyBooking()">
-    <b>📅</b>
-    התור שלי
+    <b>📅</b> התור שלי
   </button>
   <button onclick="window.open('https://www.instagram.com/gefen.ganon/','_blank')">
-    <b>📸</b>
-    אינסטגרם
+    <b>📸</b> אינסטגרם
   </button>
 </div>
 
 <script>
-/* =========================
-   SUPABASE
-========================= */
 const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 
-/* =========================
-   VARIABLES
-========================= */
 let services = [];
 let workingHours = [];
 let selectedService = null;
 let selectedDate = null;
 let selectedTime = null;
+let availableSlotsList = [];
 
-/* =========================
-   SUPABASE REQUEST
-========================= */
 async function supabaseFetch(path, options = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, 10000);
-
-  try {
-    const response = await fetch(
-      SUPABASE_URL + path,
-      {
-        ...options,
-        signal: controller.signal,
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY,
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        }
-      }
-    );
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error("Supabase error: " + response.status + " " + text);
+  const response = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
     }
-
-    return response.json();
-
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error("Supabase לא הגיב תוך 10 שניות");
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error("Supabase error: " + response.status + " " + text);
   }
+  return response.json();
 }
 
-/* =========================
-   LOAD SERVICES
-========================= */
 async function loadServices(){
   const box = document.getElementById("services");
   try{
-    const data = await supabaseFetch(
-      "/rest/v1/rpc/get_active_services",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({})
-      }
-    );
-
+    const data = await supabaseFetch("/rest/v1/rpc/get_active_services", {
+      method: "POST",
+      body: JSON.stringify({})
+    });
     const unique = [];
     const names = new Set();
     for(const service of data){
@@ -414,13 +308,7 @@ async function loadServices(){
         unique.push(service);
       }
     }
-
     services = unique;
-    if(!services.length){
-      box.innerHTML = '<div class="status error">לא נמצאו שירותים</div>';
-      return;
-    }
-
     box.innerHTML = "";
     services.forEach(service => {
       const el = document.createElement("div");
@@ -430,43 +318,30 @@ async function loadServices(){
         <div class="service-description">${escapeHtml(service.description || "")}</div>
         <div class="price">₪${Number(service.price).toFixed(0)}</div>
       `;
-
       el.onclick = () => {
         document.querySelectorAll(".service").forEach(x => x.classList.remove("selected"));
         el.classList.add("selected");
         selectedService = service;
         selectedTime = null;
         updateBookButton();
-        if(selectedDate){
-          loadSlots();
-        }
+        if(selectedDate) loadSlots();
       };
       box.appendChild(el);
     });
   }catch(error){
-    console.error(error);
-    box.innerHTML = '<div class="status error">לא הצלחנו לטעון את השירותים</div>';
+    box.innerHTML = '<div class="status error">שגיאת טעינה</div>';
   }
 }
 
-/* =========================
-   LOAD WORKING HOURS
-========================= */
 async function loadWorkingHours(){
   try{
-    workingHours = await supabaseFetch(
-      "/rest/v1/working_hours?select=day_of_week,day_name,is_open,open_time,close_time,break_start,break_end,slot_duration&is_open=eq.true&order=day_of_week"
-    );
+    workingHours = await supabaseFetch("/rest/v1/working_hours?select=day_of_week,is_open,open_time,close_time,break_start,break_end,slot_duration&is_open=eq.true&order=day_of_week");
     renderDates();
   }catch(error){
-    console.error(error);
-    document.getElementById("dates").innerHTML = '<div class="status error">לא הצלחנו לטעון את שעות העבודה</div>';
+    document.getElementById("dates").innerHTML = '<div class="status error">שגיאת טעינה</div>';
   }
 }
 
-/* =========================
-   DATES
-========================= */
 function renderDates(){
   const box = document.getElementById("dates");
   box.innerHTML = "";
@@ -477,21 +352,16 @@ function renderDates(){
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dayOfWeek = date.getDay();
-
     const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
-    if(!hours || !hours.is_open){
-      continue;
-    }
+    if(!hours || !hours.is_open) continue;
 
     const el = document.createElement("div");
     el.className = "date";
     const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-    
     el.innerHTML = `
       <div class="day">${dayNames[dayOfWeek]}</div>
       <div class="date-number">${date.getDate()}/${date.getMonth()+1}</div>
     `;
-
     el.onclick = () => {
       document.querySelectorAll(".date").forEach(x => x.classList.remove("selected"));
       el.classList.add("selected");
@@ -500,103 +370,69 @@ function renderDates(){
       updateBookButton();
       loadSlots();
     };
-
     box.appendChild(el);
   }
 }
 
-/* =========================
-   LOAD BOOKED SLOTS
-========================= */
-async function getBookedSlots(date){
-  const dateString = isoDate(date);
-  try{
-    const data = await supabaseFetch(
-      "/rest/v1/rpc/get_booked_slots",
-      {
-        method: "POST",
-        body: JSON.stringify({ p_date: dateString })
-      }
-    );
-    return Array.isArray(data) ? data : [];
-  }catch(error){
-    console.error(error);
-    return [];
-  }
-}
-
-/* =========================
-   CREATE TIME SLOTS
-========================= */
 async function loadSlots(){
   const box = document.getElementById("times");
-  const status = document.getElementById("timeStatus");
+  const waitlistBtn = document.getElementById("waitlistOpenBtn");
   box.innerHTML = '<div class="loading">טוען שעות...</div>';
-  status.textContent = "";
+  waitlistBtn.classList.add("hidden");
 
-  if(!selectedDate){
-    box.innerHTML = '<div class="status">בחר תאריך</div>';
-    return;
-  }
+  if(!selectedDate) return;
 
   const dayOfWeek = selectedDate.getDay();
   const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
-
   if(!hours){
-    box.innerHTML = '<div class="status">אין שעות עבודה ביום הזה</div>';
+    box.innerHTML = '<div class="status">אין שעות עבודה</div>';
     return;
   }
 
-  const booked = await getBookedSlots(selectedDate);
+  let booked = [];
+  try{
+    const data = await supabaseFetch("/rest/v1/rpc/get_booked_slots", {
+      method: "POST",
+      body: JSON.stringify({ p_date: isoDate(selectedDate) })
+    });
+    booked = Array.isArray(data) ? data : [];
+  }catch(e){}
+
   const bookedSet = new Set();
-  
   booked.forEach(item => {
-    if(typeof item === "string"){
-      bookedSet.add(item.slice(0,5));
-    }else if(item && item.time){
-      bookedSet.add(String(item.time).slice(0,5));
-    }
+    if(typeof item === "string") bookedSet.add(item.slice(0,5));
+    else if(item && item.time) bookedSet.add(String(item.time).slice(0,5));
   });
 
-  const slots = generateSlots(
-    hours.open_time,
-    hours.close_time,
-    hours.break_start,
-    hours.break_end,
-    Number(hours.slot_duration || 30)
-  );
+  const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
+  
+  // מסנן רק שעות פנויות לחלוטין!
+  availableSlotsList = allSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
 
   box.innerHTML = "";
-
-  if(!slots.length){
-    box.innerHTML = '<div class="status">אין שעות זמינות</div>';
+  if(!availableSlotsList.length){
+    box.innerHTML = '<div class="status">כל התורים לתאריך זה תפוסים</div>';
+    waitlistBtn.classList.remove("hidden");
     return;
   }
 
-  slots.forEach(time => {
+  availableSlotsList.forEach(time => {
     const timeStr = String(time).slice(0,5);
-    const isBooked = bookedSet.has(timeStr);
-
     const el = document.createElement("div");
-    el.className = "time" + (isBooked ? " disabled" : "");
-    el.textContent = isBooked ? "תפוס" : timeStr;
-
-    if(!isBooked){
-      el.onclick = () => {
-        document.querySelectorAll(".time").forEach(x => x.classList.remove("selected"));
-        el.classList.add("selected");
-        selectedTime = timeStr;
-        updateBookButton();
-      };
-    }
-
+    el.className = "time";
+    el.textContent = timeStr;
+    el.onclick = () => {
+      document.querySelectorAll(".time").forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedTime = timeStr;
+      updateBookButton();
+    };
     box.appendChild(el);
   });
+
+  waitlistBtn.classList.remove("hidden");
 }
 
-/* =========================
-   GENERATE SLOTS
-========================= */
 function generateSlots(openTime, closeTime, breakStart, breakEnd, duration){
   const result = [];
   let current = timeToMinutes(openTime);
@@ -607,18 +443,12 @@ function generateSlots(openTime, closeTime, breakStart, breakEnd, duration){
   while(current + duration <= close){
     const end = current + duration;
     const overlapsBreak = breakFrom !== null && breakTo !== null && current < breakTo && end > breakFrom;
-
-    if(!overlapsBreak){
-      result.push(minutesToTime(current));
-    }
+    if(!overlapsBreak) result.push(minutesToTime(current));
     current += duration;
   }
   return result;
 }
 
-/* =========================
-   BOOK
-========================= */
 document.getElementById("book").addEventListener("click", bookAppointment);
 
 async function bookAppointment(){
@@ -627,60 +457,37 @@ async function bookAppointment(){
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  if(!selectedService || !selectedDate || !selectedTime){
-    status.textContent = "בחר שירות, תאריך ושעה";
-    status.className = "status error";
-    return;
-  }
-
-  if(!name){
-    status.textContent = "נא להזין שם";
-    status.className = "status error";
-    return;
-  }
-
-  if(!phone){
-    status.textContent = "נא להזין מספר טלפון";
+  if(!selectedService || !selectedDate || !selectedTime) return;
+  if(!name || !phone){
+    status.textContent = "נא להזין שם ומספר טלפון";
     status.className = "status error";
     return;
   }
 
   button.disabled = true;
   button.textContent = "קובע תור...";
-  status.textContent = "";
 
   try{
-    const result = await supabaseFetch(
-      "/rest/v1/rpc/book_slot",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          p_service_id: selectedService.id,
-          p_name: name,
-          p_phone: phone,
-          p_date: isoDate(selectedDate),
-          p_time: selectedTime + ":00"
-        })
-      }
-    );
+    const result = await supabaseFetch("/rest/v1/rpc/book_slot", {
+      method: "POST",
+      body: JSON.stringify({
+        p_service_id: selectedService.id,
+        p_name: name,
+        p_phone: phone,
+        p_date: isoDate(selectedDate),
+        p_time: selectedTime + ":00"
+      })
+    });
 
-    if(result && result.success === false){
-      throw new Error(result.message || "לא ניתן לקבוע את התור");
-    }
+    if(result && result.success === false) throw new Error(result.message || "התור תפוס");
 
     localStorage.setItem("myBooking", JSON.stringify({
-      name: name,
-      service: selectedService.name,
-      date: selectedDate,
-      time: selectedTime,
-      price: selectedService.price,
-      phone: phone
+      name, service: selectedService.name, date: selectedDate, time: selectedTime, price: selectedService.price, phone
     }));
 
     document.getElementById("booking").classList.add("hidden");
     const success = document.getElementById("success");
     success.classList.remove("hidden");
-    
     document.getElementById("successText").innerHTML = `
       <strong>${escapeHtml(name)}</strong><br>
       ${escapeHtml(selectedService.name)}<br>
@@ -689,28 +496,89 @@ async function bookAppointment(){
       מחיר: ₪${Number(selectedService.price).toFixed(0)}<br><br>
       הטלפון שלך: ${escapeHtml(phone)}
     `;
-
   }catch(error){
-    console.error(error);
-    status.textContent = error.message || "אירעה שגיאה בקביעת התור";
+    status.textContent = "השעה הזו כבר נתפסה ממש עכשיו";
     status.className = "status error";
     button.disabled = false;
     button.textContent = "קביעת תור";
-    await loadSlots();
+    loadSlots();
   }
 }
 
-/* =========================
-   BUTTON STATE
-========================= */
+function openWaitlistModal(){
+  if(!selectedService || !selectedDate){
+    alert("נא לבחור שירות ותאריך קודם");
+    return;
+  }
+  const select = document.getElementById("wlTime");
+  select.innerHTML = "";
+  
+  // אפשרות להירשם לכל שעה אפשרית ביום
+  const dayOfWeek = selectedDate.getDay();
+  const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
+  if(hours){
+    const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
+    allSlots.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+  }
+
+  document.getElementById("waitlistInfo").textContent = `הירשם לרשימת המתנה לתאריך ${formatDate(selectedDate)}:`;
+  document.getElementById("wlName").value = document.getElementById("name").value;
+  document.getElementById("wlPhone").value = document.getElementById("phone").value;
+  document.getElementById("wlStatus").textContent = "";
+  document.getElementById("waitlistModal").classList.remove("hidden");
+}
+
+function closeWaitlistModal(){
+  document.getElementById("waitlistModal").classList.add("hidden");
+}
+
+async function submitWaitlist(){
+  const name = document.getElementById("wlName").value.trim();
+  const phone = document.getElementById("wlPhone").value.trim();
+  const time = document.getElementById("wlTime").value;
+  const statusEl = document.getElementById("wlStatus");
+
+  if(!name || !phone || !time){
+    statusEl.textContent = "נא למלא את כל השדות";
+    statusEl.className = "status error";
+    return;
+  }
+
+  statusEl.textContent = "רושם אותך...";
+  statusEl.className = "status";
+
+  try{
+    await supabaseFetch("/rest/v1/waitlist", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        service_id: selectedService.id,
+        customer_name: name,
+        phone: phone,
+        booking_date: isoDate(selectedDate),
+        booking_time: time + ":00"
+      })
+    });
+
+    statusEl.textContent = "נרשמת בהצלחה לרשימת ההמתנה!";
+    statusEl.className = "status success";
+    setTimeout(() => { closeWaitlistModal(); }, 1500);
+  }catch(error){
+    statusEl.textContent = "שגיאה בהרשמה";
+    statusEl.className = "status error";
+  }
+}
+
 function updateBookButton(){
   const button = document.getElementById("book");
   button.disabled = !selectedService || !selectedDate || !selectedTime;
 }
 
-/* =========================
-   HELPERS
-========================= */
 function isoDate(date){
   const y = date.getFullYear();
   const m = String(date.getMonth()+1).padStart(2,"0");
@@ -720,11 +588,7 @@ function isoDate(date){
 
 function formatDate(date){
   const d = new Date(date);
-  return d.toLocaleDateString("he-IL", {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  });
+  return d.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" });
 }
 
 function timeToMinutes(value){
@@ -739,63 +603,27 @@ function minutesToTime(minutes){
 }
 
 function escapeHtml(value){
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
-/* =========================
-   START
-========================= */
 async function init(){
-  const servicesBox = document.getElementById("services");
-  const datesBox = document.getElementById("dates");
-
-  servicesBox.innerHTML = '<div class="status">בודק שירותים...</div>';
-  datesBox.innerHTML = '<div class="status">בודק תאריכים...</div>';
-
   try {
-    await Promise.all([
-      loadServices(),
-      loadWorkingHours()
-    ]);
-  } catch(error) {
-    console.error(error);
-    servicesBox.innerHTML = '<div class="status error">לא הצלחנו לטעון את השירותים</div>';
-    datesBox.innerHTML = '<div class="status error">לא הצלחנו לטעון את התאריכים</div>';
-  }
+    await Promise.all([loadServices(), loadWorkingHours()]);
+  } catch(error) {}
 }
 
 init();
 
 function showMyBooking(){
   const saved = localStorage.getItem("myBooking");
-  if(!saved){
-    alert("אין כרגע תור שמור");
-    return;
-  }
-
+  if(!saved){ alert("אין כרגע תור שמור"); return; }
   let data;
-  try{
-    data = JSON.parse(saved);
-  }catch(e){
-    alert("לא ניתן לקרוא את פרטי התור");
-    return;
-  }
+  try{ data = JSON.parse(saved); }catch(e){ return; }
 
   const success = document.getElementById("success");
-  if(!success){
-    alert("לא נמצא אזור התור");
-    return;
-  }
-
-  // הצג את אזור ההצלחה והסתר את טופס הקביעה אם צריך
   document.getElementById("booking").classList.add("hidden");
   success.classList.remove("hidden");
-
+  document.getElementById("successTitle").textContent = "התור השמור שלי";
   document.getElementById("successText").innerHTML = `
     <strong>${escapeHtml(data.name || "")}</strong><br><br>
     ${escapeHtml(data.service || "")}<br><br>
@@ -804,13 +632,7 @@ function showMyBooking(){
     מחיר: ₪${Number(data.price || 0).toFixed(0)}<br><br>
     הטלפון שלך: ${escapeHtml(data.phone || "")}
   `;
-
-  setTimeout(() => {
-    success.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }, 100);
+  success.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 </script>
 
