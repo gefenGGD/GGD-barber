@@ -406,7 +406,6 @@ async function loadSlots(){
 
   const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
   
-  // מסנן רק שעות פנויות לחלוטין!
   availableSlotsList = allSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
 
   box.innerHTML = "";
@@ -513,7 +512,6 @@ function openWaitlistModal(){
   const select = document.getElementById("wlTime");
   select.innerHTML = "";
   
-  // אפשרות להירשם לכל שעה אפשרית ביום
   const dayOfWeek = selectedDate.getDay();
   const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
   if(hours){
@@ -552,23 +550,29 @@ async function submitWaitlist(){
   statusEl.textContent = "רושם אותך...";
   statusEl.className = "status";
 
+  // תיקון: הבטחת שליחת שעה נקייה (ללא שניות) ו-service_id כ-String למניעת שגיאות שרת
+  const cleanTime = String(time).slice(0, 5);
+
   try{
+    const payload = {
+      service_id: String(selectedService.id),
+      customer_name: name,
+      phone: phone,
+      booking_date: isoDate(selectedDate),
+      booking_time: cleanTime
+    };
+
     await supabaseFetch("/rest/v1/waitlist", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({
-        service_id: selectedService.id,
-        customer_name: name,
-        phone: phone,
-        booking_date: isoDate(selectedDate),
-        booking_time: time + ":00"
-      })
+      body: JSON.stringify(payload)
     });
 
     statusEl.textContent = "נרשמת בהצלחה לרשימת ההמתנה!";
     statusEl.className = "status success";
     setTimeout(() => { closeWaitlistModal(); }, 1500);
   }catch(error){
+    console.error("Waitlist error:", error);
     statusEl.textContent = "שגיאה בהרשמה";
     statusEl.className = "status error";
   }
