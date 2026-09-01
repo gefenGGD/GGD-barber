@@ -473,3 +473,8 @@ if (localStorage.getItem("ggd_access_token")) {
 
 </body>
 </html>
+<script>
+window.onerror = function(msg, url, line) {
+  alert("שגיאה: " + msg + " (שורה: " + line + ")");
+};
+</script>
