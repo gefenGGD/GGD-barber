@@ -4,240 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GGD Barber - קביעת תור</title>
-
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:#090909;
-  color:#fff;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-}
-.container{
-  max-width:520px;
-  margin:auto;
-  padding:22px 16px 100px;
-}
-.brand{
-  text-align:center;
-  padding:28px 0 32px;
-}
-.logo{
-  font-size:42px;
-  font-weight:900;
-  letter-spacing:12px;
-}
-.sub{
-  color:#999;
-  font-size:13px;
-  letter-spacing:4px;
-  margin-top:8px;
-}
-.card{
-  background:#151515;
-  border:1px solid #292929;
-  border-radius:24px;
-  padding:20px;
-  margin-bottom:16px;
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
-}
-h2{
-  margin:0 0 18px;
-  font-size:22px;
-}
-.services{
-  display:grid;
-  gap:10px;
-}
-.service{
-  background:#191919;
-  border:1px solid #303030;
-  border-radius:16px;
-  padding:16px;
-  cursor:pointer;
-  transition:.15s;
-}
-.service:hover{border-color:#777;}
-.service.selected{
-  background:#fff;
-  color:#000;
-  border-color:#fff;
-}
+body{margin:0;background:#090909;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;}
+.container{max-width:520px;margin:auto;padding:22px 16px 100px;}
+.brand{text-align:center;padding:28px 0 32px;}
+.logo{font-size:42px;font-weight:900;letter-spacing:12px;}
+.sub{color:#999;font-size:13px;letter-spacing:4px;margin-top:8px;}
+.card{background:#151515;border:1px solid #292929;border-radius:24px;padding:20px;margin-bottom:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+h2{margin:0 0 18px;font-size:22px;}
+.services{display:grid;gap:10px;}
+.service{background:#191919;border:1px solid #303030;border-radius:16px;padding:16px;cursor:pointer;transition:.15s;}
+.service.selected{background:#fff;color:#000;border-color:#fff;}
 .service-name{font-size:17px;font-weight:700;}
 .service-description{color:#999;font-size:13px;margin-top:5px;}
 .service.selected .service-description{color:#555;}
 .price{font-weight:800;font-size:17px;margin-top:8px;}
-.dates{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-.date{
-  background:#191919;
-  border:1px solid #303030;
-  border-radius:14px;
-  padding:13px 7px;
-  text-align:center;
-  cursor:pointer;
-}
+.dates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.date{background:#191919;border:1px solid #303030;border-radius:14px;padding:13px 7px;text-align:center;cursor:pointer;}
 .date.selected{background:#fff;color:#000;}
 .day{font-size:13px;color:#999;}
 .date.selected .day{color:#555;}
 .date-number{font-size:19px;font-weight:800;margin-top:3px;}
-.times{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-.time{
-  padding:13px 5px;
-  text-align:center;
-  border:1px solid #303030;
-  border-radius:12px;
-  background:#191919;
-  cursor:pointer;
-}
+.times{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.time{padding:13px 5px;text-align:center;border:1px solid #303030;border-radius:12px;background:#191919;cursor:pointer;}
 .time.selected{background:#fff;color:#000;}
-input{
-  width:100%;
-  padding:15px;
-  margin-top:10px;
-  border-radius:12px;
-  border:1px solid #333;
-  background:#101010;
-  color:#fff;
-  font-size:16px;
-  outline:none;
-}
-input:focus{border-color:#888;}
-button{
-  width:100%;
-  padding:16px;
-  border:0;
-  border-radius:14px;
-  background:#fff;
-  color:#000;
-  font-size:17px;
-  font-weight:800;
-  cursor:pointer;
-}
+input{width:100%;padding:15px;margin-top:10px;border-radius:12px;border:1px solid #333;background:#101010;color:#fff;font-size:16px;outline:none;}
+button{width:100%;padding:16px;border:0;border-radius:14px;background:#fff;color:#000;font-size:17px;font-weight:800;cursor:pointer;}
 button:disabled{opacity:.4;cursor:not-allowed;}
 .status{text-align:center;color:#999;margin-top:12px;line-height:1.5;}
 .error{color:#ff6b6b;}
 .success{text-align:center;}
 .success-icon{font-size:45px;margin-bottom:10px;}
-.summary{
-  background:#101010;
-  border-radius:15px;
-  padding:15px;
-  margin:15px 0;
-  line-height:1.9;
-}
-.nav{
-  position:fixed;
-  bottom:12px;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(490px,calc(100% - 24px));
-  background:#181818;
-  border:1px solid #303030;
-  border-radius:22px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  padding:10px;
-  z-index:20;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);
-}
+.summary{background:#101010;border-radius:15px;padding:15px;margin:15px 0;line-height:1.9;}
+.nav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:min(490px,calc(100% - 24px));background:#181818;border:1px solid #303030;border-radius:22px;display:grid;grid-template-columns:repeat(3,1fr);padding:10px;z-index:20;}
 .nav span{text-align:center;color:#aaa;font-size:12px;}
 .nav b{display:block;font-size:20px;margin-bottom:3px;}
 .hidden{display:none!important;}
 .loading{color:#888;text-align:center;padding:20px;}
-
-.modal-overlay{
-  position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0.8);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:100;
-  padding:16px;
-}
-.modal-card{
-  background:#181818;
-  border:1px solid #333;
-  border-radius:22px;
-  padding:24px;
-  width:100%;
-  max-width:400px;
-}
-.waitlist-btn{
-  background:#222;
-  color:#ccc;
-  border:1px dashed #444;
-  margin-top:12px;
-  font-size:14px;
-  padding:12px;
-}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-card{background:#181818;border:1px solid #333;border-radius:22px;padding:24px;width:100%;max-width:400px;}
+.waitlist-btn{background:#222;color:#ccc;border:1px dashed #444;margin-top:12px;font-size:14px;padding:12px;}
 </style>
 </head>
-
 <body>
-
 <div class="container">
-
   <div class="brand">
     <div class="logo">GGD</div>
     <div class="sub">BARBER • BOOKING</div>
   </div>
-
   <div id="booking">
-
     <div class="card">
       <h2>בחר שירות</h2>
-      <div id="services" class="services">
-        <div class="loading">טוען שירותים...</div>
-      </div>
+      <div id="services" class="services"><div class="loading">טוען שירותים...</div></div>
     </div>
-
     <div class="card">
       <h2>בחר תאריך</h2>
-      <div id="dates" class="dates">
-        <div class="loading">טוען תאריכים...</div>
-      </div>
+      <div id="dates" class="dates"><div class="loading">טוען תאריכים...</div></div>
     </div>
-
     <div class="card">
       <h2>בחר שעה</h2>
-      <div id="times" class="times">
-        <div class="loading">בחר תאריך...</div>
-      </div>
+      <div id="times" class="times"><div class="loading">בחר תאריך...</div></div>
       <button id="waitlistOpenBtn" class="waitlist-btn hidden" onclick="openWaitlistModal()">📋 השעה תפוסה? היכנס לרשימת המתנה</button>
       <div id="timeStatus" class="status"></div>
     </div>
-
     <div class="card">
       <h2>פרטים</h2>
       <input id="name" type="text" placeholder="שם מלא">
       <input id="phone" type="tel" placeholder="מספר טלפון">
-      <div style="margin-top:15px">
-        <button id="book" disabled>קביעת תור</button>
-      </div>
+      <div style="margin-top:15px"><button id="book" disabled>קביעת תור</button></div>
       <div id="status" class="status"></div>
     </div>
-
   </div>
-
   <div id="success" class="card success hidden">
     <div class="success-icon">✓</div>
     <h2 id="successTitle">התור נקבע בהצלחה!</h2>
     <div id="successText" class="summary"></div>
     <button onclick="location.reload()">קביעת תור נוסף</button>
   </div>
-
 </div>
 
-<!-- Waitlist Modal -->
 <div id="waitlistModal" class="modal-overlay hidden">
   <div class="modal-card">
     <h2>📋 רשימת המתנה</h2>
@@ -254,15 +100,9 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 </div>
 
 <div class="nav">
-  <button onclick="window.open('https://maps.google.com/?q=GGD+Barber','_blank')">
-    <b>📍</b> מיקום
-  </button>
-  <button onclick="showMyBooking()">
-    <b>📅</b> התור שלי
-  </button>
-  <button onclick="window.open('https://www.instagram.com/gefen.ganon/','_blank')">
-    <b>📸</b> אינסטגרם
-  </button>
+  <button style="background:transparent;border:0" onclick="window.open('https://maps.google.com/?q=GGD+Barber','_blank')"><b>📍</b><span>מיקום</span></button>
+  <button style="background:transparent;border:0" onclick="showMyBooking()"><b>📅</b><span>התור שלי</span></button>
+  <button style="background:transparent;border:0" onclick="window.open('https://www.instagram.com/gefen.ganon/','_blank')"><b>📸</b><span>אינסטגרם</span></button>
 </div>
 
 <script>
@@ -296,28 +136,13 @@ async function supabaseFetch(path, options = {}) {
 async function loadServices(){
   const box = document.getElementById("services");
   try{
-    const data = await supabaseFetch("/rest/v1/rpc/get_active_services", {
-      method: "POST",
-      body: JSON.stringify({})
-    });
-    const unique = [];
-    const names = new Set();
-    for(const service of data){
-      if(!names.has(service.name)){
-        names.add(service.name);
-        unique.push(service);
-      }
-    }
-    services = unique;
+    const data = await supabaseFetch("/rest/v1/rpc/get_active_services", { method: "POST", body: JSON.stringify({}) });
+    services = data || [];
     box.innerHTML = "";
     services.forEach(service => {
       const el = document.createElement("div");
       el.className = "service";
-      el.innerHTML = `
-        <div class="service-name">${escapeHtml(service.name)}</div>
-        <div class="service-description">${escapeHtml(service.description || "")}</div>
-        <div class="price">₪${Number(service.price).toFixed(0)}</div>
-      `;
+      el.innerHTML = `<div class="service-name">${escapeHtml(service.name)}</div><div class="service-description">${escapeHtml(service.description || "")}</div><div class="price">₪${Number(service.price).toFixed(0)}</div>`;
       el.onclick = () => {
         document.querySelectorAll(".service").forEach(x => x.classList.remove("selected"));
         el.classList.add("selected");
@@ -328,18 +153,14 @@ async function loadServices(){
       };
       box.appendChild(el);
     });
-  }catch(error){
-    box.innerHTML = '<div class="status error">שגיאת טעינה</div>';
-  }
+  }catch(e){ box.innerHTML = '<div class="status error">שגיאת טעינה</div>'; }
 }
 
 async function loadWorkingHours(){
   try{
-    workingHours = await supabaseFetch("/rest/v1/working_hours?select=day_of_week,is_open,open_time,close_time,break_start,break_end,slot_duration&is_open=eq.true&order=day_of_week");
+    workingHours = await supabaseFetch("/rest/v1/working_hours?select=*&is_open=eq.true");
     renderDates();
-  }catch(error){
-    document.getElementById("dates").innerHTML = '<div class="status error">שגיאת טעינה</div>';
-  }
+  }catch(e){ document.getElementById("dates").innerHTML = '<div class="status error">שגיאת טעינה</div>'; }
 }
 
 function renderDates(){
@@ -347,7 +168,6 @@ function renderDates(){
   box.innerHTML = "";
   const today = new Date();
   today.setHours(0,0,0,0);
-
   for(let i=0; i<21; i++){
     const date = new Date(today);
     date.setDate(today.getDate() + i);
@@ -358,10 +178,7 @@ function renderDates(){
     const el = document.createElement("div");
     el.className = "date";
     const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-    el.innerHTML = `
-      <div class="day">${dayNames[dayOfWeek]}</div>
-      <div class="date-number">${date.getDate()}/${date.getMonth()+1}</div>
-    `;
+    el.innerHTML = `<div class="day">${dayNames[dayOfWeek]}</div><div class="date-number">${date.getDate()}/${date.getMonth()+1}</div>`;
     el.onclick = () => {
       document.querySelectorAll(".date").forEach(x => x.classList.remove("selected"));
       el.classList.add("selected");
@@ -379,22 +196,15 @@ async function loadSlots(){
   const waitlistBtn = document.getElementById("waitlistOpenBtn");
   box.innerHTML = '<div class="loading">טוען שעות...</div>';
   waitlistBtn.classList.add("hidden");
-
   if(!selectedDate) return;
 
   const dayOfWeek = selectedDate.getDay();
   const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
-  if(!hours){
-    box.innerHTML = '<div class="status">אין שעות עבודה</div>';
-    return;
-  }
+  if(!hours){ box.innerHTML = '<div class="status">אין שעות עבודה</div>'; return; }
 
   let booked = [];
   try{
-    const data = await supabaseFetch("/rest/v1/rpc/get_booked_slots", {
-      method: "POST",
-      body: JSON.stringify({ p_date: isoDate(selectedDate) })
-    });
+    const data = await supabaseFetch("/rest/v1/rpc/get_booked_slots", { method: "POST", body: JSON.stringify({ p_date: isoDate(selectedDate) }) });
     booked = Array.isArray(data) ? data : [];
   }catch(e){}
 
@@ -405,7 +215,6 @@ async function loadSlots(){
   });
 
   const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
-  
   availableSlotsList = allSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
 
   box.innerHTML = "";
@@ -428,7 +237,6 @@ async function loadSlots(){
     };
     box.appendChild(el);
   });
-
   waitlistBtn.classList.remove("hidden");
 }
 
@@ -438,7 +246,6 @@ function generateSlots(openTime, closeTime, breakStart, breakEnd, duration){
   const close = timeToMinutes(closeTime);
   const breakFrom = breakStart ? timeToMinutes(breakStart) : null;
   const breakTo = breakEnd ? timeToMinutes(breakEnd) : null;
-
   while(current + duration <= close){
     const end = current + duration;
     const overlapsBreak = breakFrom !== null && breakTo !== null && current < breakTo && end > breakFrom;
@@ -457,11 +264,7 @@ async function bookAppointment(){
   const phone = document.getElementById("phone").value.trim();
 
   if(!selectedService || !selectedDate || !selectedTime) return;
-  if(!name || !phone){
-    status.textContent = "נא להזין שם ומספר טלפון";
-    status.className = "status error";
-    return;
-  }
+  if(!name || !phone){ status.textContent = "נא להזין שם ומספר טלפון"; status.className = "status error"; return; }
 
   button.disabled = true;
   button.textContent = "קובע תור...";
@@ -469,33 +272,15 @@ async function bookAppointment(){
   try{
     const result = await supabaseFetch("/rest/v1/rpc/book_slot", {
       method: "POST",
-      body: JSON.stringify({
-        p_service_id: selectedService.id,
-        p_name: name,
-        p_phone: phone,
-        p_date: isoDate(selectedDate),
-        p_time: selectedTime + ":00"
-      })
+      body: JSON.stringify({ p_service_id: selectedService.id, p_name: name, p_phone: phone, p_date: isoDate(selectedDate), p_time: selectedTime + ":00" })
     });
-
     if(result && result.success === false) throw new Error(result.message || "התור תפוס");
 
-    localStorage.setItem("myBooking", JSON.stringify({
-      name, service: selectedService.name, date: selectedDate, time: selectedTime, price: selectedService.price, phone
-    }));
-
+    localStorage.setItem("myBooking", JSON.stringify({ name, service: selectedService.name, date: selectedDate, time: selectedTime, price: selectedService.price, phone }));
     document.getElementById("booking").classList.add("hidden");
-    const success = document.getElementById("success");
-    success.classList.remove("hidden");
-    document.getElementById("successText").innerHTML = `
-      <strong>${escapeHtml(name)}</strong><br>
-      ${escapeHtml(selectedService.name)}<br>
-      ${formatDate(selectedDate)}<br>
-      שעה: <strong>${selectedTime}</strong><br>
-      מחיר: ₪${Number(selectedService.price).toFixed(0)}<br><br>
-      הטלפון שלך: ${escapeHtml(phone)}
-    `;
-  }catch(error){
+    document.getElementById("success").classList.remove("hidden");
+    document.getElementById("successText").innerHTML = `<strong>${escapeHtml(name)}</strong><br>${escapeHtml(selectedService.name)}<br>${formatDate(selectedDate)}<br>שעה: <strong>${selectedTime}</strong><br>מחיר: ₪${Number(selectedService.price).toFixed(0)}<br><br>הטלפון שלך: ${escapeHtml(phone)}`;
+  }catch(e){
     status.textContent = "השעה הזו כבר נתפסה ממש עכשיו";
     status.className = "status error";
     button.disabled = false;
@@ -505,25 +290,19 @@ async function bookAppointment(){
 }
 
 function openWaitlistModal(){
-  if(!selectedService || !selectedDate){
-    alert("נא לבחור שירות ותאריך קודם");
-    return;
-  }
+  if(!selectedService || !selectedDate){ alert("נא לבחור שירות ותאריך קודם"); return; }
   const select = document.getElementById("wlTime");
   select.innerHTML = "";
-  
   const dayOfWeek = selectedDate.getDay();
   const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
   if(hours){
     const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
     allSlots.forEach(t => {
       const opt = document.createElement("option");
-      opt.value = t;
-      opt.textContent = t;
+      opt.value = t; opt.textContent = t;
       select.appendChild(opt);
     });
   }
-
   document.getElementById("waitlistInfo").textContent = `הירשם לרשימת המתנה לתאריך ${formatDate(selectedDate)}:`;
   document.getElementById("wlName").value = document.getElementById("name").value;
   document.getElementById("wlPhone").value = document.getElementById("phone").value;
@@ -531,9 +310,7 @@ function openWaitlistModal(){
   document.getElementById("waitlistModal").classList.remove("hidden");
 }
 
-function closeWaitlistModal(){
-  document.getElementById("waitlistModal").classList.add("hidden");
-}
+function closeWaitlistModal(){ document.getElementById("waitlistModal").classList.add("hidden"); }
 
 async function submitWaitlist(){
   const name = document.getElementById("wlName").value.trim();
@@ -541,109 +318,46 @@ async function submitWaitlist(){
   const time = document.getElementById("wlTime").value;
   const statusEl = document.getElementById("wlStatus");
 
-  if(!name || !phone || !time){
-    statusEl.textContent = "נא למלא את כל השדות";
-    statusEl.className = "status error";
-    return;
-  }
-
+  if(!name || !phone || !time){ statusEl.textContent = "נא למלא את כל השדות"; statusEl.className = "status error"; return; }
   statusEl.textContent = "רושם אותך...";
   statusEl.className = "status";
 
-  // תיקון: הבטחת שליחת שעה נקייה (ללא שניות) ו-service_id כ-String למניעת שגיאות שרת
-  const cleanTime = String(time).slice(0, 5);
-
   try{
-    const payload = {
-      service_id: String(selectedService.id),
-      customer_name: name,
-      phone: phone,
-      booking_date: isoDate(selectedDate),
-      booking_time: cleanTime
-    };
-
     await supabaseFetch("/rest/v1/waitlist", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ service_id: String(selectedService.id), customer_name: name, phone: phone, booking_date: isoDate(selectedDate), booking_time: String(time).slice(0,5) })
     });
-
     statusEl.textContent = "נרשמת בהצלחה לרשימת ההמתנה!";
     statusEl.className = "status success";
-    setTimeout(() => { closeWaitlistModal(); }, 1500);
-  }catch(error){
-    console.error("Waitlist error:", error);
+    setTimeout(() => closeWaitlistModal(), 1500);
+  }catch(e){
     statusEl.textContent = "שגיאה בהרשמה";
     statusEl.className = "status error";
   }
 }
 
-function updateBookButton(){
-  const button = document.getElementById("book");
-  button.disabled = !selectedService || !selectedDate || !selectedTime;
-}
+function updateBookButton(){ document.getElementById("book").disabled = !selectedService || !selectedDate || !selectedTime; }
+function isoDate(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
+function formatDate(date){ return new Date(date).toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" }); }
+function timeToMinutes(val){ const p = String(val).slice(0,5).split(":"); return Number(p[0])*60 + Number(p[1]); }
+function minutesToTime(m){ return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); }
+function escapeHtml(val){ return String(val ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-function isoDate(date){
-  const y = date.getFullYear();
-  const m = String(date.getMonth()+1).padStart(2,"0");
-  const d = String(date.getDate()).padStart(2,"0");
-  return `${y}-${m}-${d}`;
-}
-
-function formatDate(date){
-  const d = new Date(date);
-  return d.toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" });
-}
-
-function timeToMinutes(value){
-  const parts = String(value).slice(0,5).split(":");
-  return Number(parts[0]) * 60 + Number(parts[1]);
-}
-
-function minutesToTime(minutes){
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
-}
-
-function escapeHtml(value){
-  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-async function init(){
-  try {
-    await Promise.all([loadServices(), loadWorkingHours()]);
-  } catch(error) {}
-}
-
+async function init(){ try{ await Promise.all([loadServices(), loadWorkingHours()]); }catch(e){} }
 init();
 
 function showMyBooking(){
   const saved = localStorage.getItem("myBooking");
   if(!saved){ alert("אין כרגע תור שמור"); return; }
-  let data;
-  try{ data = JSON.parse(saved); }catch(e){ return; }
-
-  const success = document.getElementById("success");
+  let data; try{ data = JSON.parse(saved); }catch(e){ return; }
   document.getElementById("booking").classList.add("hidden");
+  const success = document.getElementById("success");
   success.classList.remove("hidden");
   document.getElementById("successTitle").textContent = "התור השמור שלי";
-  document.getElementById("successText").innerHTML = `
-    <strong>${escapeHtml(data.name || "")}</strong><br><br>
-    ${escapeHtml(data.service || "")}<br><br>
-    ${formatDate(data.date)}<br><br>
-    שעה: <strong>${escapeHtml(data.time || "")}</strong><br><br>
-    מחיר: ₪${Number(data.price || 0).toFixed(0)}<br><br>
-    הטלפון שלך: ${escapeHtml(data.phone || "")}
-  `;
+  document.getElementById("successText").innerHTML = `<strong>${escapeHtml(data.name || "")}</strong><br><br>${escapeHtml(data.service || "")}<br><br>${formatDate(data.date)}<br><br>שעה: <strong>${escapeHtml(data.time || "")}</strong><br><br>מחיר: ₪${Number(data.price || 0).toFixed(0)}<br><br>הטלפון שלך: ${escapeHtml(data.phone || "")}`;
   success.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 </script>
-
 </body>
 </html>
-<script>
-window.onerror = function(msg, url, line) {
-  alert("שגיאה: " + msg + " (שורה: " + line + ")");
-};
-</script>
