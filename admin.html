@@ -73,7 +73,7 @@ input{
 }
 .filter{background:#202020;color:#aaa;border:1px solid #333;}
 .filter.active{background:#fff;color:#000;}
-.booking{
+.booking, .waitlist-item{
   background:#101010;
   border:1px solid #303030;
   border-radius:18px;
@@ -131,6 +131,12 @@ input{
 
     <div id="bookings"></div>
 
+    <!-- WAITLIST MANAGER -->
+    <div class="card" style="margin-top:30px;">
+      <h2>📋 רשימת המתנה</h2>
+      <div id="waitlistContainer">טוען רשימת המתנה...</div>
+    </div>
+
     <!-- SERVICE MANAGER -->
     <div class="card" style="margin-top:30px;">
       <h2>💈 ניהול שירותים</h2>
@@ -146,6 +152,7 @@ const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 
 let allBookings = [];
+let allWaitlist = [];
 let currentFilter = "today";
 
 async function request(path, options = {}) {
@@ -230,7 +237,7 @@ function showAdmin() {
 }
 
 async function loadAllData() {
-  await Promise.all([loadBookings(), loadServiceManager()]);
+  await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager()]);
 }
 
 async function loadBookings() {
@@ -247,6 +254,48 @@ async function loadBookings() {
     status.textContent = "שגיאה בטעינת התורים";
     status.className = "status error";
     document.getElementById("bookings").innerHTML = `<div class="card error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function loadWaitlist() {
+  const container = document.getElementById("waitlistContainer");
+  try {
+    allWaitlist = await request("/rest/v1/waitlist?select=*&order=booking_date.asc,booking_time.asc");
+    if (!Array.isArray(allWaitlist)) allWaitlist = [];
+    
+    if (!allWaitlist.length) {
+      container.innerHTML = `<div class="empty">אין נרשמים ברשימת ההמתנה</div>`;
+      return;
+    }
+
+    container.innerHTML = "";
+    allWaitlist.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "waitlist-item";
+      const phone = String(item.phone || "");
+
+      div.innerHTML = `
+        <div class="booking-date">📅 ${formatDate(item.booking_date)}</div>
+        <div class="booking-time">🕐 ${formatTime(item.booking_time)}</div>
+        <div class="row"><span class="label">👤 לקוח</span><span class="value">${escapeHtml(item.customer_name || "")}</span></div>
+        <div class="row"><span class="label">📞 טלפון</span><span class="value">${phone ? `<a class="phone" href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a>` : "לא צוין"}</span></div>
+        <button class="delete" onclick="deleteWaitlist(${Number(item.id)})">🗑️ הסר מהמתנה</button>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    console.error(error);
+    container.innerHTML = `<div class="error">שגיאה בטעינת רשימת ההמתנה</div>`;
+  }
+}
+
+async function deleteWaitlist(id) {
+  if (!confirm("להסיר את הלקוח מרשימת ההמתנה?")) return;
+  try {
+    await request("/rest/v1/waitlist?id=eq." + id, { method: "DELETE" });
+    await loadWaitlist();
+  } catch (error) {
+    alert("שגיאה במחיקה:\n" + error.message);
   }
 }
 
