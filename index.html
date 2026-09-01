@@ -318,7 +318,12 @@ async function submitWaitlist(){
   const time = document.getElementById("wlTime").value;
   const statusEl = document.getElementById("wlStatus");
 
-  if(!name || !phone || !time){ statusEl.textContent = "נא למלא את כל השדות"; statusEl.className = "status error"; return; }
+  if(!name || !phone || !selectedDate){ 
+    statusEl.textContent = "נא למלא את כל השדות"; 
+    statusEl.className = "status error"; 
+    return; 
+  }
+  
   statusEl.textContent = "רושם אותך...";
   statusEl.className = "status";
 
@@ -326,7 +331,13 @@ async function submitWaitlist(){
     await supabaseFetch("/rest/v1/waitlist", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ service_id: String(selectedService.id), customer_name: name, phone: phone, booking_date: isoDate(selectedDate), booking_time: String(time).slice(0,5) })
+      body: JSON.stringify({ 
+        service_id: String(selectedService?.id || "general"), 
+        customer_name: name, 
+        phone: phone, 
+        booking_date: isoDate(selectedDate), 
+        booking_time: time ? String(time).slice(0,5) : null 
+      })
     });
     statusEl.textContent = "נרשמת בהצלחה לרשימת ההמתנה!";
     statusEl.className = "status success";
