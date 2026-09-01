@@ -260,7 +260,8 @@ async function loadBookings() {
 async function loadWaitlist() {
   const container = document.getElementById("waitlistContainer");
   try {
-    allWaitlist = await request("/rest/v1/waitlist?select=*&order=booking_date.asc,booking_time.asc");
+    // פנייה נקייה ללא מיון מורכב שעלול להיכשל אם שדה ריק
+    allWaitlist = await request("/rest/v1/waitlist?select=*&order=created_at.desc");
     if (!Array.isArray(allWaitlist)) allWaitlist = [];
     
     if (!allWaitlist.length) {
