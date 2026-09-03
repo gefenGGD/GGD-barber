@@ -116,6 +116,7 @@ const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 
 let allBookings = [];
 let allCustomersCache = [];
+let galleryItemsCache = [];
 let currentFilter = "today";
 let smsTarget = "single";
 
@@ -409,6 +410,7 @@ async function loadGallery() {
   const box = document.getElementById("gallery-list");
   try {
     const items = await request("/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc");
+    galleryItemsCache = items;
     if (!items.length) { box.innerHTML = `<div class="empty">אין תמונות בגלריה</div>`; return; }
     box.innerHTML = "";
     items.forEach(item => {
@@ -422,7 +424,7 @@ async function loadGallery() {
       div.innerHTML = `
         ${thumb}
         <div style="flex:1;color:#ccc;font-size:14px;">${item.media_type === "video" ? "🎬 " : ""}${escapeHtml(item.caption || "")}</div>
-        <button style="width:auto;padding:8px 12px;margin:0;background:#333;color:#fff;flex-shrink:0;" onclick="editGalleryCaption(${Number(item.id)}, ${JSON.stringify(item.caption || "")})">✏️</button>
+        <button style="width:auto;padding:8px 12px;margin:0;background:#333;color:#fff;flex-shrink:0;" onclick="editGalleryCaption(${Number(item.id)})">✏️</button>
         <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteGalleryItem(${Number(item.id)})">🗑️</button>
       `;
       box.appendChild(div);
@@ -432,8 +434,9 @@ async function loadGallery() {
   }
 }
 
-async function editGalleryCaption(id, currentCaption) {
-  const newCaption = prompt("שם/כיתוב לסטורי:", currentCaption || "");
+async function editGalleryCaption(id) {
+  const item = galleryItemsCache.find(g => Number(g.id) === Number(id));
+  const newCaption = prompt("שם/כיתוב לסטורי:", (item && item.caption) || "");
   if (newCaption === null) return;
   try {
     await request(`/rest/v1/gallery?id=eq.${id}`, {
