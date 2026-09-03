@@ -225,7 +225,8 @@ function renderDates(){
   box.innerHTML = "";
   const today = new Date();
   today.setHours(0,0,0,0);
-  for(let i=0; i<21; i++){
+  // Rolling 7-day window: today + the next 6 days. Rolls forward automatically each midnight.
+  for(let i=0; i<7; i++){
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dayOfWeek = date.getDay();
