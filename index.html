@@ -52,7 +52,9 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .stories-strip::-webkit-scrollbar{display:none;}
 .story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;}
 .story-avatar img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;}
+.story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;position:relative;}
 .story-avatar video{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;pointer-events:none;}
+.story-play-icon{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:20px;text-shadow:0 1px 4px rgba(0,0,0,.8);pointer-events:none;}
 .story-avatar span{display:block;font-size:11px;color:#999;margin-top:5px;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column;}
 .story-viewer.hidden{display:none;}
@@ -489,7 +491,7 @@ function renderStoriesStrip(){
     const el = document.createElement("div");
     el.className = "story-avatar";
     const thumb = item.media_type === "video"
-      ? `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video>`
+      ? `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video><span class="story-play-icon">▶️</span>`
       : `<img src="${escapeHtml(item.image_url)}">`;
     el.innerHTML = `${thumb}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
     el.onclick = () => openStory(i);
