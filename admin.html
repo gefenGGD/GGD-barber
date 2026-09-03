@@ -92,6 +92,13 @@ input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #
 
     <div class="card" style="margin-top:30px;">
       <h2>🖼️ גלריה (סטוריז)</h2>
+      <div style="background:#101010;border:1px solid #303030;border-radius:14px;padding:14px;margin-bottom:16px;">
+        <div style="color:#ccc;font-size:14px;margin-bottom:8px;">🏷️ לוגו המותג (יופיע על כל הסטוריז)</div>
+        <div id="brandLogoPreview" style="margin-bottom:8px;"></div>
+        <input id="brandLogoFile" type="file" accept="image/*">
+        <button class="refresh" onclick="uploadBrandLogo()">💾 שמור לוגו</button>
+        <div id="brandLogoStatus" class="status"></div>
+      </div>
       <input id="galleryFile" type="file" accept="image/*,video/*" onchange="onGalleryFileChange()">
       <input id="galleryThumb" type="file" accept="image/*" class="hidden" placeholder="תמונת שער לסרטון">
       <div id="galleryThumbLabel" class="hidden" style="color:#999;font-size:13px;margin-top:4px;">☝️ בחר תמונת שער שתוצג בעיגול (מומלץ - תמונה של התוצאה הסופית)</div>
@@ -190,7 +197,7 @@ function showAdmin() {
   loadAllData();
 }
 
-async function loadAllData() { await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager(), loadGallery(), loadCustomers()]); }
+async function loadAllData() { await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager(), loadGallery(), loadCustomers(), loadBrandLogo()]); }
 
 async function loadBookings() {
   const status = document.getElementById("bookingStatus");
@@ -415,6 +422,7 @@ async function loadGallery() {
       div.innerHTML = `
         ${thumb}
         <div style="flex:1;color:#ccc;font-size:14px;">${item.media_type === "video" ? "🎬 " : ""}${escapeHtml(item.caption || "")}</div>
+        <button style="width:auto;padding:8px 12px;margin:0;background:#333;color:#fff;flex-shrink:0;" onclick="editGalleryCaption(${Number(item.id)}, ${JSON.stringify(item.caption || "")})">✏️</button>
         <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteGalleryItem(${Number(item.id)})">🗑️</button>
       `;
       box.appendChild(div);
@@ -424,10 +432,63 @@ async function loadGallery() {
   }
 }
 
+async function editGalleryCaption(id, currentCaption) {
+  const newCaption = prompt("שם/כיתוב לסטורי:", currentCaption || "");
+  if (newCaption === null) return;
+  try {
+    await request(`/rest/v1/gallery?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ caption: newCaption.trim() })
+    });
+    loadGallery();
+  } catch (e) { alert("שגיאה בעדכון השם"); }
+}
+
 async function deleteGalleryItem(id) {
   if (!confirm("למחוק את התמונה מהגלריה?")) return;
   try { await request("/rest/v1/gallery?id=eq." + id, { method: "DELETE" }); loadGallery(); }
   catch (e) { alert("שגיאה במחיקה"); }
+}
+
+async function loadBrandLogo() {
+  const preview = document.getElementById("brandLogoPreview");
+  try {
+    const rows = await request("/rest/v1/site_settings?key=eq.brand_logo_url&select=value");
+    if (rows.length && rows[0].value) {
+      preview.innerHTML = `<img src="${escapeHtml(rows[0].value)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`;
+    } else {
+      preview.innerHTML = `<span style="color:#777;font-size:13px;">אין לוגו מוגדר</span>`;
+    }
+  } catch (e) {
+    preview.innerHTML = `<span style="color:#ff6666;font-size:13px;">שגיאה בטעינת הלוגו</span>`;
+  }
+}
+
+async function uploadBrandLogo() {
+  const fileInput = document.getElementById("brandLogoFile");
+  const status = document.getElementById("brandLogoStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+  status.textContent = "מעלה לוגו...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+  try {
+    const url = await uploadSingleFile(file, token);
+    await request("/rest/v1/site_settings", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ key: "brand_logo_url", value: url })
+    });
+    status.textContent = "הלוגו נשמר!";
+    status.className = "status success";
+    fileInput.value = "";
+    loadBrandLogo();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בשמירת הלוגו";
+    status.className = "status error";
+  }
 }
 
 async function loadCustomers() {
