@@ -92,7 +92,9 @@ input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #
 
     <div class="card" style="margin-top:30px;">
       <h2>🖼️ גלריה (סטוריז)</h2>
-      <input id="galleryFile" type="file" accept="image/*,video/*">
+      <input id="galleryFile" type="file" accept="image/*,video/*" onchange="onGalleryFileChange()">
+      <input id="galleryThumb" type="file" accept="image/*" class="hidden" placeholder="תמונת שער לסרטון">
+      <div id="galleryThumbLabel" class="hidden" style="color:#999;font-size:13px;margin-top:4px;">☝️ בחר תמונת שער שתוצג בעיגול (מומלץ - תמונה של התוצאה הסופית)</div>
       <input id="galleryCaption" type="text" placeholder="כיתוב (אופציונלי)">
       <button class="refresh" onclick="uploadGalleryImage()">⬆️ העלה תמונה/סרטון</button>
       <div id="galleryUploadStatus" class="status"></div>
@@ -334,37 +336,59 @@ async function loadServiceManager() {
   } catch (e) { list.innerHTML = `<div style="color:#ff5555">❌ ${escapeHtml(e.message)}</div>`; }
 }
 
+function onGalleryFileChange() {
+  const file = document.getElementById("galleryFile").files[0];
+  const isVideo = file && file.type.startsWith("video/");
+  document.getElementById("galleryThumb").classList.toggle("hidden", !isVideo);
+  document.getElementById("galleryThumbLabel").classList.toggle("hidden", !isVideo);
+}
+
+async function uploadSingleFile(file, token) {
+  const filename = Date.now() + "_" + Math.random().toString(36).slice(2, 7) + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/gallery/${filename}`, {
+    method: "POST",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Content-Type": file.type || "application/octet-stream" },
+    body: file
+  });
+  if (!uploadRes.ok) throw new Error(await uploadRes.text());
+  return `${SUPABASE_URL}/storage/v1/object/public/gallery/${filename}`;
+}
+
 async function uploadGalleryImage() {
   const fileInput = document.getElementById("galleryFile");
+  const thumbInput = document.getElementById("galleryThumb");
   const caption = document.getElementById("galleryCaption").value.trim();
   const status = document.getElementById("galleryUploadStatus");
   const file = fileInput.files[0];
   if (!file) { status.textContent = "נא לבחור תמונה או סרטון"; status.className = "status error"; return; }
 
   const mediaType = file.type.startsWith("video/") ? "video" : "image";
+  const thumbFile = mediaType === "video" ? thumbInput.files[0] : null;
+
   status.textContent = mediaType === "video" ? "מעלה סרטון..." : "מעלה תמונה...";
   status.className = "status";
   const token = localStorage.getItem("ggd_access_token");
-  const filename = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
   try {
-    const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/gallery/${filename}`, {
-      method: "POST",
-      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Content-Type": file.type || "application/octet-stream" },
-      body: file
-    });
-    if (!uploadRes.ok) throw new Error(await uploadRes.text());
+    const publicUrl = await uploadSingleFile(file, token);
+    let thumbnailUrl = null;
+    if (thumbFile) {
+      status.textContent = "מעלה תמונת שער...";
+      thumbnailUrl = await uploadSingleFile(thumbFile, token);
+    }
 
-    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/gallery/${filename}`;
     await request("/rest/v1/gallery", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ image_url: publicUrl, caption, media_type: mediaType })
+      body: JSON.stringify({ image_url: publicUrl, caption, media_type: mediaType, thumbnail_url: thumbnailUrl })
     });
 
     status.textContent = "הועלה בהצלחה!";
     status.className = "status success";
     fileInput.value = "";
+    thumbInput.value = "";
+    document.getElementById("galleryThumb").classList.add("hidden");
+    document.getElementById("galleryThumbLabel").classList.add("hidden");
     document.getElementById("galleryCaption").value = "";
     loadGallery();
   } catch (e) {
@@ -384,7 +408,9 @@ async function loadGallery() {
       const div = document.createElement("div");
       div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;";
       const thumb = item.media_type === "video"
-        ? `<video src="${escapeHtml(item.image_url)}" muted style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;"></video>`
+        ? (item.thumbnail_url
+            ? `<img src="${escapeHtml(item.thumbnail_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">`
+            : `<video src="${escapeHtml(item.image_url)}" muted style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;"></video>`)
         : `<img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">`;
       div.innerHTML = `
         ${thumb}
