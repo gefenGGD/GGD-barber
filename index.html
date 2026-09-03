@@ -52,10 +52,12 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .stories-strip::-webkit-scrollbar{display:none;}
 .story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;}
 .story-avatar img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;}
+.story-avatar video{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;pointer-events:none;}
 .story-avatar span{display:block;font-size:11px;color:#999;margin-top:5px;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column;}
 .story-viewer.hidden{display:none;}
 .story-viewer img{flex:1;width:100%;object-fit:contain;min-height:0;}
+.story-viewer video{flex:1;width:100%;object-fit:contain;min-height:0;}
 .story-progress{display:flex;gap:4px;padding:10px 10px 6px;}
 .story-progress-bar{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden;}
 .story-progress-bar b{display:block;height:100%;background:#fff;}
@@ -165,6 +167,7 @@ button:disabled{opacity:.4;cursor:not-allowed;}
   <div class="story-progress" id="storyProgress"></div>
   <button class="story-close" onclick="closeStory()">✕</button>
   <img id="storyImage" src="">
+  <video id="storyVideo" class="hidden" muted playsinline autoplay></video>
   <div id="storyCaptionText" class="story-caption"></div>
   <div class="story-nav" style="right:0;" onclick="nextStory()"></div>
   <div class="story-nav" style="left:0;" onclick="prevStory()"></div>
@@ -485,7 +488,10 @@ function renderStoriesStrip(){
   galleryItems.forEach((item, i) => {
     const el = document.createElement("div");
     el.className = "story-avatar";
-    el.innerHTML = `<img src="${escapeHtml(item.image_url)}"><span>${escapeHtml(item.caption || "תספורת")}</span>`;
+    const thumb = item.media_type === "video"
+      ? `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video>`
+      : `<img src="${escapeHtml(item.image_url)}">`;
+    el.innerHTML = `${thumb}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
     el.onclick = () => openStory(i);
     box.appendChild(el);
   });
@@ -500,11 +506,28 @@ function openStory(index){
 function renderStory(){
   const item = galleryItems[storyIndex];
   if(!item){ closeStory(); return; }
-  document.getElementById("storyImage").src = item.image_url;
+  const imgEl = document.getElementById("storyImage");
+  const videoEl = document.getElementById("storyVideo");
+  clearTimeout(storyTimer);
+  videoEl.pause();
+  videoEl.onended = null;
+
+  if(item.media_type === "video"){
+    imgEl.classList.add("hidden");
+    videoEl.classList.remove("hidden");
+    videoEl.src = item.image_url;
+    videoEl.currentTime = 0;
+    videoEl.play().catch(()=>{});
+    videoEl.onended = nextStory;
+  } else {
+    videoEl.classList.add("hidden");
+    imgEl.classList.remove("hidden");
+    imgEl.src = item.image_url;
+    storyTimer = setTimeout(nextStory, 4000);
+  }
+
   document.getElementById("storyCaptionText").textContent = item.caption || "";
   renderStoryProgress();
-  clearTimeout(storyTimer);
-  storyTimer = setTimeout(nextStory, 4000);
 }
 
 function renderStoryProgress(){
@@ -528,6 +551,7 @@ function prevStory(){
 }
 function closeStory(){
   clearTimeout(storyTimer);
+  document.getElementById("storyVideo").pause();
   document.getElementById("storyViewer").classList.add("hidden");
 }
 
