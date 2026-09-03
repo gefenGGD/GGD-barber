@@ -491,7 +491,9 @@ function renderStoriesStrip(){
     const el = document.createElement("div");
     el.className = "story-avatar";
     const thumb = item.media_type === "video"
-      ? `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video><span class="story-play-icon">▶️</span>`
+      ? (item.thumbnail_url
+          ? `<img src="${escapeHtml(item.thumbnail_url)}"><span class="story-play-icon">▶️</span>`
+          : `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video><span class="story-play-icon">▶️</span>`)
       : `<img src="${escapeHtml(item.image_url)}">`;
     el.innerHTML = `${thumb}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
     el.onclick = () => openStory(i);
