@@ -92,9 +92,9 @@ input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #
 
     <div class="card" style="margin-top:30px;">
       <h2>🖼️ גלריה (סטוריז)</h2>
-      <input id="galleryFile" type="file" accept="image/*">
+      <input id="galleryFile" type="file" accept="image/*,video/*">
       <input id="galleryCaption" type="text" placeholder="כיתוב (אופציונלי)">
-      <button class="refresh" onclick="uploadGalleryImage()">⬆️ העלה תמונה</button>
+      <button class="refresh" onclick="uploadGalleryImage()">⬆️ העלה תמונה/סרטון</button>
       <div id="galleryUploadStatus" class="status"></div>
       <div id="gallery-list" style="margin-top:15px;">טוען גלריה...</div>
     </div>
@@ -339,9 +339,10 @@ async function uploadGalleryImage() {
   const caption = document.getElementById("galleryCaption").value.trim();
   const status = document.getElementById("galleryUploadStatus");
   const file = fileInput.files[0];
-  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+  if (!file) { status.textContent = "נא לבחור תמונה או סרטון"; status.className = "status error"; return; }
 
-  status.textContent = "מעלה תמונה...";
+  const mediaType = file.type.startsWith("video/") ? "video" : "image";
+  status.textContent = mediaType === "video" ? "מעלה סרטון..." : "מעלה תמונה...";
   status.className = "status";
   const token = localStorage.getItem("ggd_access_token");
   const filename = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -358,17 +359,17 @@ async function uploadGalleryImage() {
     await request("/rest/v1/gallery", {
       method: "POST",
       headers: { "Prefer": "return=minimal" },
-      body: JSON.stringify({ image_url: publicUrl, caption })
+      body: JSON.stringify({ image_url: publicUrl, caption, media_type: mediaType })
     });
 
-    status.textContent = "התמונה הועלתה בהצלחה!";
+    status.textContent = "הועלה בהצלחה!";
     status.className = "status success";
     fileInput.value = "";
     document.getElementById("galleryCaption").value = "";
     loadGallery();
   } catch (e) {
     console.error(e);
-    status.textContent = "שגיאה בהעלאת התמונה - ודא שהטבלה gallery וה-bucket קיימים וחשופים";
+    status.textContent = "שגיאה בהעלאה - ודא שהטבלה gallery וה-bucket קיימים וחשופים";
     status.className = "status error";
   }
 }
@@ -382,9 +383,12 @@ async function loadGallery() {
     items.forEach(item => {
       const div = document.createElement("div");
       div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;";
+      const thumb = item.media_type === "video"
+        ? `<video src="${escapeHtml(item.image_url)}" muted style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;"></video>`
+        : `<img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">`;
       div.innerHTML = `
-        <img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">
-        <div style="flex:1;color:#ccc;font-size:14px;">${escapeHtml(item.caption || "")}</div>
+        ${thumb}
+        <div style="flex:1;color:#ccc;font-size:14px;">${item.media_type === "video" ? "🎬 " : ""}${escapeHtml(item.caption || "")}</div>
         <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteGalleryItem(${Number(item.id)})">🗑️</button>
       `;
       box.appendChild(div);
