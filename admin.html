@@ -72,6 +72,15 @@ input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #
       <h2>💈 ניהול שירותים</h2>
       <div id="service-list">טוען שירותים...</div>
     </div>
+
+    <div class="card" style="margin-top:30px;">
+      <h2>🖼️ גלריה (סטוריז)</h2>
+      <input id="galleryFile" type="file" accept="image/*">
+      <input id="galleryCaption" type="text" placeholder="כיתוב (אופציונלי)">
+      <button class="refresh" onclick="uploadGalleryImage()">⬆️ העלה תמונה</button>
+      <div id="galleryUploadStatus" class="status"></div>
+      <div id="gallery-list" style="margin-top:15px;">טוען גלריה...</div>
+    </div>
   </div>
 </div>
 
@@ -82,7 +91,27 @@ const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 let allBookings = [];
 let currentFilter = "today";
 
-async function request(path, options = {}) {
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("ggd_refresh_token");
+  if (!refreshToken) return false;
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    if (!data.access_token) return false;
+    localStorage.setItem("ggd_access_token", data.access_token);
+    localStorage.setItem("ggd_refresh_token", data.refresh_token);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function request(path, options = {}, allowRetry = true) {
   const token = localStorage.getItem("ggd_access_token");
   const headers = { "apikey": SUPABASE_KEY, "Content-Type": "application/json", ...(options.headers || {}) };
   if (token) headers["Authorization"] = "Bearer " + token;
@@ -93,7 +122,15 @@ async function request(path, options = {}) {
   try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
 
   if (!response.ok) {
-    if (response.status === 401) { logout(); throw new Error("פג תוקף ההתחברות, אנא התחבר מחדש."); }
+    if (response.status === 401) {
+      // Access token expired - try a silent refresh before giving up.
+      if (allowRetry) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) return request(path, options, false);
+      }
+      logout();
+      throw new Error("פג תוקף ההתחברות, אנא התחבר מחדש.");
+    }
     throw new Error(response.status + " " + (data?.message || text));
   }
   return data;
@@ -132,7 +169,7 @@ function showAdmin() {
   loadAllData();
 }
 
-async function loadAllData() { await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager()]); }
+async function loadAllData() { await Promise.all([loadBookings(), loadWaitlist(), loadServiceManager(), loadGallery()]); }
 
 async function loadBookings() {
   const status = document.getElementById("bookingStatus");
@@ -276,6 +313,72 @@ async function loadServiceManager() {
       list.appendChild(item);
     });
   } catch (e) { list.innerHTML = `<div style="color:#ff5555">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function uploadGalleryImage() {
+  const fileInput = document.getElementById("galleryFile");
+  const caption = document.getElementById("galleryCaption").value.trim();
+  const status = document.getElementById("galleryUploadStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+
+  status.textContent = "מעלה תמונה...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+  const filename = Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+  try {
+    const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/gallery/${filename}`, {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Content-Type": file.type || "application/octet-stream" },
+      body: file
+    });
+    if (!uploadRes.ok) throw new Error(await uploadRes.text());
+
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/gallery/${filename}`;
+    await request("/rest/v1/gallery", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ image_url: publicUrl, caption })
+    });
+
+    status.textContent = "התמונה הועלתה בהצלחה!";
+    status.className = "status success";
+    fileInput.value = "";
+    document.getElementById("galleryCaption").value = "";
+    loadGallery();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהעלאת התמונה - ודא שהטבלה gallery וה-bucket קיימים וחשופים";
+    status.className = "status error";
+  }
+}
+
+async function loadGallery() {
+  const box = document.getElementById("gallery-list");
+  try {
+    const items = await request("/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc");
+    if (!items.length) { box.innerHTML = `<div class="empty">אין תמונות בגלריה</div>`; return; }
+    box.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;";
+      div.innerHTML = `
+        <img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">
+        <div style="flex:1;color:#ccc;font-size:14px;">${escapeHtml(item.caption || "")}</div>
+        <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteGalleryItem(${Number(item.id)})">🗑️</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת הגלריה</div>`;
+  }
+}
+
+async function deleteGalleryItem(id) {
+  if (!confirm("למחוק את התמונה מהגלריה?")) return;
+  try { await request("/rest/v1/gallery?id=eq." + id, { method: "DELETE" }); loadGallery(); }
+  catch (e) { alert("שגיאה במחיקה"); }
 }
 
 function formatDate(val) { if (!val) return ""; const p = String(val).split("-"); return p.length !== 3 ? val : `${p[2]}/${p[1]}/${p[0]}`; }
