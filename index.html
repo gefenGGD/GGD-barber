@@ -29,6 +29,7 @@ h2{margin:0 0 18px;font-size:22px;}
 .times{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .time{padding:13px 5px;text-align:center;border:1px solid #303030;border-radius:12px;background:#191919;cursor:pointer;}
 .time.selected{background:#fff;color:#000;}
+.time.booked{opacity:.45;text-decoration:line-through;cursor:pointer;}
 input{width:100%;padding:15px;margin-top:10px;border-radius:12px;border:1px solid #333;background:#101010;color:#fff;font-size:16px;outline:none;}
 button{width:100%;padding:16px;border:0;border-radius:14px;background:#fff;color:#000;font-size:17px;font-weight:800;cursor:pointer;}
 button:disabled{opacity:.4;cursor:not-allowed;}
@@ -45,6 +46,20 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;}
 .modal-card{background:#181818;border:1px solid #333;border-radius:22px;padding:24px;width:100%;max-width:400px;}
 .waitlist-btn{background:#222;color:#ccc;border:1px dashed #444;margin-top:12px;font-size:14px;padding:12px;}
+.stories-strip{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 20px;-webkit-overflow-scrolling:touch;}
+.stories-strip::-webkit-scrollbar{display:none;}
+.story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;}
+.story-avatar img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;}
+.story-avatar span{display:block;font-size:11px;color:#999;margin-top:5px;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column;}
+.story-viewer.hidden{display:none;}
+.story-viewer img{flex:1;width:100%;object-fit:contain;min-height:0;}
+.story-progress{display:flex;gap:4px;padding:10px 10px 6px;}
+.story-progress-bar{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden;}
+.story-progress-bar b{display:block;height:100%;background:#fff;}
+.story-caption{color:#fff;text-align:center;padding:12px;font-size:14px;}
+.story-close{position:absolute;top:16px;left:16px;color:#fff;font-size:22px;background:rgba(0,0,0,.4);border:0;width:36px;height:36px;padding:0;border-radius:50%;z-index:5;}
+.story-nav{position:absolute;top:60px;bottom:60px;width:50%;}
 </style>
 </head>
 <body>
@@ -53,6 +68,7 @@ button:disabled{opacity:.4;cursor:not-allowed;}
     <div class="logo">GGD</div>
     <div class="sub">BARBER • BOOKING</div>
   </div>
+  <div id="storiesStrip" class="stories-strip"></div>
   <div id="booking">
     <div class="card">
       <h2>בחר שירות</h2>
@@ -105,6 +121,15 @@ button:disabled{opacity:.4;cursor:not-allowed;}
   <button style="background:transparent;border:0" onclick="window.open('https://www.instagram.com/gefen.ganon/','_blank')"><b>📸</b><span>אינסטגרם</span></button>
 </div>
 
+<div id="storyViewer" class="story-viewer hidden">
+  <div class="story-progress" id="storyProgress"></div>
+  <button class="story-close" onclick="closeStory()">✕</button>
+  <img id="storyImage" src="">
+  <div id="storyCaptionText" class="story-caption"></div>
+  <div class="story-nav" style="right:0;" onclick="nextStory()"></div>
+  <div class="story-nav" style="left:0;" onclick="prevStory()"></div>
+</div>
+
 <script>
 const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
@@ -115,6 +140,10 @@ let selectedService = null;
 let selectedDate = null;
 let selectedTime = null;
 let availableSlotsList = [];
+let galleryItems = [];
+let storyIndex = 0;
+let storyTimer = null;
+let currentBookedTimes = [];
 
 async function supabaseFetch(path, options = {}) {
   const response = await fetch(SUPABASE_URL + path, {
@@ -215,21 +244,31 @@ async function loadSlots(){
   });
 
   const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
-  availableSlotsList = allSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
+
+  // Hide times that have already passed, when the selected date is today.
+  const isToday = isoDate(selectedDate) === isoDate(new Date());
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+  const relevantSlots = isToday ? allSlots.filter(t => timeToMinutes(t) > nowMinutes) : allSlots;
+
+  // Booked times still relevant today (for the waitlist), excluding ones already in the past.
+  currentBookedTimes = relevantSlots.map(t => String(t).slice(0,5)).filter(t => bookedSet.has(t));
+  availableSlotsList = relevantSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
 
   box.innerHTML = "";
-  if(!availableSlotsList.length){
-    box.innerHTML = '<div class="status">כל התורים לתאריך זה תפוסים</div>';
-    waitlistBtn.classList.remove("hidden");
+  if(!relevantSlots.length){
+    box.innerHTML = '<div class="status">אין יותר שעות פנויות ליום זה</div>';
     return;
   }
 
-  availableSlotsList.forEach(time => {
+  // Booked slots are never offered as a bookable option - they only open the waitlist for that exact time.
+  relevantSlots.forEach(time => {
     const timeStr = String(time).slice(0,5);
+    const isBooked = bookedSet.has(timeStr);
     const el = document.createElement("div");
-    el.className = "time";
-    el.textContent = timeStr;
+    el.className = isBooked ? "time booked" : "time";
+    el.textContent = isBooked ? "🔒 " + timeStr : timeStr;
     el.onclick = () => {
+      if(isBooked){ openWaitlistModal(timeStr); return; }
       document.querySelectorAll(".time").forEach(x => x.classList.remove("selected"));
       el.classList.add("selected");
       selectedTime = timeStr;
@@ -237,7 +276,8 @@ async function loadSlots(){
     };
     box.appendChild(el);
   });
-  waitlistBtn.classList.remove("hidden");
+
+  if(!availableSlotsList.length) waitlistBtn.classList.remove("hidden");
 }
 
 function generateSlots(openTime, closeTime, breakStart, breakEnd, duration){
@@ -274,14 +314,24 @@ async function bookAppointment(){
       method: "POST",
       body: JSON.stringify({ p_service_id: selectedService.id, p_name: name, p_phone: phone, p_date: isoDate(selectedDate), p_time: selectedTime + ":00" })
     });
-    if(result && result.success === false) throw new Error(result.message || "התור תפוס");
+    if(result && result.success === false){
+      // The slot was genuinely taken by someone else in the meantime.
+      status.textContent = result.message || "השעה הזו כבר נתפסה, נא לבחור שעה אחרת";
+      status.className = "status error";
+      button.disabled = false;
+      button.textContent = "קביעת תור";
+      loadSlots();
+      return;
+    }
 
     localStorage.setItem("myBooking", JSON.stringify({ name, service: selectedService.name, date: selectedDate, time: selectedTime, price: selectedService.price, phone }));
     document.getElementById("booking").classList.add("hidden");
     document.getElementById("success").classList.remove("hidden");
     document.getElementById("successText").innerHTML = `<strong>${escapeHtml(name)}</strong><br>${escapeHtml(selectedService.name)}<br>${formatDate(selectedDate)}<br>שעה: <strong>${selectedTime}</strong><br>מחיר: ₪${Number(selectedService.price).toFixed(0)}<br><br>הטלפון שלך: ${escapeHtml(phone)}`;
   }catch(e){
-    status.textContent = "השעה הזו כבר נתפסה ממש עכשיו";
+    // A real error (network / permissions / server) - not a booking conflict.
+    console.error("bookAppointment error:", e);
+    status.textContent = "אירעה שגיאה בקביעת התור, נסה שוב בעוד רגע";
     status.className = "status error";
     button.disabled = false;
     button.textContent = "קביעת תור";
@@ -289,21 +339,24 @@ async function bookAppointment(){
   }
 }
 
-function openWaitlistModal(){
+function openWaitlistModal(presetTime){
   if(!selectedService || !selectedDate){ alert("נא לבחור שירות ותאריך קודם"); return; }
   const select = document.getElementById("wlTime");
   select.innerHTML = "";
-  const dayOfWeek = selectedDate.getDay();
-  const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
-  if(hours){
-    const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
-    allSlots.forEach(t => {
+  // Only offer times that are actually taken - there's no point waiting for a free slot.
+  if(currentBookedTimes.length){
+    currentBookedTimes.forEach(t => {
       const opt = document.createElement("option");
       opt.value = t; opt.textContent = t;
+      if(presetTime && t === presetTime) opt.selected = true;
       select.appendChild(opt);
     });
+  } else {
+    const opt = document.createElement("option");
+    opt.value = ""; opt.textContent = "כל שעה פנויה";
+    select.appendChild(opt);
   }
-  document.getElementById("waitlistInfo").textContent = `הירשם לרשימת המתנה לתאריך ${formatDate(selectedDate)}:`;
+  document.getElementById("waitlistInfo").textContent = `הירשם לרשימת המתנה לתאריך ${formatDate(selectedDate)}${presetTime ? " לשעה " + presetTime : ""}:`;
   document.getElementById("wlName").value = document.getElementById("name").value;
   document.getElementById("wlPhone").value = document.getElementById("phone").value;
   document.getElementById("wlStatus").textContent = "";
@@ -369,7 +422,68 @@ function timeToMinutes(val){ const p = String(val).slice(0,5).split(":"); return
 function minutesToTime(m){ return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); }
 function escapeHtml(val){ return String(val ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-async function init(){ try{ await Promise.all([loadServices(), loadWorkingHours()]); }catch(e){} }
+async function loadGallery(){
+  try{
+    const data = await supabaseFetch("/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc");
+    galleryItems = Array.isArray(data) ? data : [];
+  }catch(e){ galleryItems = []; }
+  renderStoriesStrip();
+}
+
+function renderStoriesStrip(){
+  const box = document.getElementById("storiesStrip");
+  if(!galleryItems.length){ box.innerHTML = ""; return; }
+  box.innerHTML = "";
+  galleryItems.forEach((item, i) => {
+    const el = document.createElement("div");
+    el.className = "story-avatar";
+    el.innerHTML = `<img src="${escapeHtml(item.image_url)}"><span>${escapeHtml(item.caption || "תספורת")}</span>`;
+    el.onclick = () => openStory(i);
+    box.appendChild(el);
+  });
+}
+
+function openStory(index){
+  storyIndex = index;
+  document.getElementById("storyViewer").classList.remove("hidden");
+  renderStory();
+}
+
+function renderStory(){
+  const item = galleryItems[storyIndex];
+  if(!item){ closeStory(); return; }
+  document.getElementById("storyImage").src = item.image_url;
+  document.getElementById("storyCaptionText").textContent = item.caption || "";
+  renderStoryProgress();
+  clearTimeout(storyTimer);
+  storyTimer = setTimeout(nextStory, 4000);
+}
+
+function renderStoryProgress(){
+  const box = document.getElementById("storyProgress");
+  box.innerHTML = "";
+  galleryItems.forEach((_, i) => {
+    const bar = document.createElement("div");
+    bar.className = "story-progress-bar";
+    const fill = i < storyIndex ? "100%" : i === storyIndex ? "100%" : "0%";
+    bar.innerHTML = `<b style="width:${fill}"></b>`;
+    box.appendChild(bar);
+  });
+}
+
+function nextStory(){
+  if(storyIndex < galleryItems.length - 1){ storyIndex++; renderStory(); }
+  else closeStory();
+}
+function prevStory(){
+  if(storyIndex > 0){ storyIndex--; renderStory(); }
+}
+function closeStory(){
+  clearTimeout(storyTimer);
+  document.getElementById("storyViewer").classList.add("hidden");
+}
+
+async function init(){ try{ await Promise.all([loadServices(), loadWorkingHours(), loadGallery()]); }catch(e){} }
 init();
 
 function showMyBooking(){
