@@ -48,14 +48,17 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .waitlist-btn{background:#222;color:#ccc;border:1px dashed #444;margin-top:12px;font-size:14px;padding:12px;}
 .policy-banner{background:#1a1210;border:1px solid #4a2a1a;border-right:4px solid #ff7a3d;border-radius:14px;padding:16px 18px;margin-bottom:16px;font-size:14px;line-height:1.9;color:#ddd;}
 .policy-banner strong{display:block;color:#fff;font-size:19px;font-weight:900;margin-bottom:10px;}
-.stories-strip{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 20px;-webkit-overflow-scrolling:touch;}
+.stories-title{font-size:20px;font-weight:900;color:#fff;margin:4px 2px 14px;letter-spacing:.5px;}
+.stories-strip{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 30px;-webkit-overflow-scrolling:touch;}
 .stories-strip::-webkit-scrollbar{display:none;}
-.story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;}
-.story-avatar img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;}
-.story-avatar{flex:0 0 auto;width:66px;text-align:center;cursor:pointer;position:relative;}
-.story-avatar video{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;padding:2px;background:#000;pointer-events:none;}
-.story-play-icon{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-size:20px;text-shadow:0 1px 4px rgba(0,0,0,.8);pointer-events:none;}
-.story-avatar span{display:block;font-size:11px;color:#999;margin-top:5px;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.story-avatar{flex:0 0 auto;width:92px;text-align:center;cursor:pointer;position:relative;padding-bottom:16px;}
+.story-thumb-wrap{width:92px;height:132px;border-radius:16px;overflow:hidden;position:relative;border:2px solid #fff;background:#111;}
+.story-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.story-avatar video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.story-play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;text-shadow:0 1px 4px rgba(0,0,0,.8);pointer-events:none;}
+.story-badge{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid #000;background:#181818;display:flex;align-items:center;justify-content:center;}
+.story-badge img{width:100%;height:100%;object-fit:cover;}
+.story-avatar span{display:block;font-size:11px;color:#999;margin-top:20px;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column;}
 .story-viewer.hidden{display:none;}
 .story-viewer img{flex:1;width:100%;object-fit:contain;min-height:0;}
@@ -86,7 +89,10 @@ button:disabled{opacity:.4;cursor:not-allowed;}
     🎯 המדיניות נועדה לשמור על זמני התורים ולמנוע מצב של מקומות פנויים ברגע האחרון<br><br>
     תודה על ההבנה ❤️🙏🏼
   </div>
-  <div id="storiesStrip" class="stories-strip"></div>
+  <div id="storiesSection" class="hidden">
+    <div class="stories-title">✂️ סטוריז</div>
+    <div id="storiesStrip" class="stories-strip"></div>
+  </div>
   <div id="accountBar" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;">
     <div id="accountStatus" style="font-size:14px;color:#ccc;">טוען...</div>
     <div id="accountButtons" style="display:flex;gap:8px;"></div>
@@ -186,6 +192,7 @@ let selectedDate = null;
 let selectedTime = null;
 let availableSlotsList = [];
 let galleryItems = [];
+let brandLogoUrl = "";
 let storyIndex = 0;
 let storyTimer = null;
 let currentCustomer = null;
@@ -480,13 +487,20 @@ async function loadGallery(){
     const data = await supabaseFetch("/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc");
     galleryItems = Array.isArray(data) ? data : [];
   }catch(e){ galleryItems = []; }
+  try{
+    const settings = await supabaseFetch("/rest/v1/site_settings?key=eq.brand_logo_url&select=value");
+    brandLogoUrl = (Array.isArray(settings) && settings[0] && settings[0].value) || "";
+  }catch(e){ brandLogoUrl = ""; }
   renderStoriesStrip();
 }
 
 function renderStoriesStrip(){
   const box = document.getElementById("storiesStrip");
-  if(!galleryItems.length){ box.innerHTML = ""; return; }
+  const section = document.getElementById("storiesSection");
+  if(!galleryItems.length){ section.classList.add("hidden"); box.innerHTML = ""; return; }
+  section.classList.remove("hidden");
   box.innerHTML = "";
+  const badge = brandLogoUrl ? `<div class="story-badge"><img src="${escapeHtml(brandLogoUrl)}"></div>` : "";
   galleryItems.forEach((item, i) => {
     const el = document.createElement("div");
     el.className = "story-avatar";
@@ -495,7 +509,7 @@ function renderStoriesStrip(){
           ? `<img src="${escapeHtml(item.thumbnail_url)}"><span class="story-play-icon">▶️</span>`
           : `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video><span class="story-play-icon">▶️</span>`)
       : `<img src="${escapeHtml(item.image_url)}">`;
-    el.innerHTML = `${thumb}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
+    el.innerHTML = `<div class="story-thumb-wrap">${thumb}</div>${badge}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
     el.onclick = () => openStory(i);
     box.appendChild(el);
   });
