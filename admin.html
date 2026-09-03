@@ -74,6 +74,18 @@ input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #
     </div>
 
     <div class="card" style="margin-top:30px;">
+      <h2>💬 שליחת הודעת SMS</h2>
+      <div class="filters" style="grid-template-columns:1fr 1fr;">
+        <button id="smsTargetSingleBtn" class="filter active" onclick="setSmsTarget('single')">לקוח בודד</button>
+        <button id="smsTargetAllBtn" class="filter" onclick="setSmsTarget('all')">כל הלקוחות</button>
+      </div>
+      <input id="smsPhone" type="tel" placeholder="מספר טלפון של הלקוח">
+      <textarea id="smsMessage" placeholder="תוכן ההודעה..." style="width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;min-height:100px;"></textarea>
+      <button class="refresh" onclick="sendCustomSms()">📤 שלח הודעה</button>
+      <div id="smsStatus" class="status"></div>
+    </div>
+
+    <div class="card" style="margin-top:30px;">
       <h2>💈 ניהול שירותים</h2>
       <div id="service-list">טוען שירותים...</div>
     </div>
@@ -94,7 +106,9 @@ const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
 
 let allBookings = [];
+let allCustomersCache = [];
 let currentFilter = "today";
+let smsTarget = "single";
 
 async function refreshAccessToken() {
   const refreshToken = localStorage.getItem("ggd_refresh_token");
@@ -390,6 +404,7 @@ async function loadCustomers() {
   const box = document.getElementById("customers-list");
   try {
     const list = await request("/rest/v1/customers?select=id,name,phone,birth_date,created_at,is_blocked&order=created_at.desc");
+    allCustomersCache = list;
     if (!list.length) { box.innerHTML = `<div class="empty">אין לקוחות רשומים עדיין</div>`; return; }
     box.innerHTML = "";
     list.forEach(c => {
@@ -426,6 +441,50 @@ async function deleteCustomer(id) {
   if (!confirm("למחוק את הלקוח לצמיתות?")) return;
   try { await request("/rest/v1/customers?id=eq." + id, { method: "DELETE" }); loadCustomers(); }
   catch (e) { alert("שגיאה במחיקה"); }
+}
+
+function setSmsTarget(target) {
+  smsTarget = target;
+  document.getElementById("smsTargetSingleBtn").classList.toggle("active", target === "single");
+  document.getElementById("smsTargetAllBtn").classList.toggle("active", target === "all");
+  document.getElementById("smsPhone").classList.toggle("hidden", target === "all");
+}
+
+async function sendCustomSms() {
+  const status = document.getElementById("smsStatus");
+  const message = document.getElementById("smsMessage").value.trim();
+  if (!message) { status.textContent = "נא לכתוב הודעה"; status.className = "status error"; return; }
+
+  let recipients = [];
+  if (smsTarget === "single") {
+    const phone = document.getElementById("smsPhone").value.trim();
+    if (!phone) { status.textContent = "נא להזין מספר טלפון"; status.className = "status error"; return; }
+    recipients = [phone];
+  } else {
+    recipients = allCustomersCache.map(c => c.phone).filter(Boolean);
+    if (!recipients.length) { status.textContent = "אין לקוחות רשומים"; status.className = "status error"; return; }
+    if (!confirm(`לשלוח הודעה ל-${recipients.length} לקוחות?`)) return;
+  }
+
+  status.textContent = "שולח...";
+  status.className = "status";
+  try {
+    const token = localStorage.getItem("ggd_access_token");
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-custom-sms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, "apikey": SUPABASE_KEY },
+      body: JSON.stringify({ recipients, message })
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || "שגיאה");
+    status.textContent = `נשלחו ${data.sent} הודעות בהצלחה!`;
+    status.className = "status success";
+    document.getElementById("smsMessage").value = "";
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בשליחת ההודעות";
+    status.className = "status error";
+  }
 }
 
 function formatDate(val) { if (!val) return ""; const p = String(val).split("-"); return p.length !== 3 ? val : `${p[2]}/${p[1]}/${p[0]}`; }
