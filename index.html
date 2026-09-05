@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GGD Barber - קביעת תור</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GGD Barber">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+*{box-sizing:border-box}
+html{overflow-x:hidden;}
+body{margin:0;background:#090909;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;overflow-x:hidden;}
+body::before{content:"";position:fixed;width:340px;height:340px;border:1.5px solid rgba(255,255,255,0.10);border-radius:50%;top:-90px;right:-90px;pointer-events:none;z-index:0;}
+body::after{content:"";position:fixed;width:220px;height:220px;border:1.5px solid rgba(255,255,255,0.07);border-radius:50%;bottom:-60px;left:-60px;pointer-events:none;z-index:0;}
+.container{max-width:520px;margin:auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));position:relative;z-index:1;}
+.brand{text-align:center;padding:28px 0 32px;}
+.logo{font-size:42px;font-weight:900;letter-spacing:12px;}
+@keyframes ggdShine{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+@keyframes ggdBar{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+.ggd-shine{
+  font-family:'Anton',sans-serif;font-size:56px;letter-spacing:1px;line-height:1;
+  background:linear-gradient(100deg,#e8e8e8 25%,#ffffff 40%,#9a9a9a 48%,#ffffff 56%,#e8e8e8 75%);
+  background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:ggdShine 3.5s linear infinite;
+}
+.ggd-bar{width:100%;height:3px;background:#f5f5f5;margin:10px auto 0;transform-origin:center;animation:ggdBar 1s ease-out;}
+.logo img{max-width:220px;width:100%;height:auto;display:block;margin:0 auto;}
+.sub{color:#999;font-size:13px;letter-spacing:4px;margin-top:8px;}
+#splashScreen{position:fixed;inset:0;background:#090909;z-index:300;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease;}
+#splashScreen.splash-hidden{opacity:0;pointer-events:none;}
+.splash-logo{width:220px;text-align:center;}
+.splash-logo .ggd-shine{font-size:56px;}
+.card{background:#151515;border:1px solid #292929;border-radius:24px;padding:20px;margin-bottom:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+h2{margin:0 0 18px;font-size:22px;}
+.services{display:flex;flex-direction:column;gap:10px;}
+.service{background:#101010;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;}
+.service-left{display:flex;align-items:center;gap:12px;}
+.service-icon{font-size:19px;flex-shrink:0;}
+.service.selected{background:#fff;}
+.service.selected::before{content:"";position:absolute;right:0;top:14px;bottom:14px;width:3px;background:#0a0a0a;border-radius:0 3px 3px 0;}
+.service-name{font-size:15px;font-weight:700;}
+.service.selected .service-name{color:#0a0a0a;}
+.service-description{color:#7d7d7d;font-size:11px;margin-top:3px;}
+.service.selected .service-description{color:#5a5a5a;}
+.price{font-weight:800;font-size:17px;flex-shrink:0;}
+.service.selected .price{color:#0a0a0a;}
+.dates{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.dates::-webkit-scrollbar{display:none;}
+.date{flex:0 0 auto;min-width:52px;text-align:center;cursor:pointer;}
+.day{font-size:10px;color:#767676;margin-bottom:6px;}
+.date-circle{width:44px;height:44px;border-radius:50%;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:13px;color:#d4d4d4;margin:0 auto;}
+.date.selected .day{color:#c9c9c9;}
+.date.selected .date-circle{background:#fff;color:#0a0a0a;font-weight:700;border-color:#fff;}
+.times{display:flex;flex-wrap:wrap;gap:8px;}
+.time{padding:10px 16px;text-align:center;border:1px solid #2a2a2a;border-radius:20px;background:transparent;font-size:13px;color:#d4d4d4;cursor:pointer;}
+.time.selected{background:#fff;color:#0a0a0a;font-weight:700;border-color:#fff;}
+.time.booked{opacity:.5;text-decoration:line-through;border-color:#232323;color:#666;cursor:pointer;}
+.service,.date-circle,.time{transition:transform .12s ease, background .15s ease, border-color .15s ease;}
+.service:active,.date-circle:active,.time:active{transform:scale(0.96);}
+button{transition:transform .1s ease;}
+button:active:not(:disabled){transform:scale(0.97);}
+@keyframes skeletonPulse{0%{opacity:.55;}50%{opacity:1;}100%{opacity:.55;}}
+.skel{background:#1c1c1c;border-radius:10px;animation:skeletonPulse 1.3s ease-in-out infinite;}
+.skel-service{background:#101010;border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+.skel-service .skel{height:14px;}
+.skel-date{flex:0 0 auto;min-width:52px;text-align:center;}
+.skel-date .skel{width:44px;height:44px;border-radius:50%;margin:0 auto;}
+.skel-time{width:64px;height:38px;border-radius:20px;}
+.rebook-card{background:linear-gradient(135deg,#1a1a1a,#141414);border:1px solid #333;border-radius:20px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.rebook-card .rebook-text{font-size:13px;color:#ddd;line-height:1.5;}
+.rebook-card .rebook-text strong{color:#fff;}
+.rebook-card button{width:auto;padding:10px 16px;margin:0;font-size:13px;white-space:nowrap;flex-shrink:0;}
+.hamburger-btn{position:fixed;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:50;width:42px;height:42px;border-radius:50%;background:#181818;border:1px solid #303030;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;padding:0;margin:0;}
+.products-scroll-row{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;}
+.products-scroll-row::-webkit-scrollbar{display:none;}
+.product-card{flex:0 0 auto;width:150px;background:#141414;border:1px solid #262626;border-radius:16px;padding:12px;position:relative;text-align:center;}
+.product-card img{width:100%;height:110px;object-fit:contain;border-radius:10px;background:#1c1c1c;margin-bottom:10px;}
+.product-card-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;min-height:34px;display:flex;align-items:center;justify-content:center;}
+.product-price-row{display:flex;align-items:center;justify-content:center;gap:6px;}
+.product-price-pill{display:inline-block;background:#fff;color:#000;font-size:12px;font-weight:800;padding:5px 10px;border-radius:20px;}
+.product-price-old{color:#777;font-size:11px;text-decoration:line-through;}
+.product-sale-badge{position:absolute;top:8px;left:8px;background:#facc15;color:#000;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;border-radius:26px;transition:.2s;}
+.switch-slider:before{position:absolute;content:"";height:20px;width:20px;right:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+.switch input:checked + .switch-slider{background:#4ade80;}
+.switch input:checked + .switch-slider:before{transform:translateX(-20px);}
+.settings-list{display:flex;flex-direction:column;}
+.settings-list-item{display:flex;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid #232323;background:none;border-top:0;border-left:0;border-right:0;color:#fff;text-decoration:none;font-size:14px;width:100%;text-align:right;justify-content:flex-start;margin:0;}
+.notification-item{background:#101010;border:1px solid #232323;border-radius:12px;padding:12px 14px;margin-bottom:8px;text-align:right;}
+.notification-item .n-title{font-weight:700;font-size:14px;margin-bottom:4px;}
+.notification-item .n-body{color:#aaa;font-size:13px;line-height:1.5;}
+.notification-item .n-time{color:#666;font-size:11px;margin-top:6px;}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+.drawer-overlay.open{opacity:1;pointer-events:auto;}
+.drawer{position:fixed;top:0;bottom:0;right:0;width:min(300px,82%);background:#141414;border-left:1px solid #262626;z-index:91;transform:translateX(100%);transition:transform .28s ease;padding:calc(20px + env(safe-area-inset-top)) 22px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;display:flex;flex-direction:column;}
+.drawer.open{transform:translateX(0);}
+.drawer-close{background:transparent !important;border:0;color:#fff;font-size:24px;width:auto;padding:0;margin:0;align-self:flex-start;}
+.drawer-greeting{font-size:17px;font-weight:800;margin:18px 0 26px;}
+.drawer-items{display:flex;flex-direction:column;flex:1;}
+.drawer-item{display:flex;align-items:center;justify-content:space-between;padding:15px 2px;border-bottom:1px solid #232323;color:#fff;text-decoration:none;font-size:15px;cursor:pointer;background:none;border-top:0;border-left:0;border-right:0;width:100%;text-align:right;}
+.drawer-item .icon{font-size:17px;}
+.drawer-footer{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;padding-top:16px;border-top:1px solid #232323;}
+.drawer-footer button{width:auto;padding:9px 12px;font-size:12px;background:#242424;color:#fff;margin:0;}
+input{width:100%;padding:15px;margin-top:10px;border-radius:12px;border:1px solid #333;background:#101010;color:#fff;font-size:16px;outline:none;}
+button{width:100%;padding:16px;border:0;border-radius:14px;background:#fff;color:#000;font-size:17px;font-weight:800;cursor:pointer;}
+button:disabled{opacity:.4;cursor:not-allowed;}
+.status{text-align:center;color:#999;margin-top:12px;line-height:1.5;}
+.error{color:#ff6b6b;}
+.success{text-align:center;}
+.success-icon{font-size:45px;margin-bottom:10px;}
+.summary{background:#101010;border-radius:15px;padding:15px;margin:15px 0;line-height:1.9;}
+.nav{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(490px,calc(100% - 24px));display:flex;align-items:flex-end;justify-content:center;gap:26px;z-index:20;}
+.nav-item{width:auto;background:transparent;border:0;padding:0;text-align:center;color:inherit;}
+.nav-icon{width:44px;height:44px;border-radius:50%;background:#151515;border:1px solid #2e2e2e;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto;}
+.nav-item.main{margin-top:-18px;}
+.nav-item.main .nav-icon{width:66px;height:66px;font-size:25px;background:#f5f5f5;border:0;}
+.nav-label{font-size:10px;color:#999;margin-top:6px;display:block;}
+.nav-item.main .nav-label{color:#f5f5f5;font-weight:700;}
+@media (max-width:360px){
+  .nav{gap:14px;}
+  .nav-icon{width:38px;height:38px;font-size:16px;}
+  .nav-item.main .nav-icon{width:56px;height:56px;font-size:21px;}
+  .nav-label{font-size:9px;}
+}
+@media (min-width:600px){
+  .container{max-width:560px;}
+}
+.hidden{display:none!important;}
+.hp-field{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0;}
+.loading{color:#888;text-align:center;padding:20px;}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+.modal-card{background:#181818;border:1px solid #333;border-radius:22px;padding:24px;width:100%;max-width:400px;max-height:calc(100vh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto;}
+.waitlist-btn{background:#222;color:#ccc;border:1px dashed #444;margin-top:12px;font-size:14px;padding:12px;}
+.policy-banner{background:#1a1210;border:1px solid #4a2a1a;border-right:4px solid #ff7a3d;border-radius:14px;padding:16px 18px 20px;margin-bottom:26px;font-size:14px;line-height:1.7;color:#ddd;position:relative;opacity:0;transform:translateY(-10px);transition:opacity .45s ease, transform .45s ease, padding .3s ease, border-radius .3s ease;}
+.policy-banner.visible{opacity:1;transform:translateY(0);}
+.policy-banner.collapsed{padding:10px 16px;border-radius:24px;}
+.policy-banner-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;transition:margin .3s ease;}
+.policy-banner.collapsed .policy-banner-head{margin-bottom:0;}
+.policy-banner-head strong{color:#fff;font-size:17px;font-weight:800;}
+.policy-banner.collapsed .policy-banner-head strong{font-size:14px;}
+.policy-banner-body{overflow:hidden;max-height:600px;opacity:1;transition:max-height .35s ease, opacity .25s ease, margin .35s ease;}
+.policy-banner-body.collapsed{max-height:0;opacity:0;}
+.policy-banner-toggle{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);width:64px;height:11px;border-radius:4px;background:#241a14;border:0;color:#ff7a3d;font-size:8px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.policy-banner-toggle:hover{background:#2c2019;}
+.policy-banner.collapsed .policy-banner-toggle{display:none;}
+.policy-banner-toggle-inline{display:none;width:auto;background:none;border:0;color:#ff7a3d;font-size:11px;line-height:1;cursor:pointer;padding:0;flex-shrink:0;}
+.policy-banner.collapsed .policy-banner-toggle-inline{display:flex;align-items:center;}
+.policy-banner p{margin:0 0 10px;}
+.policy-banner-list{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px;}
+.policy-banner-list li{display:flex;align-items:flex-start;gap:8px;}
+.policy-banner-footer{color:#aaa;font-size:13px;margin:0;}
+.stories-title{font-size:20px;font-weight:900;color:#fff;margin:4px 2px 14px;letter-spacing:.5px;}
+.stories-strip{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 30px;-webkit-overflow-scrolling:touch;}
+.stories-strip::-webkit-scrollbar{display:none;}
+.story-avatar{flex:0 0 auto;width:92px;text-align:center;cursor:pointer;}
+.story-thumb-wrap{width:92px;height:132px;border-radius:16px;overflow:hidden;position:relative;border:2px solid #fff;background:#111;}
+.story-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.story-avatar video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.story-badge{width:42px;height:42px;border-radius:50%;overflow:hidden;background:#181818;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.6);margin:-21px auto 6px;position:relative;z-index:2;}
+.story-badge img{width:100%;height:100%;object-fit:cover;}
+.story-avatar span{display:block;font-size:11px;color:#999;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;flex-direction:column;}
+.story-viewer.hidden{display:none;}
+.story-viewer img{flex:1;width:100%;object-fit:contain;min-height:0;}
+.story-viewer video{flex:1;width:100%;object-fit:contain;min-height:0;}
+.story-progress{display:flex;gap:4px;padding:10px 10px 6px;}
+.story-progress-bar{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden;}
+.story-progress-bar b{display:block;height:100%;background:#fff;}
+.story-caption{color:#fff;text-align:center;padding:12px;font-size:14px;}
+.story-close{position:absolute;top:16px;left:16px;color:#fff;font-size:22px;background:rgba(0,0,0,.4);border:0;width:36px;height:36px;padding:0;border-radius:50%;z-index:5;}
+.story-nav{position:absolute;top:60px;bottom:60px;width:50%;}
+</style>
+</head>
+<body>
+<div id="splashScreen">
+  <div class="splash-logo">
+    <div class="ggd-shine">GGD</div>
+    <div class="ggd-bar"></div>
+    <div class="sub">BARBER • BOOKING</div>
+  </div>
+</div>
+<div class="container">
+  <button type="button" class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
+  <div class="brand">
+    <div class="logo"><div class="ggd-shine">GGD</div><div class="ggd-bar"></div></div>
+    <div class="sub">BARBER • BOOKING</div>
+  </div>
+  <div class="policy-banner" id="policyBanner">
+    <div class="policy-banner-head">
+      <button type="button" class="policy-banner-toggle-inline" id="policyBannerToggleInline" onclick="togglePolicyBanner()" aria-label="הרחב את ההודעה">⌄</button>
+      <strong>מדיניות תורים</strong>
+    </div>
+    <div class="policy-banner-body" id="policyBannerBody">
+      <p>לקוחות יקרים, עקב בעיה חוזרת בנושא זימון תורים ללא הגעה או איחורים, המספרה מעדכנת את מדיניות ההתנהלות מול הלקוחות:</p>
+      <ul class="policy-banner-list">
+        <li><span>⏱️</span> יש להגיע 10 דקות לפני מועד התור.</li>
+        <li><span></span> ניתן לבטל תור עד שעה לפני המועד, ללא עלות.</li>
+        <li><span>🚫</span> קביעת תור ללא הגעה, וללא ביטול מראש כאמור - תגרור חסימה אוטומטית של הלקוח באתר.</li>
+        <li><span>📞</span> במקרה חריג ניתן ליצור קשר ולסדר זאת.</li>
+        <li><span></span> ניתן לשחרר את החסימה ע"י הגעה לתשלום על התור שהוזמן, או בשיחת טלפון למספרה.</li>
+      </ul>
+      <p class="policy-banner-footer">הימנעו מאי-נעימות והגיעו כרגיל - המדיניות נועדה לשמור על זמני התורים ולמנוע מקומות פנויים ברגע האחרון. תודה על ההבנה.</p>
+    </div>
+    <button type="button" class="policy-banner-toggle" id="policyBannerToggle" onclick="togglePolicyBanner()" aria-label="כווץ את ההודעה">⌃</button>
+  </div>
+  <script>
+    setTimeout(function(){
+      var b = document.getElementById("policyBanner");
+      if(b) b.classList.add("visible");
+    }, 900);
+  </script>
+  <div id="accountBar" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;">
+    <div id="accountStatus" style="font-size:14px;color:#ccc;">טוען...</div>
+    <div id="accountButtons" style="display:flex;gap:8px;"></div>
+  </div>
+  <div id="storiesSection" class="hidden">
+    <div class="stories-title">✂️ סטוריז</div>
+    <div id="storiesStrip" class="stories-strip"></div>
+  </div>
+  <div id="productsShopSection" class="hidden">
+    <div class="stories-title">🛍️ המוצרים שלנו</div>
+    <div id="productsShopStrip" class="products-scroll-row"></div>
+  </div>
+  <div id="loyaltyCard" class="card hidden" style="padding:16px 18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:13px;color:#ccc;">🎁 כרטיסיית נאמנות</span>
+      <span id="loyaltyText" style="font-size:12px;color:#999;"></span>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <div id="loyaltyDots" style="display:flex;gap:4px;flex:1;"></div>
+    </div>
+  </div>
+  <div id="rebookCard" class="rebook-card hidden"></div>
+  <div id="booking">
+    <div class="card">
+      <h2>בחר שירות</h2>
+      <div id="services" class="services">
+        <div class="skel-service"><div class="skel" style="width:60%;height:16px;"></div><div class="skel" style="width:15%;height:18px;"></div></div>
+        <div class="skel-service"><div class="skel" style="width:50%;height:16px;"></div><div class="skel" style="width:15%;height:18px;"></div></div>
+        <div class="skel-service"><div class="skel" style="width:65%;height:16px;"></div><div class="skel" style="width:15%;height:18px;"></div></div>
+      </div>
+    </div>
+    <div class="card" id="datesCard">
+      <h2>בחר תאריך</h2>
+      <div id="dates" class="dates">
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+        <div class="skel-date"><div class="skel" style="width:26px;height:10px;margin:0 auto 6px;"></div><div class="skel"></div></div>
+      </div>
+    </div>
+    <div class="card" id="timesCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="margin:0;">בחר שעה</h2>
+        <button type="button" onclick="if(selectedDate){haptic();loadSlots();}" style="width:auto;padding:6px 12px;margin:0;background:#242424;color:#fff;font-size:12px;">🔄 רענון</button>
+      </div>
+      <div id="times" class="times"><div class="status">בחר תאריך...</div></div>
+      <button id="waitlistOpenBtn" class="waitlist-btn hidden" onclick="openWaitlistModal()">🔔 תודיע לי אם מתפנה מקום ביום הזה</button>
+      <div id="timeStatus" class="status"></div>
+    </div>
+    <div class="card" id="detailsCard">
+      <h2>פרטים</h2>
+      <input id="name" type="text" placeholder="שם מלא" aria-label="שם מלא">
+      <input id="phone" type="tel" placeholder="מספר טלפון" aria-label="מספר טלפון">
+      <input id="hpBooking" type="text" class="hp-field" tabindex="-1" autocomplete="off">
+      <div style="margin-top:15px"><button id="book" disabled>קביעת תור</button></div>
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+  <div id="success" class="card success hidden">
+    <div class="success-icon">✓</div>
+    <h2 id="successTitle">התורים שלי</h2>
+    <button onclick="openNavigationModal()" style="width:auto;padding:10px 18px;margin:0 auto 14px;display:block;background:#242424;color:#fff;font-size:13px;">🗺️ ניווט למספרה</button>
+    <div id="myBookingsList"></div>
+    <div id="myBookingsStatus" class="status"></div>
+    <button onclick="location.reload()" style="margin-top:10px;">חזרה לקביעת תור</button>
+  </div>
+  <div style="text-align:center;margin-top:26px;">
+    <a href="#" onclick="openAccessibilityModal();return false;" style="color:#777;font-size:12px;text-decoration:underline;">הצהרת נגישות</a>
+    <span style="color:#444;margin:0 8px;">•</span>
+    <a href="#" onclick="openPrivacyModal();return false;" style="color:#777;font-size:12px;text-decoration:underline;">מדיניות פרטיות</a>
+  </div>
+</div>
+
+<div id="navigationModal" class="modal-overlay hidden">
+  <div class="modal-card" style="text-align:center;">
+    <h2 style="margin-top:0;">🗺️ איך מגיעים</h2>
+    <p style="color:#999;font-size:13px;margin-bottom:16px;">בחרו את אפליקציית הניווט שלכם</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <a href="" id="navWazeBtn" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#33ccff;color:#001;padding:14px;border-radius:12px;font-size:14px;font-weight:800;">🔵 Waze</a>
+      <a href="" id="navGoogleBtn" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#4285F4;color:#fff;padding:14px;border-radius:12px;font-size:14px;font-weight:800;">🔴 Google Maps</a>
+      <a href="" id="navAppleBtn" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#242424;color:#fff;padding:14px;border-radius:12px;font-size:14px;font-weight:800;">🍏 Apple Maps</a>
+    </div>
+    <button onclick="closeNavigationModal()" style="background:#333;color:#fff;margin-top:16px;">סגירה</button>
+  </div>
+</div>
+
+<div id="authModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2 id="authModalTitle">התחברות</h2>
+    <div id="loginFields">
+      <input id="loginPhone" type="tel" placeholder="מספר טלפון">
+      <input id="loginPassword" type="password" placeholder="סיסמה">
+      <p onclick="openForgotPasswordModal();" style="text-align:center;color:#999;font-size:12px;margin-top:8px;cursor:pointer;text-decoration:underline;">שכחתי סיסמה</p>
+      <p onclick="openOtpLoginModal();" style="text-align:center;color:#ccc;font-size:12px;margin-top:6px;cursor:pointer;text-decoration:underline;">🔑 התחברות עם קוד SMS (בלי סיסמה)</p>
+    </div>
+    <div id="signupFields" class="hidden">
+      <input id="signupName" type="text" placeholder="שם מלא">
+      <input id="signupPhone" type="tel" placeholder="מספר טלפון">
+      <label style="display:block;color:#999;font-size:13px;margin-top:6px;">תאריך לידה</label>
+      <input id="signupBirthdate" type="date">
+      <input id="signupPassword" type="password" placeholder="סיסמה">
+      <input id="hpSignup" type="text" class="hp-field" tabindex="-1" autocomplete="off">
+    </div>
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button id="authSubmitBtn" onclick="submitAuth()" style="background:#fff; color:#000;">התחברות</button>
+      <button onclick="closeAuthModal()" style="background:#333; color:#fff;">ביטול</button>
+    </div>
+    <p id="authSwitchText" onclick="toggleAuthMode()" style="text-align:center;color:#999;font-size:13px;margin-top:14px;cursor:pointer;">אין לך חשבון? הרשמה</p>
+    <div id="authStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="forgotPasswordModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>שחזור סיסמה</h2>
+    <div id="fpStep1">
+      <input id="fpPhone" type="tel" placeholder="מספר טלפון">
+      <div style="margin-top:15px; display:flex; gap:10px;">
+        <button onclick="submitForgotPasswordRequest()" style="background:#fff; color:#000;">שליחת קוד</button>
+        <button onclick="closeForgotPasswordModal()" style="background:#333; color:#fff;">ביטול</button>
+      </div>
+    </div>
+    <div id="fpStep2" class="hidden">
+      <p style="color:#aaa;font-size:14px;margin-bottom:10px;">קוד נשלח ב-SMS למספר שהזנת. הזן אותו ואת הסיסמה החדשה:</p>
+      <input id="fpCode" type="text" inputmode="numeric" placeholder="קוד בן 6 ספרות">
+      <input id="fpNewPassword" type="password" placeholder="סיסמה חדשה">
+      <div style="margin-top:15px; display:flex; gap:10px;">
+        <button onclick="submitForgotPasswordReset()" style="background:#fff; color:#000;">איפוס סיסמה</button>
+        <button onclick="closeForgotPasswordModal()" style="background:#333; color:#fff;">ביטול</button>
+      </div>
+    </div>
+    <div id="fpStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="otpLoginModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>🔑 התחברות עם קוד SMS</h2>
+    <div id="otpStep1">
+      <input id="otpPhone" type="tel" placeholder="מספר טלפון">
+      <div style="margin-top:15px; display:flex; gap:10px;">
+        <button onclick="submitOtpLoginRequest()" style="background:#fff; color:#000;">שליחת קוד</button>
+        <button onclick="closeOtpLoginModal()" style="background:#333; color:#fff;">ביטול</button>
+      </div>
+    </div>
+    <div id="otpStep2" class="hidden">
+      <p style="color:#aaa;font-size:14px;margin-bottom:10px;">קוד בן 4 ספרות נשלח ב-SMS למספר שהזנת:</p>
+      <input id="otpCode" type="text" inputmode="numeric" maxlength="4" placeholder="קוד בן 4 ספרות">
+      <div style="margin-top:15px; display:flex; gap:10px;">
+        <button onclick="submitOtpLoginVerify()" style="background:#fff; color:#000;">התחברות</button>
+        <button onclick="closeOtpLoginModal()" style="background:#333; color:#fff;">ביטול</button>
+      </div>
+    </div>
+    <div id="otpStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="waitlistModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>📋 רשימת המתנה</h2>
+    <p id="waitlistInfo" style="color:#aaa; font-size:14px; margin-bottom:15px;"></p>
+    <select id="wlTime" style="width:100%; padding:14px; margin-bottom:10px; border-radius:12px; border:1px solid #333; background:#101010; color:#fff; font-size:16px;"></select>
+    <input id="wlName" type="text" placeholder="שם מלא" aria-label="שם מלא">
+    <input id="wlPhone" type="tel" placeholder="מספר טלפון" aria-label="מספר טלפון">
+    <input id="hpWaitlist" type="text" class="hp-field" tabindex="-1" autocomplete="off">
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button onclick="submitWaitlist()" style="background:#fff; color:#000;">אישור הרשמה</button>
+      <button onclick="closeWaitlistModal()" style="background:#333; color:#fff;">ביטול</button>
+    </div>
+    <div id="wlStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="policyConfirmModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>לפני שקובעים</h2>
+    <ul class="policy-banner-list" style="margin-bottom:18px;">
+      <li><span>⏱️</span> יש להגיע 10 דקות לפני מועד התור.</li>
+      <li><span></span> אפשר לבטל עד שעה לפני התור, ללא עלות.</li>
+      <li><span>🚫</span> אי-הגעה ללא ביטול מראש תגרור חסימה אוטומטית באתר.</li>
+    </ul>
+    <div style="display:flex; gap:10px;">
+      <button onclick="confirmBookingAfterPolicy()" style="background:#fff; color:#000;">הבנתי, קבע תור</button>
+      <button onclick="closePolicyConfirmModal()" style="background:#333; color:#fff;">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<div id="accessibilityModal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-height:80vh;overflow-y:auto;text-align:right;">
+    <h2>♿ הצהרת נגישות</h2>
+    <div style="color:#ccc;font-size:14px;line-height:1.9;">
+      <p>GGD Barber רואה חשיבות רבה במתן שירות שוויוני ונגיש לכלל לקוחותיו, לרבות אנשים עם מוגבלות.</p>
+      <p>האתר תוכנן ונבנה תוך מאמץ לעמוד בדרישות תקן נגישות ישראלי (ת"י 5568), בהתבסס על הנחיות WCAG 2.0 הבינלאומיות ברמה AA, ככל שהדבר ניתן.</p>
+      <p><strong>התאמות שבוצעו באתר:</strong><br>
+      • ניתן לנווט באתר באמצעות מקלדת<br>
+      • תוויות טקסט עבור מקריאי מסך בטפסים ובכפתורים<br>
+      • ניגודיות צבעים נבחרה עבור קריאות<br>
+      • מבנה עמוד ברור ועקבי</p>
+      <p><strong>חלקים שטרם הונגשו במלואם:</strong><br>
+      נכון להיום העסק פועל ללא בית עסק פיזי קבוע, ולכן אין הסדרי נגישות פיזיים לפרסם. עם פתיחת מקום פיזי, יעודכן פרק ייעודי בהצהרה זו בנוגע להסדרי הנגישות במקום (חניה, כניסה וכו').</p>
+      <p><strong>יצירת קשר בנושא נגישות:</strong><br>
+      נתקלתם בבעיית נגישות באתר? נשמח שתפנו אלינו דרך פרטי הקשר המופיעים באינסטגרם של העסק.</p>
+      <p style="color:#888;font-size:12px;">תאריך עדכון ההצהרה: 03/09/2026</p>
+    </div>
+    <button onclick="closeAccessibilityModal()" style="background:#333;color:#fff;margin-top:10px;">סגירה</button>
+  </div>
+</div>
+
+<div id="privacyModal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-height:80vh;overflow-y:auto;text-align:right;">
+    <h2>🔒 מדיניות פרטיות</h2>
+    <div style="color:#ccc;font-size:14px;line-height:1.9;">
+      <p>אתר GGD Barber ("האתר") מופעל על ידי בעל העסק. השימוש באתר כפוף למדיניות פרטיות זו, והמשך השימוש בו מהווה הסכמה לתנאיה.</p>
+      <p><strong>איזה מידע נאסף:</strong><br>
+      • בעת קביעת תור: שם מלא ומספר טלפון.<br>
+      • בעת הרשמה לחשבון לקוח (אופציונלי): שם, טלפון, תאריך לידה וסיסמה (נשמרת מוצפנת, לא בטקסט גלוי).<br>
+      • פרטי התורים שנקבעים (תאריך, שעה, סוג שירות).</p>
+      <p><strong>למה משתמשים במידע:</strong><br>
+      • קביעת תורים וניהול היומן<br>
+      • שליחת הודעות SMS בנוגע לתור (אישור תור, תזכורות, עדכונים)<br>
+      • יצירת קשר במקרה הצורך<br>
+      • שיפור השירות באתר</p>
+      <p><strong>מסירת מידע לצדדים שלישיים:</strong><br>
+      המידע שלך לא נמכר ולא מועבר לגורמים חיצוניים, למעט: ספק שירות ה-SMS (רק לשם שליחת הודעות בנוגע לתור), ספק האחסון ומסד הנתונים של האתר (Supabase - המידע מאוחסן בשרתים מאובטחים שעשויים להימצא מחוץ לישראל), או אם נדרש על פי צו בית משפט או דרישה חוקית מוסמכת.</p>
+      <p><strong>אבטחת מידע:</strong><br>
+      אנו נוקטים אמצעים סבירים לאבטחת המידע (כגון הצפנת סיסמאות), אך איננו יכולים להתחייב להגנה מוחלטת מפני גישה בלתי מורשית.</p>
+      <p><strong>הזכות שלך לעיין, לתקן או למחוק מידע:</strong><br>
+      לפי חוק הגנת הפרטיות, תשמ"א-1981, אתה זכאי לעיין במידע השמור עליך במערכת, ולבקש לתקנו או למחקו. לצורך כך, ניתן לפנות אלינו בפרטי הקשר שבתחתית מסמך זה.</p>
+      <p><strong>שינויים במדיניות:</strong><br>
+      מדיניות זו עשויה להתעדכן מעת לעת. המשך השימוש באתר לאחר עדכון מהווה הסכמה לתנאים המעודכנים.</p>
+      <p><strong>יצירת קשר:</strong><br>
+      לכל שאלה, בקשה או תלונה בנושא פרטיות - ניתן לפנות אלינו דרך פרטי הקשר המופיעים באינסטגרם של העסק, או בטלפון 0549207908.</p>
+      <p style="color:#888;font-size:12px;">תאריך עדכון: 03/09/2026</p>
+    </div>
+    <button onclick="closePrivacyModal()" style="background:#333;color:#fff;margin-top:10px;">סגירה</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-item" onclick="openNavigationModal()"><div class="nav-icon">📍</div><span class="nav-label">מיקום</span></button>
+  <a class="nav-item" href="https://www.instagram.com/gefen.ganon/" target="_blank" rel="noopener" style="text-decoration:none;"><div class="nav-icon">📸</div><span class="nav-label">אינסטגרם</span></a>
+  <button class="nav-item main" onclick="showMyBookings()"><div class="nav-icon">📅</div><span class="nav-label">התורים שלי</span></button>
+  <button class="nav-item" onclick="openContactModal()"><div class="nav-icon">💬</div><span class="nav-label">הודעה לצוות</span></button>
+  <a class="nav-item" href="/install-guide.html" style="text-decoration:none;"><div class="nav-icon">📲</div><span class="nav-label">התקנה</span></a>
+</div>
+
+<div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="sideDrawer" class="drawer">
+  <button type="button" class="drawer-close" onclick="closeDrawer()" aria-label="סגור תפריט">✕</button>
+  <div class="drawer-greeting" id="drawerGreeting">שלום 👋</div>
+  <div class="drawer-items">
+    <button class="drawer-item" onclick="closeDrawer(); window.scrollTo({top:0,behavior:'smooth'});"><span>ראשי</span><span class="icon">🏠</span></button>
+    <button class="drawer-item" onclick="closeDrawer(); openAboutModal();"><span>הצוות שלנו</span><span class="icon">💈</span></button>
+    <button class="drawer-item" onclick="closeDrawer(); showMyBookings();"><span>התורים שלי</span><span class="icon">📆</span></button>
+    <button class="drawer-item" onclick="closeDrawer(); openContactModal();"><span>צריך עזרה?</span><span class="icon">💬</span></button>
+    <a class="drawer-item" href="/install-guide.html"><span>התקנת האתר</span><span class="icon">📲</span></a>
+    <button class="drawer-item" onclick="closeDrawer(); openNavigationModal();"><span>איך מגיעים</span><span class="icon">📍</span></button>
+  </div>
+  <div class="drawer-footer" id="drawerFooter"></div>
+</div>
+
+<div id="aboutModal" class="modal-overlay hidden">
+  <div class="modal-card" style="text-align:center;">
+    <div class="logo" style="justify-content:center;margin-bottom:10px;"><div class="ggd-shine">GGD</div><div class="ggd-bar"></div></div>
+    <h2 style="margin-top:0;">✂️ גפן גנון</h2>
+    <p style="color:#bbb;font-size:14px;line-height:1.7;">
+      הבעלים והספר של GGD Barber. מתמחה בכל סוגי הפֵייד, הגזירות ועיצובי השיער -
+      עם דגש על דיוק ושירות אישי לכל לקוח.
+    </p>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <a href="https://www.instagram.com/gefen.ganon/" target="_blank" rel="noopener" style="flex:1;text-decoration:none;background:#242424;color:#fff;padding:11px;border-radius:10px;font-size:13px;font-weight:700;">📸 אינסטגרם</a>
+      <a href="tel:0549207908" style="flex:1;text-decoration:none;background:#242424;color:#fff;padding:11px;border-radius:10px;font-size:13px;font-weight:700;">📞 התקשרות</a>
+    </div>
+    <button onclick="closeAboutModal()" style="margin-top:16px;background:#333;color:#fff;">סגירה</button>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="modal-card" style="text-align:center;padding-top:20px;">
+    <div style="position:relative;width:88px;height:88px;margin:0 auto 12px;">
+      <div style="width:88px;height:88px;border-radius:50%;background:#242424;display:flex;align-items:center;justify-content:center;font-size:38px;">👤</div>
+    </div>
+    <h2 style="margin:0 0 4px;" id="settingsDisplayName">גפן גנון</h2>
+    <div id="settingsLastVisit" style="color:#999;font-size:12px;margin-bottom:14px;"></div>
+    <button onclick="closeSettingsModal(); customerLogout();" style="background:#333;color:#fff;width:auto;padding:9px 20px;margin:0 0 18px;font-size:13px;">🚪 התנתק</button>
+
+    <div style="text-align:right;">
+      <label style="font-size:12px;color:#999;">שם תצוגה</label>
+      <input id="settingsName" type="text" style="width:100%;padding:13px;margin:6px 0 10px;border-radius:10px;border:1px solid #333;background:#101010;color:#fff;font-size:16px;">
+      <button onclick="saveProfileSettings()" style="background:#fff;color:#000;">💾 שמירת שם</button>
+      <div id="settingsStatus" class="status"></div>
+    </div>
+
+    <div style="height:1px;background:#232323;margin:20px 0 14px;"></div>
+    <div style="text-align:right;font-size:13px;color:#999;font-weight:700;margin-bottom:10px;">נוטיפיקציות</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#101010;border:1px solid #232323;border-radius:12px;padding:14px;margin-bottom:18px;">
+      <label class="switch">
+        <input type="checkbox" id="pushToggle" onchange="togglePushSetting(this.checked)">
+        <span class="switch-slider"></span>
+      </label>
+      <span style="font-size:13px;">אפשר נוטיפיקציות (התראות)</span>
+    </div>
+
+    <div style="text-align:right;font-size:13px;color:#999;font-weight:700;margin-bottom:10px;">כללי</div>
+    <div class="settings-list">
+      <button class="settings-list-item" onclick="shareApp()"><span>📤</span><span>שתפו את האפליקציה</span></button>
+      <button class="settings-list-item" onclick="rateUs()"><span>⭐</span><span>דרגו אותנו</span></button>
+      <a class="settings-list-item" href="/install-guide.html"><span>📲</span><span>התקנת האתר</span></a>
+      <button class="settings-list-item" onclick="closeSettingsModal(); openTermsModal();"><span>📄</span><span>תנאי שימוש</span></button>
+      <button class="settings-list-item" style="color:#f16565;" onclick="confirmDeleteAccount()"><span>🗑️</span><span>מחק חשבון</span></button>
+    </div>
+    <button onclick="closeSettingsModal()" style="background:#333;color:#fff;margin-top:16px;">סגירה</button>
+  </div>
+</div>
+
+<div id="notificationsModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>🔔 ההתראות שלך</h2>
+    <div id="notificationsList" style="max-height:60vh;overflow-y:auto;"></div>
+    <button onclick="closeNotificationsModal()" style="background:#333;color:#fff;margin-top:14px;">סגירה</button>
+  </div>
+</div>
+
+<div id="termsModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>📄 תנאי שימוש</h2>
+    <div style="color:#bbb;font-size:13px;line-height:1.8;max-height:55vh;overflow-y:auto;text-align:right;">
+      <p>השימוש באתר GGD Barber ובשירות קביעת התורים כפוף למדיניות התורים המוצגת באתר, כולל מדיניות ביטולים ואיחורים.</p>
+      <p>הפרטים האישיים שנמסרים (שם, טלפון) משמשים לצורך ניהול התורים, שליחת תזכורות ועדכונים בלבד, ולא יועברו לגורם שלישי.</p>
+      <p>המספרה שומרת לעצמה את הזכות לעדכן את המדיניות ואת תנאי השימוש מעת לעת.</p>
+    </div>
+    <button onclick="closeTermsModal()" style="background:#333;color:#fff;margin-top:14px;">סגירה</button>
+  </div>
+</div>
+
+<div id="contactModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2>ההודעות שלי</h2>
+    <p style="color:#aaa;font-size:13px;margin-bottom:10px;">אם הבעיה דחופה - אפשר גם ליצור קשר ישירות בטלפון <a href="tel:0549207908" style="color:#fff;font-weight:bold;">0549207908</a>.</p>
+    <div id="messageThread" style="max-height:260px;overflow-y:auto;margin-bottom:10px;"></div>
+    <textarea id="contactMessage" rows="3" placeholder="כתוב הודעה חדשה..." style="width:100%;padding:15px;margin-top:10px;border-radius:12px;border:1px solid #333;background:#101010;color:#fff;font-size:16px;outline:none;resize:vertical;"></textarea>
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button onclick="submitContactMessage()" style="background:#fff; color:#000;">שליחה</button>
+      <button onclick="closeContactModal()" style="background:#333; color:#fff;">סגירה</button>
+    </div>
+    <div id="contactStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="storyViewer" class="story-viewer hidden">
+  <div class="story-progress" id="storyProgress"></div>
+  <button class="story-close" onclick="closeStory()" aria-label="סגור סטורי">✕</button>
+  <img id="storyImage" src="">
+  <video id="storyVideo" class="hidden" muted playsinline autoplay></video>
+  <div id="storyCaptionText" class="story-caption"></div>
+  <div class="story-nav" style="right:0;" onclick="nextStory()"></div>
+  <div class="story-nav" style="left:0;" onclick="prevStory()"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
+const VAPID_PUBLIC_KEY = "BA5-uGj1e485lE1avOqdsK1Ez9f0nxGKAz_Us2TtfbWfyQ9Xc_Y3xOJ3vshxW-iuHW1veZ_FGI6ZfyuPCgeu5Ig";
+
+const SHOP_LOCATION = { lat: 29.56459, lng: 34.94153, name: "GGD Barber" };
+function buildWazeUrl(){ return `https://waze.com/ul?ll=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}&navigate=yes`; }
+function buildGoogleMapsNavUrl(){ return `https://www.google.com/maps/dir/?api=1&destination=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}`; }
+function buildAppleMapsUrl(){ return `https://maps.apple.com/?daddr=${SHOP_LOCATION.lat},${SHOP_LOCATION.lng}&dirflg=d`; }
+function openNavigationModal(){
+  document.getElementById("navWazeBtn").href = buildWazeUrl();
+  document.getElementById("navGoogleBtn").href = buildGoogleMapsNavUrl();
+  document.getElementById("navAppleBtn").href = buildAppleMapsUrl();
+  document.getElementById("navigationModal").classList.remove("hidden");
+}
+function closeNavigationModal(){ document.getElementById("navigationModal").classList.add("hidden"); }
+
+let services = [];
+let workingHours = [];
+let selectedService = null;
+let selectedDate = null;
+let selectedTime = null;
+let availableSlotsList = [];
+let galleryItems = [];
+let productItems = [];
+let brandLogoUrl = "";
+let storyIndex = 0;
+let storyTimer = null;
+let currentCustomer = null;
+let authMode = "login";
+let currentBookedTimes = [];
+
+async function supabaseFetch(path, options = {}) {
+  const response = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error("Supabase error: " + response.status + " " + text);
+  }
+  return response.json();
+}
+
+async function loadServices(){
+  const box = document.getElementById("services");
+  try{
+    const data = await supabaseFetch("/rest/v1/rpc/get_active_services", { method: "POST", body: JSON.stringify({}) });
+    services = (data || []).slice().sort((a, b) => Number(a.price) - Number(b.price));
+    box.innerHTML = "";
+    services.forEach(service => {
+      const el = document.createElement("div");
+      el.className = "service";
+      el.innerHTML = `
+        <div class="service-left">
+          <span class="service-icon">✂️</span>
+          <div>
+            <div class="service-name">${escapeHtml(service.name)}</div>
+            <div class="service-description">${escapeHtml(service.description || "")}</div>
+          </div>
+        </div>
+        <div class="price">₪${Number(service.price).toFixed(0)}</div>
+      `;
+      el.onclick = () => {
+        haptic();
+        document.querySelectorAll(".service").forEach(x => x.classList.remove("selected"));
+        el.classList.add("selected");
+        selectedService = service;
+        selectedTime = null;
+        updateBookButton();
+        if(selectedDate) loadSlots();
+        setTimeout(() => document.getElementById("datesCard").scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+      };
+      box.appendChild(el);
+    });
+  }catch(e){ box.innerHTML = '<div class="status error">שגיאת טעינה</div>'; }
+}
+
+async function loadWorkingHours(){
+  try{
+    workingHours = await supabaseFetch("/rest/v1/working_hours?select=*&is_open=eq.true");
+    renderDates();
+  }catch(e){ document.getElementById("dates").innerHTML = '<div class="status error">שגיאת טעינה</div>'; }
+}
+
+function renderDates(){
+  const box = document.getElementById("dates");
+  box.innerHTML = "";
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+
+  // Always show a constant rolling window of the next 6 OPEN business days.
+  // As today's days run out, the following week's early days fill in automatically.
+  let shown = 0;
+  for(let i = 0; shown < 6 && i < 30; i++){
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayOfWeek = date.getDay();
+    const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
+    if(!hours || !hours.is_open) continue;
+    shown++;
+
+    const el = document.createElement("div");
+    el.className = "date";
+    el.innerHTML = `<div class="day">${dayNames[dayOfWeek]}</div><div class="date-circle">${date.getDate()}/${date.getMonth()+1}</div>`;
+    const dateCopy = new Date(date);
+    el.onclick = () => {
+      haptic();
+      document.querySelectorAll(".date").forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedDate = dateCopy;
+      selectedTime = null;
+      updateBookButton();
+      loadSlots();
+      setTimeout(() => document.getElementById("timesCard").scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    };
+    box.appendChild(el);
+  }
+}
+
+async function loadSlots(){
+  const box = document.getElementById("times");
+  const waitlistBtn = document.getElementById("waitlistOpenBtn");
+  box.innerHTML = '<div class="skel-time skel"></div><div class="skel-time skel"></div><div class="skel-time skel"></div><div class="skel-time skel"></div><div class="skel-time skel"></div><div class="skel-time skel"></div>';
+  waitlistBtn.classList.add("hidden");
+  if(!selectedDate) return;
+
+  const dayOfWeek = selectedDate.getDay();
+  const hours = workingHours.find(x => Number(x.day_of_week) === dayOfWeek);
+  if(!hours){ box.innerHTML = '<div class="status">אין שעות עבודה</div>'; return; }
+
+  let booked = [];
+  try{
+    const data = await supabaseFetch("/rest/v1/rpc/get_booked_slots", { method: "POST", body: JSON.stringify({ p_date: isoDate(selectedDate) }) });
+    if(data && data.is_date_blocked){
+      box.innerHTML = `<div class="status">המספרה סגורה בתאריך זה${data.block_reason ? " (" + escapeHtml(data.block_reason) + ")" : ""}</div>`;
+      currentBookedTimes = [];
+      availableSlotsList = [];
+      return;
+    }
+    booked = (data && Array.isArray(data.booked_times)) ? data.booked_times : [];
+  }catch(e){}
+
+  const bookedSet = new Set();
+  booked.forEach(item => {
+    if(typeof item === "string"){ bookedSet.add(item.slice(0,5)); return; }
+    if(item && typeof item === "object"){
+      // Postgres names an unaliased expression column after the function used (e.g. "to_char"),
+      // so read whichever value the row actually has instead of assuming a fixed key name.
+      const val = item.time ?? item.to_char ?? Object.values(item)[0];
+      if(val) bookedSet.add(String(val).slice(0,5));
+    }
+  });
+
+  const allSlots = generateSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
+
+  // Hide times that have already passed, when the selected date is today.
+  const isToday = isoDate(selectedDate) === isoDate(new Date());
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+  const relevantSlots = isToday ? allSlots.filter(t => timeToMinutes(t) > nowMinutes) : allSlots;
+
+  // Booked times still relevant today (for the waitlist), excluding ones already in the past.
+  currentBookedTimes = relevantSlots.map(t => String(t).slice(0,5)).filter(t => bookedSet.has(t));
+  availableSlotsList = relevantSlots.filter(t => !bookedSet.has(String(t).slice(0,5)));
+
+  box.innerHTML = "";
+  if(!relevantSlots.length){
+    box.innerHTML = '<div class="status">אין יותר שעות פנויות ליום זה</div>';
+    return;
+  }
+
+  // Booked slots are never offered as a bookable option - they only open the waitlist for that exact time.
+  const previouslySelectedTime = selectedTime;
+  let stillAvailable = false;
+  relevantSlots.forEach(time => {
+    const timeStr = String(time).slice(0,5);
+    const isBooked = bookedSet.has(timeStr);
+    const el = document.createElement("div");
+    el.className = isBooked ? "time booked" : "time";
+    el.textContent = isBooked ? "🔒 " + timeStr : timeStr;
+    if(!isBooked && previouslySelectedTime === timeStr){
+      el.classList.add("selected");
+      stillAvailable = true;
+    }
+    el.onclick = () => {
+      if(isBooked){ openWaitlistModal(timeStr); return; }
+      haptic();
+      document.querySelectorAll(".time").forEach(x => x.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedTime = timeStr;
+      updateBookButton();
+      setTimeout(() => document.getElementById("detailsCard").scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    };
+    box.appendChild(el);
+  });
+
+  if(previouslySelectedTime && !stillAvailable){
+    // Someone else grabbed this slot while it was open in the background - clear it instead of letting a stale selection through.
+    selectedTime = null;
+    updateBookButton();
+    document.getElementById("timeStatus").innerHTML = '<span class="error">השעה שבחרת נתפסה הרגע, בחר שעה אחרת</span>';
+  }
+
+  if(!availableSlotsList.length) waitlistBtn.classList.remove("hidden");
+}
+
+function generateSlots(openTime, closeTime, breakStart, breakEnd, duration){
+  const result = [];
+  let current = timeToMinutes(openTime);
+  const close = timeToMinutes(closeTime);
+  const breakFrom = breakStart ? timeToMinutes(breakStart) : null;
+  const breakTo = breakEnd ? timeToMinutes(breakEnd) : null;
+  while(current + duration <= close){
+    const end = current + duration;
+    const overlapsBreak = breakFrom !== null && breakTo !== null && current < breakTo && end > breakFrom;
+    if(!overlapsBreak) result.push(minutesToTime(current));
+    current += duration;
+  }
+  return result;
+}
+
+document.getElementById("book").addEventListener("click", handleBookClick);
+
+function handleBookClick(){
+  const status = document.getElementById("status");
+  if(document.getElementById("hpBooking").value){ return; }
+
+  if(!currentCustomer){
+    status.textContent = "";
+    alert("צריך להירשם או להתחבר לאתר כדי לקבוע תור");
+    openAuthModal("signup");
+    return;
+  }
+
+  const name = document.getElementById("name").value.trim() || currentCustomer.name;
+  if(!selectedService || !selectedDate || !selectedTime) return;
+  if(!name){ status.textContent = "נא להזין שם"; status.className = "status error"; return; }
+
+  document.getElementById("policyConfirmModal").classList.remove("hidden");
+}
+
+function closePolicyConfirmModal(){
+  document.getElementById("policyConfirmModal").classList.add("hidden");
+}
+
+function confirmBookingAfterPolicy(){
+  closePolicyConfirmModal();
+  bookAppointment();
+}
+
+async function bookAppointment(){
+  const button = document.getElementById("book");
+  const status = document.getElementById("status");
+  if(document.getElementById("hpBooking").value){ return; }
+
+  if(!currentCustomer){
+    status.textContent = "";
+    alert("צריך להירשם או להתחבר לאתר כדי לקבוע תור");
+    openAuthModal("signup");
+    return;
+  }
+
+  const name = document.getElementById("name").value.trim() || currentCustomer.name;
+  const phone = currentCustomer.phone;
+
+  if(!selectedService || !selectedDate || !selectedTime) return;
+  if(!name){ status.textContent = "נא להזין שם"; status.className = "status error"; return; }
+
+  button.disabled = true;
+  button.textContent = "קובע תור...";
+
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/book_slot", {
+      method: "POST",
+      body: JSON.stringify({ p_service_id: selectedService.id, p_name: name, p_phone: phone, p_date: isoDate(selectedDate), p_time: selectedTime + ":00" })
+    });
+    if(result && result.success === false){
+      if(result.blocked_reason === "no_show_history" || result.blocked_reason === "manual_block"){
+        status.className = "status error";
+        status.innerHTML = (result.message || "לא ניתן לקבוע תור באופן מקוון") +
+          `<div style="margin-top:10px;"><a href="tel:0549207908" style="display:inline-block;background:#fff;color:#000;padding:10px 18px;border-radius:10px;font-weight:800;text-decoration:none;font-size:13px;">📞 התקשרות למספרה</a></div>`;
+        button.disabled = false;
+        button.textContent = "קביעת תור";
+        return;
+      }
+      // The slot was genuinely taken by someone else in the meantime.
+      status.textContent = result.message || "השעה הזו כבר נתפסה, נא לבחור שעה אחרת";
+      status.className = "status error";
+      button.disabled = false;
+      button.textContent = "קביעת תור";
+      loadSlots();
+      return;
+    }
+
+    haptic([15,40,15]);
+    document.getElementById("booking").classList.add("hidden");
+    document.getElementById("success").classList.remove("hidden");
+    await showMyBookings();
+  }catch(e){
+    // A real error (network / permissions / server) - not a booking conflict.
+    console.error("bookAppointment error:", e);
+    status.textContent = "אירעה שגיאה בקביעת התור, נסה שוב בעוד רגע";
+    status.className = "status error";
+    button.disabled = false;
+    button.textContent = "קביעת תור";
+    loadSlots();
+  }
+}
+
+function openWaitlistModal(presetTime){
+  if(!selectedService || !selectedDate){ alert("נא לבחור שירות ותאריך קודם"); return; }
+  const select = document.getElementById("wlTime");
+  select.innerHTML = "";
+  // Only offer times that are actually taken - there's no point waiting for a free slot.
+  if(currentBookedTimes.length){
+    currentBookedTimes.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t; opt.textContent = t;
+      if(presetTime && t === presetTime) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } else {
+    const opt = document.createElement("option");
+    opt.value = ""; opt.textContent = "כל שעה פנויה";
+    select.appendChild(opt);
+  }
+  document.getElementById("waitlistInfo").textContent = `הירשם לרשימת המתנה לתאריך ${formatDate(selectedDate)}${presetTime ? " לשעה " + presetTime : ""}:`;
+  document.getElementById("wlName").value = document.getElementById("name").value;
+  document.getElementById("wlPhone").value = document.getElementById("phone").value;
+  document.getElementById("wlStatus").textContent = "";
+  document.getElementById("waitlistModal").classList.remove("hidden");
+}
+
+function closeWaitlistModal(){ document.getElementById("waitlistModal").classList.add("hidden"); }
+function openAccessibilityModal(){ document.getElementById("accessibilityModal").classList.remove("hidden"); }
+function closeAccessibilityModal(){ document.getElementById("accessibilityModal").classList.add("hidden"); }
+function openPrivacyModal(){ document.getElementById("privacyModal").classList.remove("hidden"); }
+function closePrivacyModal(){ document.getElementById("privacyModal").classList.add("hidden"); }
+
+async function submitWaitlist(){
+  if(document.getElementById("hpWaitlist").value){ return; }
+  const name = document.getElementById("wlName").value.trim();
+  const phone = document.getElementById("wlPhone").value.trim();
+  const time = document.getElementById("wlTime").value;
+  const statusEl = document.getElementById("wlStatus");
+
+  if(!name || !phone || !selectedDate){ 
+    statusEl.textContent = "נא למלא את כל השדות"; 
+    statusEl.className = "status error"; 
+    return; 
+  }
+  
+  statusEl.textContent = "רושם אותך...";
+  statusEl.className = "status";
+
+  try{
+    const res = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({ 
+        service_id: String(selectedService?.id || "general"), 
+        customer_name: name, 
+        phone: phone, 
+        booking_date: isoDate(selectedDate), 
+        booking_time: time ? String(time).slice(0,5) : null 
+      })
+    });
+
+    if(!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText);
+    }
+
+    statusEl.textContent = "נרשמת בהצלחה לרשימת ההמתנה!";
+    statusEl.className = "status success";
+    setTimeout(() => {
+      closeWaitlistModal();
+    }, 1500);
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = "שגיאה בהרשמה";
+    statusEl.className = "status error";
+  }
+}
+
+function updateBookButton(){ document.getElementById("book").disabled = !selectedService || !selectedDate || !selectedTime; }
+function isoDate(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`; }
+function formatDate(date){ return new Date(date).toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" }); }
+function timeToMinutes(val){ const p = String(val).slice(0,5).split(":"); return Number(p[0])*60 + Number(p[1]); }
+function minutesToTime(m){ return String(Math.floor(m/60)).padStart(2,"0") + ":" + String(m%60).padStart(2,"0"); }
+function escapeHtml(val){ return String(val ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+function openAboutModal(){ document.getElementById("aboutModal").classList.remove("hidden"); }
+function closeAboutModal(){ document.getElementById("aboutModal").classList.add("hidden"); }
+
+function openSettingsModal(){
+  if(!currentCustomer){ openAuthModal("login"); return; }
+  document.getElementById("settingsName").value = currentCustomer.name || "";
+  document.getElementById("settingsStatus").textContent = "";
+  document.getElementById("settingsModal").classList.remove("hidden");
+}
+function closeSettingsModal(){ document.getElementById("settingsModal").classList.add("hidden"); }
+
+async function saveProfileSettings(){
+  const name = document.getElementById("settingsName").value.trim();
+  const status = document.getElementById("settingsStatus");
+  if(!name){ status.textContent = "נא להזין שם"; status.className = "status error"; return; }
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/update_customer_profile", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token, p_name: name })
+    });
+    if(result && result.success === false){
+      status.textContent = result.message || "שגיאה בשמירה";
+      status.className = "status error";
+      return;
+    }
+    currentCustomer.name = result.name;
+    localStorage.setItem("ggd_customer", JSON.stringify(currentCustomer));
+    renderAccountBar();
+    status.textContent = "נשמר!";
+    status.className = "status success";
+  }catch(e){
+    status.textContent = "שגיאה בשמירה, נסה שוב";
+    status.className = "status error";
+  }
+}
+
+function haptic(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms || 10); }catch(e){} }
+
+function openDrawer(){
+  haptic();
+  updateDrawerContent();
+  document.getElementById("drawerOverlay").classList.add("open");
+  document.getElementById("sideDrawer").classList.add("open");
+}
+function closeDrawer(){
+  document.getElementById("drawerOverlay").classList.remove("open");
+  document.getElementById("sideDrawer").classList.remove("open");
+}
+function updateDrawerContent(){
+  const greeting = document.getElementById("drawerGreeting");
+  const footer = document.getElementById("drawerFooter");
+  if(currentCustomer){
+    greeting.textContent = `שלום, ${currentCustomer.name} 👋`;
+    footer.innerHTML = `
+      <button onclick="closeDrawer(); openNotificationsModal();">🔔 התראות</button>
+      <button onclick="closeDrawer(); openSettingsModal();">⚙️ הגדרות</button>
+      <button onclick="closeDrawer(); customerLogout();">🚪 התנתקות</button>
+    `;
+  }else{
+    greeting.textContent = "שלום 👋";
+    footer.innerHTML = `<button onclick="closeDrawer(); openAuthModal('login');">👤 התחברות / הרשמה</button>`;
+  }
+}
+
+// ===== הוספה ליומן: Google Calendar + קובץ .ics =====
+function buildGoogleCalendarUrl(b){
+  const start = new Date(`${b.booking_date}T${String(b.booking_time).slice(0,5)}:00`);
+  const end = new Date(start.getTime() + (Number(b.duration_minutes) || 30) * 60000);
+  const fmt = d => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `תור ב-GGD Barber - ${b.service_name || ""}`,
+    dates: `${fmt(start)}/${fmt(end)}`,
+    details: "תור שנקבע דרך אתר GGD Barber",
+    location: "GGD Barber"
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function buildIcsContent(b){
+  const start = new Date(`${b.booking_date}T${String(b.booking_time).slice(0,5)}:00`);
+  const end = new Date(start.getTime() + (Number(b.duration_minutes) || 30) * 60000);
+  const fmt = d => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  return [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//GGD Barber//Booking//HE","BEGIN:VEVENT",
+    `UID:booking-${b.id}@ggd-barber.vercel.app`,
+    `DTSTAMP:${fmt(new Date())}`,
+    `DTSTART:${fmt(start)}`,
+    `DTEND:${fmt(end)}`,
+    `SUMMARY:תור ב-GGD Barber - ${b.service_name || ""}`,
+    "LOCATION:GGD Barber",
+    "DESCRIPTION:תור שנקבע דרך אתר GGD Barber",
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+}
+
+function downloadIcsFile(b){
+  const blob = new Blob([buildIcsContent(b)], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `GGD-Barber-${b.booking_date}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+}
+
+function renderCalendarButtons(b){
+  const safe = escapeHtml(JSON.stringify(b));
+  const menuId = "calmenu-" + b.id;
+  return `
+    <div style="position:relative;margin-top:10px;">
+      <button type="button" onclick="toggleCalendarMenu('${menuId}')"
+         style="width:100%;padding:11px;border-radius:10px;background:#242424;color:#fff;border:1px solid #333;font-size:13px;font-weight:700;cursor:pointer;">
+        📅 הוסף ליומן
+      </button>
+      <div id="${menuId}" class="hidden" style="position:absolute;top:calc(100% + 6px);right:0;left:0;background:#1f1f1f;border:1px solid #333;border-radius:12px;padding:10px;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.4);">
+        <div style="font-size:11px;color:#888;text-align:center;margin-bottom:6px;">בחרו את היומן שלכם</div>
+        <a href="${buildGoogleCalendarUrl(b)}" target="_blank" rel="noopener"
+           style="display:block;text-align:center;padding:11px;border-radius:8px;color:#fff;text-decoration:none;font-size:13px;background:#282828;margin-bottom:6px;">
+          📘 Google Calendar
+        </a>
+        <button type="button" data-booking="${safe}" onclick="downloadIcsFile(JSON.parse(this.dataset.booking)); toggleCalendarMenu('${menuId}')"
+           style="display:block;width:100%;text-align:center;padding:11px;border-radius:8px;background:#282828;color:#fff;border:0;font-size:13px;cursor:pointer;">
+          🍎 Apple Calendar / Outlook
+        </button>
+        <div style="font-size:10px;color:#777;text-align:center;margin-top:6px;">לחצו על היומן שלכם - הוא ייפתח וישמור את התור אוטומטית</div>
+      </div>
+    </div>`;
+}
+
+function toggleCalendarMenu(menuId){
+  document.querySelectorAll('[id^="calmenu-"]').forEach(el => {
+    if(el.id !== menuId) el.classList.add("hidden");
+  });
+  document.getElementById(menuId).classList.toggle("hidden");
+}
+
+function bookingStatusBadge(status){
+  const map = {
+    confirmed: { icon: "✅", label: "אישרת הגעה", color: "#4ade80" },
+    cancelled: { icon: "❌", label: "בוטל", color: "#f87171" },
+    no_show:   { icon: "🚫", label: "לא הגעת", color: "#f97316" }
+  };
+  const s = map[status];
+  if(!s) return "";
+  return `<div style="margin-top:6px;font-size:12px;font-weight:700;color:${s.color};">${s.icon} ${s.label}</div>`;
+}
+
+// ===== התראות Push =====
+function urlBase64ToUint8Array(base64String){
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function doPushSubscribe(){
+  if(!("serviceWorker" in navigator) || !("PushManager" in window)){
+    throw new Error("הדפדפן הזה לא תומך בהתראות Push");
+  }
+  if(!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY.indexOf("PASTE_YOUR") === 0){
+    throw new Error("התראות Push עדיין לא הופעלו במערכת - בקרוב! 🙂");
+  }
+  const permission = await Notification.requestPermission();
+  if(permission !== "granted"){ throw new Error("__permission_denied__"); }
+
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if(!sub){
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+  }
+  const raw = sub.toJSON();
+  await supabaseFetch("/rest/v1/rpc/save_push_subscription", {
+    method: "POST",
+    body: JSON.stringify({
+      p_phone: currentCustomer.phone,
+      p_session_token: currentCustomer.session_token,
+      p_endpoint: raw.endpoint,
+      p_p256dh: raw.keys.p256dh,
+      p_auth: raw.keys.auth
+    })
+  });
+}
+
+async function doPushUnsubscribe(){
+  if(!("serviceWorker" in navigator)) return;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if(sub){
+    const endpoint = sub.endpoint;
+    await sub.unsubscribe();
+    await supabaseFetch("/rest/v1/rpc/remove_push_subscription", {
+      method: "POST",
+      body: JSON.stringify({ p_endpoint: endpoint })
+    }).catch(() => {});
+  }
+}
+
+async function subscribeToPush(){
+  if(!currentCustomer || !currentCustomer.session_token){
+    alert("יש להתחבר לחשבון כדי להפעיל התראות");
+    openAuthModal("login");
+    return;
+  }
+  try{
+    await doPushSubscribe();
+    alert("התראות הופעלו בהצלחה! 🔔");
+  }catch(e){
+    if(e.message !== "__permission_denied__"){
+      console.error("subscribeToPush error:", e);
+      alert(e.message || "לא הצלחנו להפעיל התראות כרגע, נסה שוב מאוחר יותר");
+    }
+  }
+}
+
+async function togglePushSetting(checked){
+  const toggle = document.getElementById("pushToggle");
+  try{
+    if(checked){
+      await doPushSubscribe();
+    }else{
+      await doPushUnsubscribe();
+    }
+  }catch(e){
+    toggle.checked = !checked;
+    if(e.message !== "__permission_denied__"){
+      alert(e.message || "משהו השתבש, נסה שוב");
+    }else{
+      toggle.checked = false;
+    }
+  }
+}
+
+async function refreshPushToggleState(){
+  const toggle = document.getElementById("pushToggle");
+  if(!toggle) return;
+  try{
+    if(!("serviceWorker" in navigator)){ toggle.checked = false; return; }
+    const reg = await navigator.serviceWorker.getRegistration();
+    if(!reg){ toggle.checked = false; return; }
+    const sub = await reg.pushManager.getSubscription();
+    toggle.checked = !!sub;
+  }catch(e){ toggle.checked = false; }
+}
+
+// ===== מסך הגדרות =====
+async function openSettingsModal(){
+  if(!currentCustomer){ openAuthModal("login"); return; }
+  document.getElementById("settingsDisplayName").textContent = currentCustomer.name || "";
+  document.getElementById("settingsName").value = currentCustomer.name || "";
+  document.getElementById("settingsStatus").textContent = "";
+  document.getElementById("settingsLastVisit").textContent = "";
+  document.getElementById("settingsModal").classList.remove("hidden");
+  refreshPushToggleState();
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_last_booking", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(result && result.has_last && result.booking_date){
+      const d = new Date(result.booking_date + "T00:00:00");
+      const label = d.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" });
+      document.getElementById("settingsLastVisit").textContent = `הביקור האחרון שלך היה ב-${label}`;
+    }
+  }catch(e){}
+}
+function closeSettingsModal(){ document.getElementById("settingsModal").classList.add("hidden"); }
+
+async function saveProfileSettings(){
+  const name = document.getElementById("settingsName").value.trim();
+  const status = document.getElementById("settingsStatus");
+  if(!name){ status.textContent = "נא להזין שם"; status.className = "status error"; return; }
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/update_customer_profile", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token, p_name: name })
+    });
+    if(result && result.success === false){
+      status.textContent = result.message || "שגיאה בשמירה";
+      status.className = "status error";
+      return;
+    }
+    currentCustomer.name = result.name;
+    localStorage.setItem("ggd_customer", JSON.stringify(currentCustomer));
+    renderAccountBar();
+    document.getElementById("settingsDisplayName").textContent = result.name;
+    status.textContent = "נשמר!";
+    status.className = "status success";
+  }catch(e){
+    status.textContent = "שגיאה בשמירה, נסה שוב";
+    status.className = "status error";
+  }
+}
+
+function shareApp(){
+  const shareData = { title: "GGD Barber", text: "קביעת תור אונליין ב-GGD Barber", url: "https://ggd-barber.vercel.app" };
+  if(navigator.share){
+    navigator.share(shareData).catch(() => {});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(shareData.url).then(() => alert("הקישור הועתק! שתפו אותו עם חברים 📤"));
+  }else{
+    alert(shareData.url);
+  }
+}
+
+async function rateUs(){
+  try{
+    const rows = await supabaseFetch("/rest/v1/site_settings?key=eq.google_review_url&select=value", { method: "GET" });
+    const url = rows && rows.length && rows[0].value;
+    if(url){ window.open(url, "_blank"); }
+    else{ alert("קישור לביקורת עדיין לא הוגדר, נשמח אם תתקשרו ותגידו לנו מה דעתכם 🙂"); }
+  }catch(e){
+    alert("לא הצלחנו לפתוח את הקישור כרגע");
+  }
+}
+
+function openTermsModal(){ document.getElementById("termsModal").classList.remove("hidden"); }
+function closeTermsModal(){ document.getElementById("termsModal").classList.add("hidden"); }
+
+async function confirmDeleteAccount(){
+  if(!confirm("למחוק את החשבון שלך לצמיתות? לא ניתן לשחזר, ותצטרך/י להירשם מחדש כדי לקבוע תור.")) return;
+  if(!confirm("בטוח/ה? הפעולה הזו סופית.")) return;
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/delete_my_account", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(result && result.success === false){
+      alert(result.message || "לא הצלחנו למחוק את החשבון");
+      return;
+    }
+    localStorage.removeItem("ggd_customer");
+    currentCustomer = null;
+    closeSettingsModal();
+    renderAccountBar();
+    alert("החשבון נמחק בהצלחה");
+    location.reload();
+  }catch(e){
+    alert("לא הצלחנו למחוק את החשבון כרגע, נסה שוב");
+  }
+}
+
+// ===== פאנל התראות =====
+async function openNotificationsModal(){
+  if(!currentCustomer){ openAuthModal("login"); return; }
+  const list = document.getElementById("notificationsList");
+  list.innerHTML = '<div class="skel-row"><div class="skel" style="width:70%;"></div></div><div class="skel-row"><div class="skel" style="width:55%;"></div></div>';
+  document.getElementById("notificationsModal").classList.remove("hidden");
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_my_notifications", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    const items = (result && result.notifications) || [];
+    if(!items.length){
+      list.innerHTML = '<div class="status" style="text-align:center;">אין עדיין התראות להצגה</div>';
+      return;
+    }
+    list.innerHTML = items.map(n => {
+      const d = new Date(n.created_at);
+      const timeLabel = d.toLocaleDateString("he-IL") + " · " + d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+      return `<div class="notification-item">
+        <div class="n-title">${escapeHtml(n.title)}</div>
+        <div class="n-body">${escapeHtml(n.body)}</div>
+        <div class="n-time">GGD Barber · ${timeLabel}</div>
+      </div>`;
+    }).join("");
+  }catch(e){
+    list.innerHTML = '<div class="status error">שגיאה בטעינת ההתראות</div>';
+  }
+}
+function closeNotificationsModal(){ document.getElementById("notificationsModal").classList.add("hidden"); }
+
+async function loadGallery(){
+  try{
+    const data = await supabaseFetch("/rest/v1/gallery?select=*&order=sort_order.asc,created_at.desc");
+    galleryItems = Array.isArray(data) ? data : [];
+  }catch(e){ galleryItems = []; }
+  try{
+    const settings = await supabaseFetch("/rest/v1/site_settings?key=eq.brand_logo_url&select=value");
+    brandLogoUrl = (Array.isArray(settings) && settings[0] && settings[0].value) || "";
+  }catch(e){ brandLogoUrl = ""; }
+  renderStoriesStrip();
+}
+
+function renderStoriesStrip(){
+  const box = document.getElementById("storiesStrip");
+  const section = document.getElementById("storiesSection");
+  if(!galleryItems.length){ section.classList.add("hidden"); box.innerHTML = ""; return; }
+  section.classList.remove("hidden");
+  box.innerHTML = "";
+  const badge = brandLogoUrl ? `<div class="story-badge"><img src="${escapeHtml(brandLogoUrl)}"></div>` : "";
+  galleryItems.forEach((item, i) => {
+    const el = document.createElement("div");
+    el.className = "story-avatar";
+    const thumb = item.media_type === "video"
+      ? (item.thumbnail_url
+          ? `<img src="${escapeHtml(item.thumbnail_url)}">`
+          : `<video src="${escapeHtml(item.image_url)}" muted playsinline preload="metadata"></video>`)
+      : `<img src="${escapeHtml(item.image_url)}">`;
+    el.innerHTML = `<div class="story-thumb-wrap">${thumb}</div>${badge}<span>${escapeHtml(item.caption || "תספורת")}</span>`;
+    el.onclick = () => openStory(i);
+    box.appendChild(el);
+  });
+}
+
+async function loadProducts(){
+  try{
+    productItems = await supabaseFetch("/rest/v1/products?select=*&active=eq.true&order=sort_order.asc,created_at.desc");
+    if(!Array.isArray(productItems)) productItems = [];
+  }catch(e){ productItems = []; }
+  renderProductsShop();
+}
+
+function renderProductsShop(){
+  const box = document.getElementById("productsShopStrip");
+  const section = document.getElementById("productsShopSection");
+  if(!productItems.length){ section.classList.add("hidden"); box.innerHTML = ""; return; }
+  section.classList.remove("hidden");
+  box.innerHTML = "";
+  productItems.forEach(item => {
+    const onSale = item.original_price && Number(item.original_price) > Number(item.price);
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      ${onSale ? '<div class="product-sale-badge">מבצע!</div>' : ""}
+      <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.name)}">
+      <div class="product-card-name">${escapeHtml(item.name)}</div>
+      <div class="product-price-row">
+        ${onSale ? `<span class="product-price-old">₪${Number(item.original_price).toFixed(0)}</span>` : ""}
+        <span class="product-price-pill">₪${Number(item.price).toFixed(0)}</span>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+}
+
+function openStory(index){
+  storyIndex = index;
+  document.getElementById("storyViewer").classList.remove("hidden");
+  renderStory();
+}
+
+function renderStory(){
+  const item = galleryItems[storyIndex];
+  if(!item){ closeStory(); return; }
+  const imgEl = document.getElementById("storyImage");
+  const videoEl = document.getElementById("storyVideo");
+  clearTimeout(storyTimer);
+  videoEl.pause();
+  videoEl.onended = null;
+
+  if(item.media_type === "video"){
+    imgEl.classList.add("hidden");
+    videoEl.classList.remove("hidden");
+    videoEl.src = item.image_url;
+    videoEl.currentTime = 0;
+    videoEl.play().catch(()=>{});
+    videoEl.onended = nextStory;
+  } else {
+    videoEl.classList.add("hidden");
+    imgEl.classList.remove("hidden");
+    imgEl.src = item.image_url;
+    storyTimer = setTimeout(nextStory, 4000);
+  }
+
+  document.getElementById("storyCaptionText").textContent = item.caption || "";
+  renderStoryProgress();
+}
+
+function renderStoryProgress(){
+  const box = document.getElementById("storyProgress");
+  box.innerHTML = "";
+  galleryItems.forEach((_, i) => {
+    const bar = document.createElement("div");
+    bar.className = "story-progress-bar";
+    const fill = i < storyIndex ? "100%" : i === storyIndex ? "100%" : "0%";
+    bar.innerHTML = `<b style="width:${fill}"></b>`;
+    box.appendChild(bar);
+  });
+}
+
+function nextStory(){
+  if(storyIndex < galleryItems.length - 1){ storyIndex++; renderStory(); }
+  else closeStory();
+}
+function prevStory(){
+  if(storyIndex > 0){ storyIndex--; renderStory(); }
+}
+function closeStory(){
+  clearTimeout(storyTimer);
+  document.getElementById("storyVideo").pause();
+  document.getElementById("storyViewer").classList.add("hidden");
+}
+let policyBannerCollapsed = false;
+function togglePolicyBanner(){
+  const banner = document.getElementById("policyBanner");
+  const body = document.getElementById("policyBannerBody");
+  policyBannerCollapsed = !policyBannerCollapsed;
+  banner.classList.toggle("collapsed", policyBannerCollapsed);
+  body.classList.toggle("collapsed", policyBannerCollapsed);
+}
+
+async function init(){ try{ await Promise.all([loadServices(), loadWorkingHours(), loadGallery(), loadProducts()]); }catch(e){} loadCustomerSession(); }
+supabaseFetch("/rest/v1/rpc/log_site_visit", { method: "POST", body: JSON.stringify({ p_path: location.pathname || "/" }) }).catch(() => {});
+
+// Keep slot availability fresh: if someone else books/cancels while this page is open,
+// the times list updates on its own instead of only refreshing after a manual reload.
+setInterval(() => { if(selectedDate && !document.hidden) loadSlots(); }, 20000);
+document.addEventListener("visibilitychange", () => { if(!document.hidden && selectedDate) loadSlots(); });
+window.addEventListener("focus", () => { if(selectedDate) loadSlots(); });
+
+const splashStart = Date.now();
+function hideSplash(){
+  const splash = document.getElementById("splashScreen");
+  if(!splash || splash.classList.contains("splash-hidden")) return;
+  splash.classList.add("splash-hidden");
+  setTimeout(function(){ splash.style.display = "none"; }, 500);
+}
+init().then(function(){
+  const elapsed = Date.now() - splashStart;
+  setTimeout(hideSplash, Math.max(0, 600 - elapsed));
+});
+setTimeout(hideSplash, 2500); // safety net in case loading takes too long
+
+function loadCustomerSession(){
+  const saved = localStorage.getItem("ggd_customer");
+  currentCustomer = saved ? JSON.parse(saved) : null;
+  renderAccountBar();
+  checkRebookOffer();
+}
+
+async function checkRebookOffer(){
+  const card = document.getElementById("rebookCard");
+  if(!currentCustomer || !currentCustomer.session_token || !services.length){
+    card.classList.add("hidden");
+    card.innerHTML = "";
+    return;
+  }
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_last_booking", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(!result || result.success === false || !result.has_last || !result.active) {
+      card.classList.add("hidden");
+      card.innerHTML = "";
+      return;
+    }
+    const svc = services.find(s => Number(s.id) === Number(result.service_id));
+    if(!svc){ card.classList.add("hidden"); card.innerHTML = ""; return; }
+
+    card.innerHTML = `
+      <div class="rebook-text">רוצה לקבוע שוב <strong>${escapeHtml(svc.name)}</strong> כמו בפעם שעברה?</div>
+      <button onclick="applyRebook(${Number(svc.id)})" style="background:#fff;color:#000;">כן, קבע לי!</button>
+    `;
+    card.classList.remove("hidden");
+  }catch(e){
+    card.classList.add("hidden");
+    card.innerHTML = "";
+  }
+}
+
+function applyRebook(serviceId){
+  haptic();
+  const svc = services.find(s => Number(s.id) === Number(serviceId));
+  if(!svc) return;
+  const el = Array.from(document.querySelectorAll(".service")).find(x => x.querySelector(".service-name")?.textContent === svc.name);
+  document.querySelectorAll(".service").forEach(x => x.classList.remove("selected"));
+  if(el) el.classList.add("selected");
+  selectedService = svc;
+  selectedTime = null;
+  updateBookButton();
+  document.getElementById("dates").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function renderAccountBar(){
+  const statusEl = document.getElementById("accountStatus");
+  const buttonsEl = document.getElementById("accountButtons");
+  if(currentCustomer){
+    statusEl.textContent = `שלום, ${currentCustomer.name} 👋`;
+    buttonsEl.innerHTML = `
+      <button style="width:auto;padding:8px 14px;margin:0;background:#333;color:#fff;" onclick="customerLogout()">התנתקות</button>`;
+    document.getElementById("name").value = currentCustomer.name;
+    document.getElementById("phone").value = currentCustomer.phone;
+    document.getElementById("phone").disabled = true;
+    loadLoyaltyStatus();
+  } else {
+    statusEl.textContent = "יש לך חשבון?";
+    buttonsEl.innerHTML = `
+      <button style="width:auto;padding:8px 14px;margin:0;background:#fff;color:#000;" onclick="openAuthModal('login')">התחברות</button>
+      <button style="width:auto;padding:8px 14px;margin:0;background:#333;color:#fff;" onclick="openAuthModal('signup')">הרשמה</button>`;
+    document.getElementById("loyaltyCard").classList.add("hidden");
+  }
+}
+
+async function loadLoyaltyStatus(){
+  if(!currentCustomer || !currentCustomer.session_token) return;
+  const card = document.getElementById("loyaltyCard");
+  const textEl = document.getElementById("loyaltyText");
+  const dotsEl = document.getElementById("loyaltyDots");
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_loyalty_status", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(!result || result.success === false) return;
+    card.classList.remove("hidden");
+    dotsEl.innerHTML = "";
+    for(let i = 0; i < 10; i++){
+      const dot = document.createElement("div");
+      const filled = i < result.progress;
+      dot.style.cssText = `flex:1;height:8px;border-radius:4px;background:${filled ? "#fff" : "#2a2a2a"};`;
+      dotsEl.appendChild(dot);
+    }
+    textEl.textContent = result.free_earned
+      ? "🎉 מגיע לך תספורת חינם!"
+      : `עוד ${result.remaining} לתספורת חינם`;
+  }catch(e){
+    card.classList.add("hidden");
+  }
+}
+
+function openContactModal(){
+  if(!currentCustomer){
+    alert("צריך להתחבר לחשבון כדי לשלוח הודעה לצוות");
+    openAuthModal("login");
+    return;
+  }
+  document.getElementById("contactMessage").value = "";
+  document.getElementById("contactStatus").textContent = "";
+  document.getElementById("contactModal").classList.remove("hidden");
+  loadMessageThread();
+}
+function closeContactModal(){ document.getElementById("contactModal").classList.add("hidden"); }
+
+async function loadMessageThread(){
+  const threadEl = document.getElementById("messageThread");
+  threadEl.innerHTML = '<div class="loading">טוען...</div>';
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_my_messages", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(!result || result.success === false){
+      threadEl.innerHTML = `<div class="status error">${escapeHtml((result && result.message) || "שגיאה בטעינה")}</div>`;
+      return;
+    }
+    renderMessageThread(result.messages || []);
+  }catch(e){
+    threadEl.innerHTML = '<div class="status error">שגיאה בטעינת ההודעות</div>';
+  }
+}
+
+function renderMessageThread(messages){
+  const threadEl = document.getElementById("messageThread");
+  if(!messages.length){
+    threadEl.innerHTML = '<div class="status">עדיין אין הודעות - כתבו לנו משהו!</div>';
+    return;
+  }
+  threadEl.innerHTML = "";
+  messages.forEach(m => {
+    const mine = document.createElement("div");
+    mine.style.cssText = "background:#fff;color:#000;border-radius:12px 12px 2px 12px;padding:10px 14px;margin:8px 0;max-width:85%;margin-right:auto;font-size:14px;";
+    mine.textContent = m.message;
+    threadEl.appendChild(mine);
+
+    const reply = m.admin_reply || m.bot_reply;
+    if(reply){
+      const replyEl = document.createElement("div");
+      replyEl.style.cssText = "background:#1c1c1c;color:#eee;border-radius:12px 12px 12px 2px;padding:10px 14px;margin:8px 0;max-width:85%;margin-left:auto;font-size:14px;";
+      replyEl.textContent = (m.admin_reply ? "👤 " : "🤖 ") + reply;
+      threadEl.appendChild(replyEl);
+    }
+  });
+  threadEl.scrollTop = threadEl.scrollHeight;
+}
+
+async function submitContactMessage(){
+  if(!currentCustomer) return;
+  const message = document.getElementById("contactMessage").value.trim();
+  const statusEl = document.getElementById("contactStatus");
+  if(!message){ statusEl.textContent = "נא לכתוב הודעה"; statusEl.className = "status error"; return; }
+
+  statusEl.textContent = "שולח...";
+  statusEl.className = "status";
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/send_customer_message", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token, p_message: message })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "שגיאה בשליחה";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "";
+    document.getElementById("contactMessage").value = "";
+    await loadMessageThread();
+  }catch(e){
+    statusEl.textContent = "שגיאה בשליחה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+function openAuthModal(mode){
+  authMode = mode;
+  document.getElementById("authStatus").textContent = "";
+  updateAuthModalMode();
+  document.getElementById("authModal").classList.remove("hidden");
+}
+function closeAuthModal(){ document.getElementById("authModal").classList.add("hidden"); }
+function toggleAuthMode(){ authMode = authMode === "login" ? "signup" : "login"; updateAuthModalMode(); }
+
+function updateAuthModalMode(){
+  const isLogin = authMode === "login";
+  document.getElementById("authModalTitle").textContent = isLogin ? "התחברות" : "הרשמה";
+  document.getElementById("loginFields").classList.toggle("hidden", !isLogin);
+  document.getElementById("signupFields").classList.toggle("hidden", isLogin);
+  document.getElementById("authSubmitBtn").textContent = isLogin ? "התחברות" : "הרשמה";
+  document.getElementById("authSwitchText").textContent = isLogin ? "אין לך חשבון? הרשמה" : "כבר יש לך חשבון? התחברות";
+}
+
+async function submitAuth(){
+  const statusEl = document.getElementById("authStatus");
+  statusEl.textContent = "מעבד...";
+  statusEl.className = "status";
+  try{
+    let result;
+    if(authMode === "login"){
+      const phone = document.getElementById("loginPhone").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      if(!phone || !password){ statusEl.textContent = "נא למלא טלפון וסיסמה"; statusEl.className = "status error"; return; }
+      result = await supabaseFetch("/rest/v1/rpc/customer_login", { method: "POST", body: JSON.stringify({ p_phone: phone, p_password: password }) });
+    } else {
+      if(document.getElementById("hpSignup").value){ return; }
+      const name = document.getElementById("signupName").value.trim();
+      const phone = document.getElementById("signupPhone").value.trim();
+      const birthdate = document.getElementById("signupBirthdate").value;
+      const password = document.getElementById("signupPassword").value;
+      if(!name || !phone || !password){ statusEl.textContent = "נא למלא את כל השדות"; statusEl.className = "status error"; return; }
+      result = await supabaseFetch("/rest/v1/rpc/customer_signup", { method: "POST", body: JSON.stringify({ p_name: name, p_phone: phone, p_birth_date: birthdate || null, p_password: password }) });
+    }
+    if(!result || result.success === false){ statusEl.textContent = (result && result.message) || "שגיאה, נסה שוב"; statusEl.className = "status error"; return; }
+    currentCustomer = result.customer;
+    localStorage.setItem("ggd_customer", JSON.stringify(currentCustomer));
+    closeAuthModal();
+    renderAccountBar();
+    checkRebookOffer();
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = "שגיאה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+function openForgotPasswordModal(){
+  document.getElementById("fpPhone").value = document.getElementById("loginPhone").value || "";
+  document.getElementById("fpCode").value = "";
+  document.getElementById("fpNewPassword").value = "";
+  document.getElementById("fpStep1").classList.remove("hidden");
+  document.getElementById("fpStep2").classList.add("hidden");
+  document.getElementById("fpStatus").textContent = "";
+  document.getElementById("forgotPasswordModal").classList.remove("hidden");
+}
+function closeForgotPasswordModal(){ document.getElementById("forgotPasswordModal").classList.add("hidden"); }
+
+async function submitForgotPasswordRequest(){
+  const phone = document.getElementById("fpPhone").value.trim();
+  const statusEl = document.getElementById("fpStatus");
+  if(!phone){ statusEl.textContent = "נא להזין מספר טלפון"; statusEl.className = "status error"; return; }
+  statusEl.textContent = "שולח קוד...";
+  statusEl.className = "status";
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/request_password_reset", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: phone })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "שגיאה, נסה שוב";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = result.message || "קוד נשלח";
+    statusEl.className = "status";
+    document.getElementById("fpStep1").classList.add("hidden");
+    document.getElementById("fpStep2").classList.remove("hidden");
+  }catch(e){
+    statusEl.textContent = "שגיאה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+async function submitForgotPasswordReset(){
+  const phone = document.getElementById("fpPhone").value.trim();
+  const code = document.getElementById("fpCode").value.trim();
+  const newPassword = document.getElementById("fpNewPassword").value;
+  const statusEl = document.getElementById("fpStatus");
+  if(!code || !newPassword){ statusEl.textContent = "נא למלא קוד וסיסמה חדשה"; statusEl.className = "status error"; return; }
+  statusEl.textContent = "מעדכן...";
+  statusEl.className = "status";
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/reset_password_with_otp", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: phone, p_code: code, p_new_password: newPassword })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "שגיאה, נסה שוב";
+      statusEl.className = "status error";
+      return;
+    }
+    alert("הסיסמה עודכנה בהצלחה! אפשר להתחבר עכשיו");
+    closeForgotPasswordModal();
+    openAuthModal("login");
+    document.getElementById("loginPhone").value = phone;
+  }catch(e){
+    statusEl.textContent = "שגיאה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+function openOtpLoginModal(){
+  document.getElementById("otpPhone").value = document.getElementById("loginPhone").value || "";
+  document.getElementById("otpCode").value = "";
+  document.getElementById("otpStep1").classList.remove("hidden");
+  document.getElementById("otpStep2").classList.add("hidden");
+  document.getElementById("otpStatus").textContent = "";
+  closeAuthModal();
+  document.getElementById("otpLoginModal").classList.remove("hidden");
+}
+function closeOtpLoginModal(){ document.getElementById("otpLoginModal").classList.add("hidden"); }
+
+async function submitOtpLoginRequest(){
+  const phone = document.getElementById("otpPhone").value.trim();
+  const statusEl = document.getElementById("otpStatus");
+  if(!phone){ statusEl.textContent = "נא להזין מספר טלפון"; statusEl.className = "status error"; return; }
+  statusEl.textContent = "שולח קוד...";
+  statusEl.className = "status";
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/request_login_otp", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: phone })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "שגיאה, נסה שוב";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "";
+    document.getElementById("otpStep1").classList.add("hidden");
+    document.getElementById("otpStep2").classList.remove("hidden");
+  }catch(e){
+    statusEl.textContent = "שגיאה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+async function submitOtpLoginVerify(){
+  const phone = document.getElementById("otpPhone").value.trim();
+  const code = document.getElementById("otpCode").value.trim();
+  const statusEl = document.getElementById("otpStatus");
+  if(!code){ statusEl.textContent = "נא להזין את הקוד"; statusEl.className = "status error"; return; }
+  statusEl.textContent = "מתחבר...";
+  statusEl.className = "status";
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/login_with_otp", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: phone, p_code: code })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "שגיאה, נסה שוב";
+      statusEl.className = "status error";
+      return;
+    }
+    currentCustomer = result.customer;
+    localStorage.setItem("ggd_customer", JSON.stringify(currentCustomer));
+    closeOtpLoginModal();
+    renderAccountBar();
+    checkRebookOffer();
+  }catch(e){
+    statusEl.textContent = "שגיאה, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+function customerLogout(){
+  localStorage.removeItem("ggd_customer");
+  currentCustomer = null;
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("phone").disabled = false;
+  renderAccountBar();
+  const card = document.getElementById("rebookCard");
+  card.classList.add("hidden");
+  card.innerHTML = "";
+}
+
+async function showMyBookings(){
+  if(!currentCustomer){
+    alert("צריך להתחבר לחשבון כדי לראות את התורים שלך");
+    openAuthModal("login");
+    return;
+  }
+  if(!currentCustomer.session_token){
+    alert("החשבון שלך התחבר לפני עדכון האתר - יש להתנתק ולהתחבר מחדש כדי לראות את התורים שלך");
+    customerLogout();
+    openAuthModal("login");
+    return;
+  }
+  document.getElementById("booking").classList.add("hidden");
+  const success = document.getElementById("success");
+  success.classList.remove("hidden");
+  document.getElementById("successTitle").textContent = "התורים שלי";
+  const listEl = document.getElementById("myBookingsList");
+  const statusEl = document.getElementById("myBookingsStatus");
+  listEl.innerHTML = '<div class="loading">טוען...</div>';
+  statusEl.textContent = "";
+
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/get_my_bookings", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token })
+    });
+    if(!result || result.success === false){
+      listEl.innerHTML = "";
+      statusEl.textContent = (result && result.message) || "יש להתחבר מחדש";
+      statusEl.className = "status error";
+      return;
+    }
+    renderBookingsList(result.bookings || []);
+  }catch(e){
+    listEl.innerHTML = "";
+    statusEl.textContent = "שגיאה בטעינת התורים, נסה שוב";
+    statusEl.className = "status error";
+  }
+  success.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderBookingsList(bookings){
+  const listEl = document.getElementById("myBookingsList");
+  if(!bookings.length){
+    listEl.innerHTML = '<div class="status">אין לך תורים קרובים</div>';
+    return;
+  }
+  listEl.innerHTML = "";
+  bookings.forEach(b => {
+    const box = document.createElement("div");
+    box.className = "summary";
+    box.style.textAlign = "right";
+    const dateStr = formatDate(b.booking_date);
+    const timeStr = String(b.booking_time).slice(0,5);
+    box.innerHTML = `
+      <strong>${escapeHtml(b.service_name || "")}</strong><br>
+      ${dateStr}<br>
+      שעה: <strong>${escapeHtml(timeStr)}</strong><br>
+      מחיר: ₪${Number(b.price || 0).toFixed(0)}
+      ${bookingStatusBadge(b.status)}
+      ${renderCalendarButtons(b)}
+      <div style="margin-top:10px;"></div>
+    `;
+    const btn = document.createElement("button");
+    btn.style.margin = "0";
+    if(b.can_cancel){
+      btn.textContent = "ביטול תור";
+      btn.style.background = "#3a1515";
+      btn.style.color = "#ff8a8a";
+      btn.onclick = () => cancelBooking(b.id);
+    } else {
+      btn.textContent = "לא ניתן לבטל (פחות משעה לתור)";
+      btn.disabled = true;
+      btn.style.background = "#2a2a2a";
+      btn.style.color = "#777";
+      btn.style.cursor = "not-allowed";
+    }
+    box.appendChild(btn);
+    listEl.appendChild(box);
+  });
+}
+
+async function cancelBooking(bookingId){
+  if(!currentCustomer) return;
+  if(!confirm("לבטל את התור?")) return;
+  const statusEl = document.getElementById("myBookingsStatus");
+  statusEl.textContent = "מבטל...";
+  statusEl.className = "status";
+
+  try{
+    const result = await supabaseFetch("/rest/v1/rpc/cancel_booking_for_customer", {
+      method: "POST",
+      body: JSON.stringify({ p_phone: currentCustomer.phone, p_session_token: currentCustomer.session_token, p_booking_id: bookingId })
+    });
+    if(!result || result.success === false){
+      statusEl.textContent = (result && result.message) || "לא ניתן לבטל את התור";
+      statusEl.className = "status error";
+      return;
+    }
+    statusEl.textContent = "";
+    await showMyBookings();
+  }catch(e){
+    statusEl.textContent = "שגיאה בביטול, נסה שוב";
+    statusEl.className = "status error";
+  }
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if(!e.target.closest('[id^="calmenu-"]') && e.target.getAttribute("onclick") === null){
+    document.querySelectorAll('[id^="calmenu-"]').forEach(el => el.classList.add("hidden"));
+  }
+});
+</script>
+</body>
+</html>
