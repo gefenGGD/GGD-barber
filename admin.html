@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GGD Admin</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;color:#fff;font-family:Arial,sans-serif;min-height:100vh;background-color:#0c0c0d;background-image:url('scissors-watermark.webp'),repeating-linear-gradient(135deg,rgba(255,255,255,0.035) 0px,rgba(255,255,255,0.035) 1px,transparent 1px,transparent 50px),radial-gradient(ellipse at center,rgba(0,0,0,0) 0%,rgba(0,0,0,0.6) 100%);background-repeat:no-repeat,repeat,no-repeat;background-position:bottom left,0 0,center;background-size:320px auto,auto,100% 100%;}
+.container{width:min(900px,calc(100% - 24px));margin:25px auto;padding-bottom:50px;}
+.logo{text-align:center;font-size:42px;font-weight:900;letter-spacing:10px;}
+.subtitle{text-align:center;color:#888;letter-spacing:4px;margin:5px 0 30px;}
+.card{background:#151515;border:1px solid #2c2c2c;border-radius:20px;padding:20px;margin-bottom:16px;}
+h1,h2{margin-top:0;}
+button{width:100%;padding:14px;border:0;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px;}
+.refresh{background:#fff;color:#000;}
+.logout{background:#242424;color:#fff;}
+.delete{background:#9e2222;color:#fff;}
+input{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;}
+.status{text-align:center;color:#aaa;margin-top:12px;}
+.error{color:#ff6666;}
+.success{color:#67e39a;}
+.hidden{display:none!important;}
+.filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:15px;}
+.filter{background:#202020;color:#aaa;border:1px solid #333;}
+.filter.active{background:#fff;color:#000;}
+.row{display:flex;justify-content:space-between;gap:15px;padding:8px 0;border-bottom:1px solid #252525;}
+.row:last-child{border-bottom:0;}
+.label{color:#888;}
+.value{font-weight:bold;text-align:left;}
+.phone{color:#fff;text-decoration:none;}
+.empty{text-align:center;color:#777;padding:25px 10px;}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;}
+.topbar .brand-mini{font-weight:900;letter-spacing:2px;font-size:18px;}
+.topbar-actions{display:flex;gap:8px;}
+.topbar-actions button{width:auto;padding:10px 14px;margin:0;font-size:13px;}
+.tabs{display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{flex:0 0 auto;width:auto;padding:11px 18px;border-radius:12px;background:#151515;color:#999;border:1px solid #2c2c2c;font-weight:bold;white-space:nowrap;font-size:14px;margin:0;}
+.tab-btn.active{background:#fff;color:#000;border-color:#fff;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.dates{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.dates::-webkit-scrollbar{display:none;}
+.date-cell{flex:0 0 auto;width:58px;text-align:center;background:#101010;border:1px solid #303030;border-radius:12px;padding:10px 4px;cursor:pointer;}
+.date-cell.selected{background:#fff;color:#000;}
+.date-cell .day{font-size:11px;color:#999;}
+.date-cell.selected .day{color:#8a8a8a;}
+.date-cell .num{font-size:15px;font-weight:800;margin-top:2px;}
+.date-dot{width:5px;height:5px;border-radius:50%;background:#67e39a;margin:4px auto 0;}
+.date-cell.selected .date-dot{background:#000;}
+.calendar-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #2c2c2c;}
+.calendar-table{width:100%;border-collapse:collapse;font-size:13px;}
+.calendar-table th{background:#1c1c1c;color:#999;padding:10px 8px;text-align:right;border-bottom:1px solid #303030;white-space:nowrap;}
+.calendar-table td{padding:10px 8px;border-bottom:1px solid #1c1c1c;white-space:nowrap;}
+.calendar-table tr:last-child td{border-bottom:0;}
+#messagesUnreadBadge{display:inline-block;background:#e33;color:#fff;border-radius:10px;font-size:11px;padding:1px 7px;margin-right:5px;font-weight:bold;}
+.msg-card{background:#101010;border:1px solid #303030;border-radius:14px;padding:12px;margin-bottom:8px;}
+.msg-card.unread{border-color:#67e39a;}
+button{transition:transform .1s ease;}
+button:active:not(:disabled){transform:scale(0.97);}
+.date-cell,.tab-btn{transition:transform .1s ease, background .15s ease;}
+.date-cell:active,.tab-btn:active{transform:scale(0.96);}
+@keyframes skeletonPulse{0%{opacity:.5;}50%{opacity:1;}100%{opacity:.5;}}
+.skel{background:#1c1c1c;border-radius:8px;animation:skeletonPulse 1.3s ease-in-out infinite;}
+.skel-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1c1c1c;}
+.skel-row .skel{height:13px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-box{background:#151515;border:1px solid #2c2c2c;border-radius:20px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;}
+.modal-box h2{margin-top:0;}
+select{width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:bold;margin-top:4px;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">GGD</div>
+  <div class="subtitle">BARBER • ADMIN</div>
+
+  <div id="loginCard" class="card">
+    <h2>🔐 כניסת מנהל</h2>
+    <input id="email" type="email" placeholder="אימייל" autocomplete="email">
+    <input id="password" type="password" placeholder="סיסמה" autocomplete="current-password">
+    <button onclick="login()">כניסה</button>
+    <div id="loginStatus" class="status"></div>
+  </div>
+
+  <div id="adminPanel" class="hidden">
+    <div class="topbar">
+      <div class="brand-mini">GGD ADMIN</div>
+      <div class="topbar-actions">
+        <button class="refresh" onclick="loadAllData()">🔄 רענן</button>
+        <button class="logout" onclick="logout()">יציאה</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button id="tabbtn-calendar" class="tab-btn active" onclick="switchTab('calendar')">📊 סקירה</button>
+      <button id="tabbtn-bookings" class="tab-btn" onclick="switchTab('bookings')">📅 טבלת תורים</button>
+      <button id="tabbtn-waitlist" class="tab-btn" onclick="switchTab('waitlist')">📋 המתנה</button>
+      <button id="tabbtn-blocking" class="tab-btn" onclick="switchTab('blocking')">🚫 חסימות</button>
+      <button id="tabbtn-messages" class="tab-btn" onclick="switchTab('messages')">💬 הודעות<span id="messagesUnreadBadge" class="hidden"></span></button>
+      <button id="tabbtn-customers" class="tab-btn" onclick="switchTab('customers')">👥 לקוחות</button>
+      <button id="tabbtn-gallery" class="tab-btn" onclick="switchTab('gallery')">🖼️ גלריה</button>
+      <button id="tabbtn-services" class="tab-btn" onclick="switchTab('services')">💈 שירותים</button>
+    </div>
+
+    <div id="tab-calendar" class="tab-panel active">
+      <div class="card" id="dashboardCard">
+        <h2>🏠 סקירה יומית</h2>
+        <div id="dashboardSummary">
+          <div class="skel-row"><div class="skel" style="width:40%;"></div><div class="skel" style="width:15%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:35%;"></div><div class="skel" style="width:25%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:45%;"></div><div class="skel" style="width:15%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:38%;"></div><div class="skel" style="width:15%;"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>📊 ביקורים באתר</h2>
+        <div id="visitStats">
+          <div class="skel-row"><div class="skel" style="width:40%;"></div><div class="skel" style="width:15%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:35%;"></div><div class="skel" style="width:25%;"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>🌟 לקוחות VIP</h2>
+        <div id="vipList">
+          <div class="skel-row"><div class="skel" style="width:50%;"></div><div class="skel" style="width:30%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:45%;"></div><div class="skel" style="width:30%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:40%;"></div><div class="skel" style="width:30%;"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>⭐ קישור לביקורת בגוגל</h2>
+        <p style="color:#888;font-size:13px;">ברגע שיהיה לך Google Business Profile, תדביק כאן את קישור הביקורת - ואז לקוחות יקבלו בקשה אוטומטית לביקורת שעה-שלוש אחרי התור.</p>
+        <input id="googleReviewUrl" type="text" placeholder="https://g.page/r/....../review">
+        <button class="refresh" onclick="saveGoogleReviewUrl()">💾 שמירה</button>
+        <div id="googleReviewStatus" class="status"></div>
+      </div>
+      <div class="card">
+        <h2>🔒 חסימת לקוחות no-show</h2>
+        <p style="color:#888;font-size:13px;">אחרי כמה תורים שלא הגיע אליהם הלקוח, הוא נחסם מהזמנה מקוונת. באתר תוצג לו הודעה שעליו להגיע ולשלם על התור שפספס, או להתקשר למספרה כדי לשחרר את החסימה (שחרור בפועל דרך "🔓 בטל חסימה" בטאב לקוחות).</p>
+        <label style="font-size:12px;color:#999;">כמות no-show עד חסימה</label>
+        <input id="noShowThreshold" type="number" min="1" style="margin-bottom:10px;">
+        <button class="refresh" onclick="saveNoShowSettings()">💾 שמירה</button>
+        <div id="noShowSettingsStatus" class="status"></div>
+      </div>
+      <div class="card">
+        <h2>📢 הודעה מתפרצת ללקוחות</h2>
+        <p style="color:#888;font-size:13px;">כשמופעל, ההודעה תיפתח בחלון קופץ לכל לקוח מיד עם הכניסה לאתר. שימושי לעדכונים חשובים (שינוי שעות, סגירה זמנית וכו').</p>
+        <label style="display:flex;align-items:center;gap:8px;color:#ccc;font-size:14px;margin-bottom:10px;">
+          <input id="announcementEnabled" type="checkbox" style="width:auto;margin:0;">
+          הפעל הודעה מתפרצת
+        </label>
+        <textarea id="announcementText" placeholder="תוכן ההודעה..." style="width:100%;padding:14px;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:15px;min-height:80px;"></textarea>
+        <button class="refresh" onclick="saveAnnouncement()">💾 שמירה</button>
+        <div id="announcementStatus" class="status"></div>
+      </div>
+      <div class="card">
+        <h2>🎁 חבר מביא חבר - קופונים</h2>
+        <p style="color:#888;font-size:13px;">קופון נוצר אוטומטית ללקוח שהביא חבר, ברגע שהחבר קובע תור ראשון. אם החבר מבטל, הקופון מתבטל אוטומטית; אם קובע תור חדש, הקופון חוזר להיות פעיל.</p>
+        <div id="couponsList"><div class="empty">טוען...</div></div>
+      </div>
+    </div>
+
+    <div id="tab-bookings" class="tab-panel">
+      <div class="card">
+        <h1>📅 טבלת תורים</h1>
+        <button class="refresh" style="margin-bottom:14px;" onclick="openManualBookingModal()">➕ הוספת תור ידני</button>
+        <div id="calendarDates" class="dates"></div>
+        <div id="calendarDayLabel" style="color:#999;font-size:14px;margin:14px 0 10px;"></div>
+        <div id="calendarTable">
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:55%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:40%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:60%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:35%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-waitlist" class="tab-panel">
+      <div class="card">
+        <h1>📋 רשימת המתנה</h1>
+        <div id="waitlistDates" class="dates"></div>
+        <div id="waitlistDayLabel" style="color:#999;font-size:14px;margin:14px 0 10px;"></div>
+        <div id="waitlistTable">
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:50%;"></div></div>
+          <div class="skel-row"><div class="skel" style="width:15%;"></div><div class="skel" style="width:40%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-messages" class="tab-panel">
+      <div class="card">
+        <h2>🤖 חוקי בוט (מילות מפתח)</h2>
+        <p style="color:#888;font-size:13px;">אם הודעת לקוח מכילה אחת ממילות המפתח, הבוט יענה מיד את התשובה הקבועה - אחרת ההודעה תחכה לך.</p>
+        <input id="botKeywords" type="text" placeholder="מילות מפתח, מופרדות בפסיקים (למשל: שעות,פתוח)">
+        <textarea id="botResponse" placeholder="התשובה הקבועה שהבוט ישלח..." style="width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;min-height:70px;"></textarea>
+        <button class="refresh" onclick="addBotRule()">➕ הוספת חוק</button>
+        <div id="botRuleStatus" class="status"></div>
+        <div id="bot-rules-list" style="margin-top:15px;">טוען חוקים...</div>
+      </div>
+      <div class="card">
+        <h2>💬 הודעות מלקוחות</h2>
+        <div id="messages-list">טוען הודעות...</div>
+      </div>
+    </div>
+
+    <div id="tab-blocking" class="tab-panel">
+      <div class="card">
+        <h2>🚫 חסימת תאריך שלם</h2>
+        <p style="color:#888;font-size:13px;">למשל חופשה או חג - המספרה תיסגר לגמרי באותו יום.</p>
+        <label style="display:block;color:#888;font-size:13px;margin-top:6px;">תאריך לחסימה</label>
+        <input id="blockDateInput" type="date">
+        <input id="blockDateReason" type="text" placeholder="סיבה (אופציונלי)">
+        <button class="refresh" onclick="addBlockedDate()">➕ חסימת התאריך</button>
+        <div id="blockDateStatus" class="status"></div>
+        <div id="blocked-dates-list" style="margin-top:15px;">טוען...</div>
+      </div>
+      <div class="card">
+        <h2>🕐 חסימת שעות בתאריך מסוים</h2>
+        <p style="color:#888;font-size:13px;">למשל תור אישי או פגישה - רק השעות האלה ייחסמו, שאר היום פנוי.</p>
+        <label style="display:block;color:#888;font-size:13px;margin-top:6px;">תאריך</label>
+        <input id="blockRangeDate" type="date">
+        <div style="display:flex;gap:8px;">
+          <input id="blockRangeStart" type="time" style="flex:1;">
+          <input id="blockRangeEnd" type="time" style="flex:1;">
+        </div>
+        <input id="blockRangeReason" type="text" placeholder="סיבה (אופציונלי)">
+        <button class="refresh" onclick="addBlockedRange()">➕ חסימת השעות</button>
+        <div id="blockRangeStatus" class="status"></div>
+        <div id="blocked-ranges-list" style="margin-top:15px;">טוען...</div>
+      </div>
+    </div>
+
+    <div id="tab-customers" class="tab-panel">
+      <div class="card">
+        <h2>👥 לקוחות רשומים</h2>
+        <div id="customers-list">טוען לקוחות...</div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>💬 שליחת הודעת SMS</h2>
+        <div class="filters" style="grid-template-columns:1fr 1fr;">
+          <button id="smsTargetSingleBtn" class="filter active" onclick="setSmsTarget('single')">לקוח בודד</button>
+          <button id="smsTargetAllBtn" class="filter" onclick="setSmsTarget('all')">כל הלקוחות</button>
+        </div>
+        <input id="smsPhone" type="tel" placeholder="מספר טלפון של הלקוח">
+        <textarea id="smsMessage" placeholder="תוכן ההודעה..." style="width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;min-height:100px;"></textarea>
+        <button class="refresh" onclick="sendCustomSms()">📤 שלח הודעה</button>
+        <div id="smsStatus" class="status"></div>
+      </div>
+    </div>
+
+    <div id="tab-gallery" class="tab-panel">
+      <div class="card">
+        <h2>🖼️ גלריה (סטוריז)</h2>
+        <div style="background:#101010;border:1px solid #303030;border-radius:14px;padding:14px;margin-bottom:16px;">
+          <div style="color:#ccc;font-size:14px;margin-bottom:8px;">🏷️ לוגו המותג (יופיע על כל הסטוריז)</div>
+          <div id="brandLogoPreview" style="margin-bottom:8px;"></div>
+          <input id="brandLogoFile" type="file" accept="image/*">
+          <button class="refresh" onclick="uploadBrandLogo()">💾 שמור לוגו</button>
+          <div id="brandLogoStatus" class="status"></div>
+        </div>
+        <input id="galleryFile" type="file" accept="image/*,video/*" onchange="onGalleryFileChange()">
+        <input id="galleryThumb" type="file" accept="image/*" class="hidden" placeholder="תמונת שער לסרטון">
+        <div id="galleryThumbLabel" class="hidden" style="color:#999;font-size:13px;margin-top:4px;">☝️ בחר תמונת שער שתוצג בעיגול (מומלץ - תמונה של התוצאה הסופית)</div>
+        <input id="galleryCaption" type="text" placeholder="כיתוב (אופציונלי)">
+        <button class="refresh" onclick="uploadGalleryImage()">⬆️ העלה תמונה/סרטון</button>
+        <div id="galleryUploadStatus" class="status"></div>
+        <div id="gallery-list" style="margin-top:15px;">טוען גלריה...</div>
+      </div>
+      <div class="card">
+        <h2>⭐ הביקורות שלכם (תמונות ביקורות מלקוחות)</h2>
+        <p style="color:#888;font-size:13px;">תמונות שתעלה כאן (צילומי מסך של הודעות/ביקורות מלקוחות) יופיעו באתר תחת הכותרת "⭐ הביקורות שלכם".</p>
+        <input id="reviewFile" type="file" accept="image/*">
+        <input id="reviewCaption" type="text" placeholder="כיתוב (אופציונלי)">
+        <button class="refresh" onclick="uploadReviewImage()">⬆️ העלה תמונת ביקורת</button>
+        <div id="reviewUploadStatus" class="status"></div>
+        <div id="review-list" style="margin-top:15px;">טוען ביקורות...</div>
+      </div>
+      <div class="card">
+        <h2>🛍️ מוצרים (מוצגים כשורת כרטיסים בעמוד הראשי)</h2>
+        <input id="productFile" type="file" accept="image/*">
+        <input id="productName" type="text" placeholder="שם המוצר (למשל: חימר עיצוב מאט)">
+        <div style="display:flex;gap:8px;">
+          <input id="productPrice" type="number" min="0" placeholder="מחיר (₪)" style="flex:1;">
+          <input id="productOriginalPrice" type="number" min="0" placeholder="מחיר לפני הנחה (אופציונלי)" style="flex:1;">
+        </div>
+        <textarea id="productDescription" placeholder="תיאור קצר (אופציונלי)" style="width:100%;padding:14px;margin:6px 0;border-radius:12px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:16px;min-height:70px;"></textarea>
+        <button class="refresh" onclick="uploadProduct()">⬆️ הוסף מוצר</button>
+        <div id="productUploadStatus" class="status"></div>
+        <div id="products-list" style="margin-top:15px;">טוען מוצרים...</div>
+      </div>
+    </div>
+
+    <div id="tab-services" class="tab-panel">
+      <div class="card">
+        <h2>💈 ניהול שירותים</h2>
+        <div style="background:#101010;border:1px solid #2c2c2c;border-radius:14px;padding:15px;margin-bottom:16px;">
+          <h3 style="margin-top:0;font-size:15px;">➕ הוספת שירות חדש</h3>
+          <input id="newServiceName" type="text" placeholder="שם השירות">
+          <input id="newServicePrice" type="number" placeholder="מחיר (₪)">
+          <input id="newServiceDuration" type="number" placeholder="משך בדקות">
+          <button class="refresh" onclick="addNewService()">➕ הוסף שירות</button>
+          <div id="newServiceStatus" class="status"></div>
+        </div>
+        <div id="service-list">טוען שירותים...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="manualBookingModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h2>➕ הוספת תור ידני</h2>
+    <input id="manualBookingName" type="text" placeholder="שם הלקוח">
+    <input id="manualBookingPhone" type="tel" placeholder="טלפון">
+    <select id="manualBookingService"><option value="">בחר שירות...</option></select>
+    <input id="manualBookingDate" type="date">
+    <input id="manualBookingTime" type="time">
+    <button class="refresh" onclick="submitManualBooking()">✅ הוסף תור</button>
+    <button class="logout" onclick="closeManualBookingModal()">ביטול</button>
+    <div id="manualBookingStatus" class="status"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://cgvyizfjizbnevueasbj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kQ5lsDDPA1FaXH0szLBlyw_H2U9qrQ9";
+
+let allBookings = [];
+let allWaitlist = [];
+let allCustomersCache = [];
+let galleryItemsCache = [];
+let smsTarget = "single";
+let calendarSelectedDate = null;
+let waitlistSelectedDate = null;
+
+function switchTab(name) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  document.getElementById("tabbtn-" + name).classList.add("active");
+}
+
+async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("ggd_refresh_token");
+  if (!refreshToken) return false;
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    if (!response.ok) return false;
+    const data = await response.json();
+    if (!data.access_token) return false;
+    localStorage.setItem("ggd_access_token", data.access_token);
+    localStorage.setItem("ggd_refresh_token", data.refresh_token);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function request(path, options = {}, allowRetry = true) {
+  const token = localStorage.getItem("ggd_access_token");
+  const headers = { "apikey": SUPABASE_KEY, "Content-Type": "application/json", ...(options.headers || {}) };
+  if (token) headers["Authorization"] = "Bearer " + token;
+
+  const response = await fetch(SUPABASE_URL + path, { ...options, headers });
+  const text = await response.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Access token expired - try a silent refresh before giving up.
+      if (allowRetry) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) return request(path, options, false);
+      }
+      logout();
+      throw new Error("פג תוקף ההתחברות, אנא התחבר מחדש.");
+    }
+    throw new Error(response.status + " " + (data?.message || text));
+  }
+  return data;
+}
+
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const status = document.getElementById("loginStatus");
+
+  if (!email || !password) { status.textContent = "נא למלא אימייל וסיסמה"; status.className = "status error"; return; }
+  status.textContent = "מתחבר...";
+  status.className = "status";
+
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error_description || data.message || "שגיאת התחברות");
+
+    localStorage.setItem("ggd_access_token", data.access_token);
+    localStorage.setItem("ggd_refresh_token", data.refresh_token);
+    showAdmin();
+  } catch (e) {
+    status.textContent = "אימייל או סיסמה שגויים";
+    status.className = "status error";
+  }
+}
+
+function showAdmin() {
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("adminPanel").classList.remove("hidden");
+  loadAllData();
+}
+
+async function loadAllData() {
+  await Promise.all([loadWorkingHoursAdmin(), loadServicesCache(), loadBlockedDates(), loadBlockedRanges(), loadGoogleReviewUrl(), loadNoShowSettings(), loadAnnouncementSettings(), loadCoupons()]);
+  await loadBookings();
+  await Promise.all([loadWaitlist(), loadServiceManager(), loadGallery(), loadReviewImages(), loadProducts(), loadCustomers(), loadBrandLogo(), loadMessages(), loadBotRules(), loadVisitStats()]);
+}
+
+async function loadVisitStats() {
+  const box = document.getElementById("visitStats");
+  try {
+    const stats = await request("/rest/v1/rpc/get_visit_stats", { method: "POST", body: JSON.stringify({}) });
+    box.innerHTML = `
+      <div class="row"><span class="label">👁️ ביקורים היום</span><span class="value">${stats.today_visits} (${stats.today_unique} ייחודיים)</span></div>
+      <div class="row"><span class="label">📅 7 ימים אחרונים</span><span class="value">${stats.week_visits} (${stats.week_unique} ייחודיים)</span></div>
+      <div class="row"><span class="label">🗓️ 30 יום אחרונים</span><span class="value">${stats.month_visits} (${stats.month_unique} ייחודיים)</span></div>
+    `;
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#888;">אין עדיין נתוני ביקורים</div>`;
+  }
+}
+
+let workingHours = [];
+let blockedDatesCache = [];
+let blockedRangesCache = [];
+async function loadWorkingHoursAdmin() {
+  try {
+    workingHours = await request("/rest/v1/working_hours?select=*&is_open=eq.true");
+    if (!Array.isArray(workingHours)) workingHours = [];
+  } catch (e) {
+    workingHours = [];
+  }
+}
+
+let servicesCache = [];
+async function loadServicesCache() {
+  try {
+    servicesCache = await request("/rest/v1/services?select=id,name,price,duration_minutes,active");
+    if (!Array.isArray(servicesCache)) servicesCache = [];
+  } catch (e) {
+    servicesCache = [];
+  }
+}
+function getServiceInfo(serviceId) {
+  return servicesCache.find(s => Number(s.id) === Number(serviceId));
+}
+
+function getUpcomingBusinessDates() {
+  const dates = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (let i = 0, shown = 0; shown < 6 && i < 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const hours = workingHours.find(x => Number(x.day_of_week) === d.getDay());
+    if (!hours || !hours.is_open) continue;
+    shown++;
+    dates.push(d);
+  }
+  return dates;
+}
+
+async function loadBookings() {
+  try {
+    allBookings = await request("/rest/v1/bookings?select=*&order=booking_date.asc,booking_time.asc");
+    if (!Array.isArray(allBookings)) allBookings = [];
+  } catch (e) {
+    allBookings = [];
+  }
+  if (!calendarSelectedDate) calendarSelectedDate = localDateString(getUpcomingBusinessDates()[0] || new Date());
+  renderCalendarDates();
+  renderCalendarTable();
+  renderDashboardSummary();
+  renderVipList();
+  if (waitlistSelectedDate) renderWaitlistTable();
+}
+
+function localDateString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+function getToday() { return localDateString(new Date()); }
+
+const DAY_NAMES = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+
+function timeToMinutes(t) { const [h, m] = String(t).slice(0,5).split(":").map(Number); return h * 60 + m; }
+function minutesToTime(m) { return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+function generateAllSlots(openTime, closeTime, breakStart, breakEnd, duration) {
+  const result = [];
+  let current = timeToMinutes(openTime);
+  const close = timeToMinutes(closeTime);
+  const breakFrom = breakStart ? timeToMinutes(breakStart) : null;
+  const breakTo = breakEnd ? timeToMinutes(breakEnd) : null;
+  while (current + duration <= close) {
+    const end = current + duration;
+    const overlapsBreak = breakFrom !== null && breakTo !== null && current < breakTo && end > breakFrom;
+    if (!overlapsBreak) result.push(minutesToTime(current));
+    current += duration;
+  }
+  return result;
+}
+
+function renderCalendarDates() {
+  const box = document.getElementById("calendarDates");
+  box.innerHTML = "";
+  const bookingDates = new Set(allBookings.map(b => b.booking_date));
+  getUpcomingBusinessDates().forEach(d => {
+    const iso = localDateString(d);
+    const el = document.createElement("div");
+    el.className = "date-cell" + (iso === calendarSelectedDate ? " selected" : "");
+    el.innerHTML = `
+      <div class="day">${DAY_NAMES[d.getDay()]}</div>
+      <div class="num">${d.getDate()}/${d.getMonth() + 1}</div>
+      ${bookingDates.has(iso) ? '<div class="date-dot"></div>' : ''}
+    `;
+    el.onclick = () => { calendarSelectedDate = iso; renderCalendarDates(); renderCalendarTable(); };
+    box.appendChild(el);
+  });
+}
+
+function bookingStatusBadge(status, noShow) {
+  if (noShow) return `<span class="badge" style="background:#5c2222;color:#ff9d9d;">🚫 לא הגיע</span>`;
+  const map = {
+    confirmed: { icon: "✅", label: "אושר", bg: "#1f4d33", color: "#8ff0bb" },
+    pending: { icon: "⏳", label: "ממתין לאישור", bg: "#4d3f1f", color: "#f0d68f" },
+    cancelled: { icon: "❌", label: "בוטל", bg: "#5c2222", color: "#ff9d9d" },
+    completed: { icon: "🏁", label: "הושלם", bg: "#1f3d4d", color: "#8fd3f0" }
+  };
+  const s = map[status];
+  if (!s) return "";
+  return `<span class="badge" style="background:${s.bg};color:${s.color};">${s.icon} ${s.label}</span>`;
+}
+
+function renderCalendarTable() {
+  const box = document.getElementById("calendarTable");
+  const label = document.getElementById("calendarDayLabel");
+  const dayBookings = allBookings.filter(b => b.booking_date === calendarSelectedDate);
+  const bookingByTime = new Map(dayBookings.map(b => [String(b.booking_time).slice(0,5), b]));
+
+  label.textContent = `${formatDate(calendarSelectedDate)} · ${dayBookings.length} תורים`;
+
+  const blockedWholeDay = blockedDatesCache.find(d => d.blocked_date === calendarSelectedDate);
+  if (blockedWholeDay) {
+    box.innerHTML = `<div class="empty">🚫 היום הזה חסום${blockedWholeDay.reason ? " (" + escapeHtml(blockedWholeDay.reason) + ")" : ""}</div>`;
+    return;
+  }
+
+  const dow = new Date(calendarSelectedDate + "T00:00:00").getDay();
+  const hours = workingHours.find(x => Number(x.day_of_week) === dow);
+  if (!hours) { box.innerHTML = `<div class="empty">המספרה סגורה ביום זה</div>`; return; }
+
+  const dayRanges = blockedRangesCache.filter(r => r.blocked_date === calendarSelectedDate);
+  const isRangeBlocked = (time) => {
+    const mins = timeToMinutes(time);
+    return dayRanges.find(r => mins >= timeToMinutes(r.start_time) && mins < timeToMinutes(r.end_time));
+  };
+
+  const allSlots = generateAllSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
+  // Bookings can now land on times that aren't on the fixed grid (e.g. a 10:20
+  // "bonus" slot opened up by an earlier appointment ending early) - merge
+  // those real booking times into the displayed list so nothing goes missing.
+  const bookingTimes = dayBookings.map(b => String(b.booking_time).slice(0, 5));
+  const allTimes = Array.from(new Set([...allSlots, ...bookingTimes])).sort((a, b) => timeToMinutes(a) - timeToMinutes(b));
+
+  const rows = allTimes.map(time => {
+    const booking = bookingByTime.get(time);
+    if (booking) {
+      const phone = String(booking.phone || "");
+      const svc = getServiceInfo(booking.service_id);
+      const service = (svc && svc.name) || booking.service_name || booking.service || (booking.service_id ? "שירות #" + booking.service_id : "לא צוין");
+      const basePrice = booking.price !== undefined && booking.price !== null ? Number(booking.price) : (svc && svc.price !== undefined && svc.price !== null ? Number(svc.price) : null);
+      const bookingDiscount = Number(booking.discount_percent || 0);
+      const price = basePrice === null ? "-" : (bookingDiscount > 0
+        ? `<s style="color:#888;">₪${basePrice.toFixed(0)}</s> ₪${(basePrice * (1 - bookingDiscount / 100)).toFixed(0)}`
+        : "₪" + basePrice);
+      const isDimmed = booking.no_show || booking.status === "cancelled";
+      return `
+        <tr${isDimmed ? ' style="opacity:0.55;"' : ""}>
+          <td><strong>${time}</strong></td>
+          <td>${escapeHtml(booking.customer_name || "")}<br>${bookingStatusBadge(booking.status, booking.no_show)}</td>
+          <td>${phone ? `<a class="phone" href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a>` : "-"}</td>
+          <td>${escapeHtml(service)}</td>
+          <td>${price}</td>
+          <td style="white-space:nowrap;">
+            ${booking.no_show ? "" : `<button style="width:auto;padding:6px 8px;margin:0 4px 0 0;font-size:11px;background:#9e6a22;color:#fff;" onclick="markNoShow(${Number(booking.id)})" title="לא הגיע">❌</button>`}
+            ${booking.status === "cancelled" ? "" : `<button style="width:auto;padding:6px 10px;margin:0;font-size:12px;background:#7a2a2a;color:#fff;" onclick="cancelBookingWithSms(${Number(booking.id)})" title="ביטול + הודעת SMS ללקוח">📵 ביטול</button>`}
+          </td>
+        </tr>`;
+    }
+    const blockedRange = isRangeBlocked(time);
+    if (blockedRange) {
+      return `
+        <tr style="opacity:0.6;">
+          <td><strong>${time}</strong></td>
+          <td colspan="4" style="color:#e39a67;">🚫 חסום${blockedRange.reason ? " - " + escapeHtml(blockedRange.reason) : ""}</td>
+          <td></td>
+        </tr>`;
+    }
+    return `
+      <tr style="opacity:0.55;">
+        <td><strong>${time}</strong></td>
+        <td colspan="4" style="color:#67e39a;">פנוי</td>
+        <td></td>
+      </tr>`;
+  }).join("");
+
+  box.innerHTML = `
+    <div class="calendar-table-wrap">
+      <table class="calendar-table">
+        <thead><tr><th>שעה</th><th>לקוח</th><th>טלפון</th><th>שירות</th><th>מחיר</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function openManualBookingModal() {
+  document.getElementById("manualBookingName").value = "";
+  document.getElementById("manualBookingPhone").value = "";
+  document.getElementById("manualBookingDate").value = calendarSelectedDate || getToday();
+  document.getElementById("manualBookingTime").value = "";
+  const status = document.getElementById("manualBookingStatus");
+  status.textContent = "";
+  status.className = "status";
+  const select = document.getElementById("manualBookingService");
+  select.innerHTML = '<option value="">בחר שירות...</option>' +
+    servicesCache.filter(s => s.active !== false).map(s => `<option value="${s.id}">${escapeHtml(s.name)} - ₪${s.price}</option>`).join("");
+  document.getElementById("manualBookingModal").classList.remove("hidden");
+}
+
+function closeManualBookingModal() {
+  document.getElementById("manualBookingModal").classList.add("hidden");
+}
+
+async function submitManualBooking() {
+  const status = document.getElementById("manualBookingStatus");
+  const name = document.getElementById("manualBookingName").value.trim();
+  const phone = document.getElementById("manualBookingPhone").value.trim();
+  const serviceId = document.getElementById("manualBookingService").value;
+  const date = document.getElementById("manualBookingDate").value;
+  const time = document.getElementById("manualBookingTime").value;
+
+  if (!name || !phone || !serviceId || !date || !time) {
+    status.textContent = "נא למלא את כל השדות";
+    status.className = "status error";
+    return;
+  }
+
+  const service = servicesCache.find(s => Number(s.id) === Number(serviceId));
+  if (!service) { status.textContent = "שירות לא נמצא"; status.className = "status error"; return; }
+
+  const duration = Number(service.duration_minutes || 30);
+  const timeFull = time.length === 5 ? time + ":00" : time;
+  const startMin = timeToMinutes(timeFull);
+  const endMin = startMin + duration;
+
+  const conflict = allBookings.find(b =>
+    b.booking_date === date && b.status !== "cancelled" &&
+    startMin < (timeToMinutes(b.booking_time) + Number(b.duration_minutes || 30)) &&
+    endMin > timeToMinutes(b.booking_time)
+  );
+  if (conflict && !confirm(`יש כבר תור בשעה הזו (${conflict.customer_name || "לקוח"}). להוסיף בכל זאת?`)) return;
+
+  status.textContent = "מוסיף תור...";
+  status.className = "status";
+  try {
+    await request("/rest/v1/bookings", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        service_id: Number(serviceId),
+        customer_name: name,
+        phone: phone,
+        booking_date: date,
+        booking_time: timeFull,
+        duration_minutes: duration,
+        price: service.price,
+        status: "confirmed",
+        no_show: false
+      })
+    });
+    closeManualBookingModal();
+    calendarSelectedDate = date;
+    await loadBookings();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהוספת התור";
+    status.className = "status error";
+  }
+}
+
+async function loadWaitlist() {
+  try {
+    allWaitlist = await request("/rest/v1/waitlist?select=*&order=booking_date.asc,created_at.desc");
+    if (!Array.isArray(allWaitlist)) allWaitlist = [];
+  } catch (e) {
+    allWaitlist = [];
+  }
+  if (!waitlistSelectedDate) waitlistSelectedDate = localDateString(getUpcomingBusinessDates()[0] || new Date());
+  renderWaitlistDates();
+  renderWaitlistTable();
+}
+
+function renderDashboardSummary() {
+  const box = document.getElementById("dashboardSummary");
+  const todayStr = getToday();
+  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+
+  const priceOf = b => {
+    const base = (b.price !== undefined && b.price !== null) ? Number(b.price) : ((getServiceInfo(b.service_id) || {}).price || 0);
+    const discount = Number(b.discount_percent || 0);
+    return discount > 0 ? base * (1 - discount / 100) : base;
+  };
+
+  const todays = allBookings.filter(b => b.booking_date === todayStr && !b.no_show && b.status !== "cancelled");
+  const upcoming = todays.filter(b => timeToMinutes(b.booking_time) >= nowMinutes).sort((a,b) => String(a.booking_time).localeCompare(String(b.booking_time)));
+  const next = upcoming[0];
+  const todayRevenue = todays.reduce((sum,b) => sum + priceOf(b), 0);
+
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 6);
+  const weekAgoStr = localDateString(weekAgo);
+  const weekRevenue = allBookings.filter(b => !b.no_show && b.status !== "cancelled" && b.booking_date >= weekAgoStr && b.booking_date <= todayStr).reduce((sum,b) => sum + priceOf(b), 0);
+
+  const monthPrefix = todayStr.slice(0, 7);
+  const monthRevenue = allBookings.filter(b => !b.no_show && b.status !== "cancelled" && b.booking_date.startsWith(monthPrefix)).reduce((sum,b) => sum + priceOf(b), 0);
+
+  const thirtyAgoStr = localDateString(new Date(Date.now() - 30*24*60*60*1000));
+  const recentBookings = allBookings.filter(b => !b.no_show && b.status !== "cancelled" && b.booking_date >= thirtyAgoStr && b.booking_date <= todayStr);
+
+  const serviceCounts = {};
+  recentBookings.forEach(b => {
+    const svc = getServiceInfo(b.service_id);
+    const name = (svc && svc.name) || b.service_name || "לא ידוע";
+    serviceCounts[name] = (serviceCounts[name] || 0) + 1;
+  });
+  const topService = Object.entries(serviceCounts).sort((a,b) => b[1]-a[1])[0];
+
+  const dayCounts = [0,0,0,0,0,0,0];
+  recentBookings.forEach(b => { dayCounts[new Date(b.booking_date + "T00:00:00").getDay()]++; });
+  const maxDayCount = Math.max(...dayCounts);
+  const topDayIndex = maxDayCount > 0 ? dayCounts.indexOf(maxDayCount) : -1;
+
+  box.innerHTML = `
+    <div class="row"><span class="label">📌 תורים היום</span><span class="value">${todays.length}</span></div>
+    <div class="row"><span class="label">⏭️ הבא בתור</span><span class="value">${next ? formatTime(next.booking_time) + " - " + escapeHtml(next.customer_name || "") : "אין"}</span></div>
+    <div class="row"><span class="label">💰 הכנסה היום</span><span class="value">₪${todayRevenue}</span></div>
+    <div class="row"><span class="label">💰 הכנסה 7 ימים אחרונים</span><span class="value">₪${weekRevenue}</span></div>
+    <div class="row"><span class="label">💰 הכנסה החודש</span><span class="value">₪${monthRevenue}</span></div>
+    <div class="row"><span class="label">🔥 השירות הפופולרי (30 יום)</span><span class="value">${topService ? escapeHtml(topService[0]) + " (" + topService[1] + ")" : "-"}</span></div>
+    <div class="row"><span class="label">📊 היום העמוס ביותר (30 יום)</span><span class="value">${topDayIndex >= 0 ? DAY_NAMES[topDayIndex] : "-"}</span></div>
+  `;
+}
+
+function renderVipList() {
+  const box = document.getElementById("vipList");
+  const todayStr = getToday();
+  const counts = {};
+  allBookings.filter(b => !b.no_show && b.status !== "cancelled" && b.booking_date <= todayStr).forEach(b => {
+    if (!counts[b.phone]) counts[b.phone] = { name: b.customer_name, phone: b.phone, count: 0 };
+    counts[b.phone].count++;
+  });
+  const top = Object.values(counts).sort((a,b) => b.count - a.count).slice(0, 5);
+  if (!top.length) { box.innerHTML = `<div class="empty">אין עדיין מספיק היסטוריה</div>`; return; }
+  box.innerHTML = top.map((c, i) => `
+    <div class="row">
+      <span class="label">${i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "⭐"} ${escapeHtml(c.name || "")}</span>
+      <span class="value">${c.count} ביקורים · <a class="phone" href="tel:${escapeHtml(c.phone)}">${escapeHtml(c.phone)}</a></span>
+    </div>`).join("");
+}
+
+async function loadGoogleReviewUrl() {
+  try {
+    const rows = await request("/rest/v1/site_settings?key=eq.google_review_url&select=value");
+    document.getElementById("googleReviewUrl").value = (rows.length && rows[0].value) || "";
+  } catch (e) {}
+}
+
+async function loadNoShowSettings() {
+  try {
+    const rows = await request("/rest/v1/site_settings?key=eq.no_show_block_threshold&select=value");
+    document.getElementById("noShowThreshold").value = (rows.length && rows[0].value) || "2";
+  } catch (e) {}
+}
+
+async function saveNoShowSettings() {
+  const threshold = document.getElementById("noShowThreshold").value.trim() || "2";
+  const status = document.getElementById("noShowSettingsStatus");
+  try {
+    await request("/rest/v1/site_settings", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ key: "no_show_block_threshold", value: threshold })
+    });
+    status.textContent = "נשמר!";
+    status.className = "status success";
+  } catch (e) {
+    status.textContent = "שגיאה בשמירה";
+    status.className = "status error";
+  }
+}
+
+async function saveGoogleReviewUrl() {
+  const value = document.getElementById("googleReviewUrl").value.trim();
+  const status = document.getElementById("googleReviewStatus");
+  try {
+    await request("/rest/v1/site_settings", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ key: "google_review_url", value })
+    });
+    status.textContent = "נשמר!";
+    status.className = "status success";
+  } catch (e) {
+    status.textContent = "שגיאה בשמירה";
+    status.className = "status error";
+  }
+}
+
+async function loadAnnouncementSettings() {
+  try {
+    const rows = await request("/rest/v1/site_settings?key=in.(announcement_enabled,announcement_text)&select=key,value");
+    const map = {};
+    (rows || []).forEach(r => { map[r.key] = r.value; });
+    document.getElementById("announcementEnabled").checked = map.announcement_enabled === "true";
+    document.getElementById("announcementText").value = map.announcement_text || "";
+  } catch (e) {}
+}
+
+async function saveAnnouncement() {
+  const enabled = document.getElementById("announcementEnabled").checked ? "true" : "false";
+  const text = document.getElementById("announcementText").value.trim();
+  const status = document.getElementById("announcementStatus");
+  try {
+    await request("/rest/v1/site_settings", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify([
+        { key: "announcement_enabled", value: enabled },
+        { key: "announcement_text", value: text }
+      ])
+    });
+    status.textContent = "נשמר!";
+    status.className = "status success";
+  } catch (e) {
+    status.textContent = "שגיאה בשמירה";
+    status.className = "status error";
+  }
+}
+
+async function loadCoupons() {
+  const box = document.getElementById("couponsList");
+  try {
+    const [rows, customers] = await Promise.all([
+      request("/rest/v1/coupons?select=*&order=created_at.desc&limit=30"),
+      request("/rest/v1/customers?select=phone,name")
+    ]);
+    if (!rows.length) { box.innerHTML = `<div class="empty">אין עדיין קופונים</div>`; return; }
+    const nameByPhone = {};
+    (customers || []).forEach(c => { nameByPhone[c.phone] = c.name; });
+    const statusLabel = { active: "🟢 פעיל", redeemed: "✅ נוצל", cancelled: "⚪ בוטל" };
+    box.innerHTML = rows.map(c => {
+      const ownerName = nameByPhone[c.owner_phone] ? escapeHtml(nameByPhone[c.owner_phone]) + " · " : "";
+      return `
+      <div class="row">
+        <span class="label">${escapeHtml(c.code)} · ${ownerName}<a class="phone" href="tel:${escapeHtml(c.owner_phone)}">${escapeHtml(c.owner_phone)}</a></span>
+        <span class="value">${statusLabel[c.status] || c.status}</span>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת הקופונים</div>`;
+  }
+}
+
+function renderWaitlistDates() {
+  const box = document.getElementById("waitlistDates");
+  box.innerHTML = "";
+  const waitDates = new Set(allWaitlist.map(w => w.booking_date));
+  getUpcomingBusinessDates().forEach(d => {
+    const iso = localDateString(d);
+    const el = document.createElement("div");
+    el.className = "date-cell" + (iso === waitlistSelectedDate ? " selected" : "");
+    el.innerHTML = `
+      <div class="day">${DAY_NAMES[d.getDay()]}</div>
+      <div class="num">${d.getDate()}/${d.getMonth() + 1}</div>
+      ${waitDates.has(iso) ? '<div class="date-dot"></div>' : ''}
+    `;
+    el.onclick = () => { waitlistSelectedDate = iso; renderWaitlistDates(); renderWaitlistTable(); };
+    box.appendChild(el);
+  });
+}
+
+function renderWaitlistTable() {
+  const box = document.getElementById("waitlistTable");
+  const label = document.getElementById("waitlistDayLabel");
+  const dayItems = allWaitlist.filter(w => w.booking_date === waitlistSelectedDate);
+  const anyTimeItems = dayItems.filter(w => !w.booking_time);
+  const timedItemsByTime = new Map();
+  dayItems.filter(w => w.booking_time).forEach(w => {
+    const t = String(w.booking_time).slice(0,5);
+    if (!timedItemsByTime.has(t)) timedItemsByTime.set(t, []);
+    timedItemsByTime.get(t).push(w);
+  });
+
+  label.textContent = `${formatDate(waitlistSelectedDate)} · ${dayItems.length} ברשימה`;
+
+  const blockedWholeDay = blockedDatesCache.find(d => d.blocked_date === waitlistSelectedDate);
+  if (blockedWholeDay) {
+    box.innerHTML = `<div class="empty">🚫 היום הזה חסום${blockedWholeDay.reason ? " (" + escapeHtml(blockedWholeDay.reason) + ")" : ""}</div>`;
+    return;
+  }
+
+  const dow = new Date(waitlistSelectedDate + "T00:00:00").getDay();
+  const hours = workingHours.find(x => Number(x.day_of_week) === dow);
+  if (!hours) { box.innerHTML = `<div class="empty">המספרה סגורה ביום זה</div>`; return; }
+
+  const dayBookingsSet = new Set(allBookings.filter(b => b.booking_date === waitlistSelectedDate).map(b => String(b.booking_time).slice(0,5)));
+  const dayRanges = blockedRangesCache.filter(r => r.blocked_date === waitlistSelectedDate);
+  const isRangeBlocked = (time) => {
+    const mins = timeToMinutes(time);
+    return dayRanges.find(r => mins >= timeToMinutes(r.start_time) && mins < timeToMinutes(r.end_time));
+  };
+
+  const allSlots = generateAllSlots(hours.open_time, hours.close_time, hours.break_start, hours.break_end, Number(hours.slot_duration || 30));
+
+  const gridRows = allSlots.map(time => {
+    const waiters = timedItemsByTime.get(time) || [];
+    if (dayBookingsSet.has(time)) {
+      return `
+        <tr style="opacity:0.6;">
+          <td><strong>${time}</strong></td>
+          <td colspan="2" style="color:#888;">תפוס</td>
+          <td>${waiters.length ? waiters.map(w => `${escapeHtml(w.customer_name || "")} <button class="delete" style="width:auto;padding:4px 8px;margin:0 0 0 4px;font-size:11px;" onclick="deleteWaitlist(${Number(w.id)})">🗑️</button>`).join("<br>") : ""}</td>
+        </tr>`;
+    }
+    const blockedRange = isRangeBlocked(time);
+    if (blockedRange) {
+      return `
+        <tr style="opacity:0.6;">
+          <td><strong>${time}</strong></td>
+          <td colspan="3" style="color:#e39a67;">🚫 חסום${blockedRange.reason ? " - " + escapeHtml(blockedRange.reason) : ""}</td>
+        </tr>`;
+    }
+    if (waiters.length) {
+      return `
+        <tr>
+          <td><strong>${time}</strong></td>
+          <td colspan="2" style="color:#67e39a;">פנוי - ממתינים:</td>
+          <td>${waiters.map(w => `${escapeHtml(w.customer_name || "")} ${w.phone ? `<a class="phone" href="tel:${escapeHtml(w.phone)}">📞</a>` : ""} <button class="delete" style="width:auto;padding:4px 8px;margin:0 0 0 4px;font-size:11px;" onclick="deleteWaitlist(${Number(w.id)})">🗑️</button>`).join("<br>")}</td>
+        </tr>`;
+    }
+    return `
+      <tr style="opacity:0.55;">
+        <td><strong>${time}</strong></td>
+        <td colspan="3" style="color:#67e39a;">פנוי</td>
+      </tr>`;
+  }).join("");
+
+  const anyTimeHtml = anyTimeItems.length ? `
+    <div style="margin-top:15px;">
+      <div style="color:#999;font-size:13px;margin-bottom:6px;">ממתינים לכל שעה פנויה באותו יום:</div>
+      ${anyTimeItems.map(w => `
+        <div class="row">
+          <span class="label">${escapeHtml(w.customer_name || "")}</span>
+          <span class="value">${w.phone ? `<a class="phone" href="tel:${escapeHtml(w.phone)}">${escapeHtml(w.phone)}</a>` : ""} <button class="delete" style="width:auto;padding:4px 8px;margin:0 0 0 6px;font-size:11px;" onclick="deleteWaitlist(${Number(w.id)})">🗑️</button></span>
+        </div>`).join("")}
+    </div>` : "";
+
+  box.innerHTML = `
+    <div class="calendar-table-wrap">
+      <table class="calendar-table">
+        <thead><tr><th>שעה</th><th colspan="3">סטטוס / ממתינים</th></tr></thead>
+        <tbody>${gridRows}</tbody>
+      </table>
+    </div>
+    ${anyTimeHtml}`;
+}
+
+async function deleteWaitlist(id) {
+  if (!confirm("להסיר מהרשימה?")) return;
+  try {
+    await request("/rest/v1/waitlist?id=eq." + id, { method: "DELETE" });
+    loadWaitlist();
+  } catch (e) {
+    alert("שגיאה במחיקה");
+  }
+}
+
+async function markNoShow(id) {
+  if (!confirm("לסמן שהלקוח לא הגיע?")) return;
+  try {
+    await request(`/rest/v1/bookings?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ no_show: true })
+    });
+    await loadBookings();
+  } catch (e) { alert("שגיאה בסימון"); }
+}
+
+async function cancelBookingWithSms(id) {
+  if (!confirm("לבטל את התור? הלקוח יקבל הודעת SMS על הביטול.")) return;
+  try {
+    const result = await request("/rest/v1/rpc/admin_cancel_booking", {
+      method: "POST",
+      body: JSON.stringify({ p_booking_id: id })
+    });
+    if (result && result.success === false) { alert(result.message || "שגיאה בביטול התור"); return; }
+    await loadBookings();
+  } catch (e) { alert("שגיאה בביטול התור"); }
+}
+
+async function deleteBooking(id) {
+  if (!confirm("אתה בטוח שברצונך למחוק את התור?")) return;
+  try { await request("/rest/v1/bookings?id=eq." + id, { method: "DELETE" }); await loadBookings(); }
+  catch (e) { alert("לא הצלחנו למחוק את התור:\n" + e.message); }
+}
+
+async function loadServiceManager() {
+  const list = document.getElementById("service-list");
+  list.innerHTML = "טוען שירותים...";
+  try {
+    const services = await request("/rest/v1/services?select=id,name,description,price,duration_minutes,active&order=id");
+    list.innerHTML = "";
+    if (!services.length) { list.innerHTML = "אין שירותים זמינים"; return; }
+
+    services.forEach(service => {
+      const item = document.createElement("div");
+      item.style.cssText = `background:#202020;border-radius:14px;padding:15px;margin:12px 0;${service.active === false ? "opacity:0.55;" : ""}`;
+      item.innerHTML = `
+        <input value="${escapeHtml(service.name || "")}" data-field="name" style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0">
+        <input value="${service.price ?? ""}" data-field="price" type="number" style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0">
+        <input value="${service.duration_minutes ?? ""}" data-field="duration_minutes" type="number" placeholder="משך בדקות" style="width:100%;padding:12px;margin-bottom:8px;border-radius:8px;border:0">
+        <button style="width:100%;padding:12px;border:0;border-radius:10px;background:white;color:black;font-weight:bold;">💾 שמור</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button style="flex:1;margin:0;padding:10px;background:${service.active === false ? '#2a6b3f' : '#4a4a4a'};color:#fff;font-size:13px;" onclick="toggleServiceActive(${Number(service.id)}, ${service.active === false ? 'true' : 'false'})">${service.active === false ? '👁️ הצג שוב' : '🙈 הסתר'}</button>
+          <button style="flex:0 0 auto;margin:0;padding:10px 14px;background:#7a2a2a;color:#fff;font-size:13px;" onclick="deleteServicePermanently(${Number(service.id)})">🗑️ מחק</button>
+        </div>
+      `;
+      const button = item.querySelector("button");
+      button.onclick = async () => {
+        button.disabled = true; button.textContent = "שומר...";
+        try {
+          const name = item.querySelector('[data-field="name"]').value;
+          const price = Number(item.querySelector('[data-field="price"]').value);
+          const duration = Number(item.querySelector('[data-field="duration_minutes"]').value);
+          await request(`/rest/v1/services?id=eq.${service.id}`, {
+            method: "PATCH",
+            headers: { "Prefer": "return=minimal" },
+            body: JSON.stringify({ name, price, duration_minutes: duration })
+          });
+          button.textContent = "✅ נשמר!";
+          setTimeout(() => { button.textContent = "💾 שמור"; button.disabled = false; }, 1500);
+        } catch (e) { button.textContent = "❌ שגיאה"; button.disabled = false; alert("שגיאה בשמירת השירות"); }
+      };
+      list.appendChild(item);
+    });
+  } catch (e) { list.innerHTML = `<div style="color:#ff5555">❌ ${escapeHtml(e.message)}</div>`; }
+}
+
+async function addNewService() {
+  const status = document.getElementById("newServiceStatus");
+  const name = document.getElementById("newServiceName").value.trim();
+  const price = Number(document.getElementById("newServicePrice").value);
+  const duration = Number(document.getElementById("newServiceDuration").value);
+  if (!name || !price || !duration) {
+    status.textContent = "נא למלא שם, מחיר ומשך תקין";
+    status.className = "status error";
+    return;
+  }
+  status.textContent = "מוסיף...";
+  status.className = "status";
+  try {
+    await request("/rest/v1/services", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ name, price, duration_minutes: duration, active: true })
+    });
+    document.getElementById("newServiceName").value = "";
+    document.getElementById("newServicePrice").value = "";
+    document.getElementById("newServiceDuration").value = "";
+    status.textContent = "נוסף בהצלחה!";
+    status.className = "status success";
+    loadServiceManager();
+    loadServicesCache();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהוספת השירות";
+    status.className = "status error";
+  }
+}
+
+async function toggleServiceActive(id, active) {
+  try {
+    await request(`/rest/v1/services?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ active })
+    });
+    loadServiceManager();
+    loadServicesCache();
+  } catch (e) { alert("שגיאה בעדכון השירות"); }
+}
+
+async function deleteServicePermanently(id) {
+  if (!confirm("למחוק את השירות לצמיתות? פעולה זו אינה הפיכה.\nאם קיימים תורים (גם היסטוריים) שמשתמשים בשירות הזה, המחיקה תיכשל - במקרה כזה מומלץ להסתיר את השירות (🙈) במקום למחוק.")) return;
+  try {
+    await request(`/rest/v1/services?id=eq.${id}`, { method: "DELETE" });
+    loadServiceManager();
+    loadServicesCache();
+  } catch (e) {
+    alert("לא ניתן למחוק שירות שכבר נעשה בו שימוש בתורים קיימים. אפשר להסתיר אותו (🙈) במקום.");
+  }
+}
+
+function onGalleryFileChange() {
+  const file = document.getElementById("galleryFile").files[0];
+  const isVideo = file && file.type.startsWith("video/");
+  document.getElementById("galleryThumb").classList.toggle("hidden", !isVideo);
+  document.getElementById("galleryThumbLabel").classList.toggle("hidden", !isVideo);
+}
+
+async function uploadSingleFile(file, token) {
+  const filename = Date.now() + "_" + Math.random().toString(36).slice(2, 7) + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/gallery/${filename}`, {
+    method: "POST",
+    headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token, "Content-Type": file.type || "application/octet-stream" },
+    body: file
+  });
+  if (!uploadRes.ok) throw new Error(await uploadRes.text());
+  return `${SUPABASE_URL}/storage/v1/object/public/gallery/${filename}`;
+}
+
+async function uploadGalleryImage() {
+  const fileInput = document.getElementById("galleryFile");
+  const thumbInput = document.getElementById("galleryThumb");
+  const caption = document.getElementById("galleryCaption").value.trim();
+  const status = document.getElementById("galleryUploadStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה או סרטון"; status.className = "status error"; return; }
+
+  const mediaType = file.type.startsWith("video/") ? "video" : "image";
+  const thumbFile = mediaType === "video" ? thumbInput.files[0] : null;
+
+  status.textContent = mediaType === "video" ? "מעלה סרטון..." : "מעלה תמונה...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+
+  try {
+    const publicUrl = await uploadSingleFile(file, token);
+    let thumbnailUrl = null;
+    if (thumbFile) {
+      status.textContent = "מעלה תמונת שער...";
+      thumbnailUrl = await uploadSingleFile(thumbFile, token);
+    }
+
+    await request("/rest/v1/gallery", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ image_url: publicUrl, caption, media_type: mediaType, thumbnail_url: thumbnailUrl, category: "story" })
+    });
+
+    status.textContent = "הועלה בהצלחה!";
+    status.className = "status success";
+    fileInput.value = "";
+    thumbInput.value = "";
+    document.getElementById("galleryThumb").classList.add("hidden");
+    document.getElementById("galleryThumbLabel").classList.add("hidden");
+    document.getElementById("galleryCaption").value = "";
+    loadGallery();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהעלאה - ודא שהטבלה gallery וה-bucket קיימים וחשופים";
+    status.className = "status error";
+  }
+}
+
+async function loadGallery() {
+  const box = document.getElementById("gallery-list");
+  try {
+    const items = await request("/rest/v1/gallery?select=*&category=eq.story&order=sort_order.asc,created_at.desc");
+    galleryItemsCache = items;
+    if (!items.length) { box.innerHTML = `<div class="empty">אין תמונות בגלריה</div>`; return; }
+    box.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;";
+      const thumb = item.media_type === "video"
+        ? (item.thumbnail_url
+            ? `<img src="${escapeHtml(item.thumbnail_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">`
+            : `<video src="${escapeHtml(item.image_url)}" muted style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;"></video>`)
+        : `<img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">`;
+      div.innerHTML = `
+        ${thumb}
+        <div style="flex:1;color:#ccc;font-size:14px;">${item.media_type === "video" ? "🎬 " : ""}${escapeHtml(item.caption || "")}</div>
+        <button style="width:auto;padding:8px 12px;margin:0;background:#333;color:#fff;flex-shrink:0;" onclick="editGalleryCaption(${Number(item.id)})">✏️</button>
+        <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteGalleryItem(${Number(item.id)})">🗑️</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת הגלריה</div>`;
+  }
+}
+
+async function editGalleryCaption(id) {
+  const item = galleryItemsCache.find(g => Number(g.id) === Number(id));
+  const newCaption = prompt("שם/כיתוב לסטורי:", (item && item.caption) || "");
+  if (newCaption === null) return;
+  try {
+    await request(`/rest/v1/gallery?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ caption: newCaption.trim() })
+    });
+    loadGallery();
+  } catch (e) { alert("שגיאה בעדכון השם"); }
+}
+
+async function deleteGalleryItem(id) {
+  if (!confirm("למחוק את התמונה מהגלריה?")) return;
+  try { await request("/rest/v1/gallery?id=eq." + id, { method: "DELETE" }); loadGallery(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+let reviewItemsCache = [];
+async function uploadReviewImage() {
+  const fileInput = document.getElementById("reviewFile");
+  const caption = document.getElementById("reviewCaption").value.trim();
+  const status = document.getElementById("reviewUploadStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+
+  status.textContent = "מעלה תמונה...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+
+  try {
+    const publicUrl = await uploadSingleFile(file, token);
+    await request("/rest/v1/gallery", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ image_url: publicUrl, caption, media_type: "image", category: "review" })
+    });
+    status.textContent = "הועלה בהצלחה!";
+    status.className = "status success";
+    fileInput.value = "";
+    document.getElementById("reviewCaption").value = "";
+    loadReviewImages();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהעלאה";
+    status.className = "status error";
+  }
+}
+
+async function loadReviewImages() {
+  const box = document.getElementById("review-list");
+  try {
+    const items = await request("/rest/v1/gallery?select=*&category=eq.review&order=sort_order.asc,created_at.desc");
+    reviewItemsCache = items;
+    if (!items.length) { box.innerHTML = `<div class="empty">אין עדיין תמונות ביקורות</div>`; return; }
+    box.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;";
+      div.innerHTML = `
+        <img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">
+        <div style="flex:1;color:#ccc;font-size:14px;">${escapeHtml(item.caption || "")}</div>
+        <button style="width:auto;padding:8px 12px;margin:0;background:#333;color:#fff;flex-shrink:0;" onclick="editReviewCaption(${Number(item.id)})">✏️</button>
+        <button class="delete" style="width:auto;padding:8px 14px;margin:0;flex-shrink:0;" onclick="deleteReviewImage(${Number(item.id)})">🗑️</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת הביקורות</div>`;
+  }
+}
+
+async function editReviewCaption(id) {
+  const item = reviewItemsCache.find(g => Number(g.id) === Number(id));
+  const newCaption = prompt("כיתוב לתמונת הביקורת:", (item && item.caption) || "");
+  if (newCaption === null) return;
+  try {
+    await request(`/rest/v1/gallery?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ caption: newCaption.trim() })
+    });
+    loadReviewImages();
+  } catch (e) { alert("שגיאה בעדכון הכיתוב"); }
+}
+
+async function deleteReviewImage(id) {
+  if (!confirm("למחוק את תמונת הביקורת?")) return;
+  try { await request("/rest/v1/gallery?id=eq." + id, { method: "DELETE" }); loadReviewImages(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+async function loadProducts() {
+  const box = document.getElementById("products-list");
+  try {
+    const items = await request("/rest/v1/products?select=*&order=sort_order.asc,created_at.desc");
+    if (!items.length) { box.innerHTML = `<div class="empty">אין מוצרים עדיין</div>`; return; }
+    box.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.style.cssText = "display:flex;align-items:center;gap:12px;background:#101010;border:1px solid #303030;border-radius:14px;padding:10px;margin-bottom:8px;" + (item.active ? "" : "opacity:0.5;");
+      div.innerHTML = `
+        <img src="${escapeHtml(item.image_url)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;">${escapeHtml(item.name)}</div>
+          <div style="color:#999;font-size:12px;">${item.original_price ? `<span style="text-decoration:line-through;color:#8a8a8a;">₪${Number(item.original_price).toFixed(0)}</span> ` : ""}₪${Number(item.price).toFixed(0)}${item.description ? " · " + escapeHtml(item.description) : ""}</div>
+        </div>
+        <button style="width:auto;padding:8px 10px;margin:0 4px 0 0;font-size:12px;background:${item.active ? "#333" : "#4a7a4a"};color:#fff;" onclick="toggleProductActive(${Number(item.id)}, ${item.active ? "false" : "true"})">${item.active ? "🙈 הסתר" : "👁️ הצג"}</button>
+        <button class="delete" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="deleteProduct(${Number(item.id)})">🗑️</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) { box.innerHTML = `<div class="empty">שגיאה בטעינה</div>`; }
+}
+
+async function uploadProduct() {
+  const fileInput = document.getElementById("productFile");
+  const name = document.getElementById("productName").value.trim();
+  const price = document.getElementById("productPrice").value;
+  const originalPrice = document.getElementById("productOriginalPrice").value;
+  const description = document.getElementById("productDescription").value.trim();
+  const status = document.getElementById("productUploadStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+  if (!name || price === "") { status.textContent = "נא למלא שם ומחיר"; status.className = "status error"; return; }
+
+  status.textContent = "מעלה מוצר...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+
+  try {
+    const publicUrl = await uploadSingleFile(file, token);
+    await request("/rest/v1/products", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        name, price: Number(price),
+        original_price: originalPrice !== "" ? Number(originalPrice) : null,
+        description: description || null, image_url: publicUrl
+      })
+    });
+    status.textContent = "המוצר נוסף!";
+    status.className = "status success";
+    fileInput.value = "";
+    document.getElementById("productName").value = "";
+    document.getElementById("productPrice").value = "";
+    document.getElementById("productOriginalPrice").value = "";
+    document.getElementById("productDescription").value = "";
+    loadProducts();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בהעלאת המוצר";
+    status.className = "status error";
+  }
+}
+
+async function toggleProductActive(id, active) {
+  try { await request("/rest/v1/products?id=eq." + id, { method: "PATCH", body: JSON.stringify({ active }) }); loadProducts(); }
+  catch (e) { alert("שגיאה בעדכון"); }
+}
+
+async function deleteProduct(id) {
+  if (!confirm("למחוק את המוצר?")) return;
+  try { await request("/rest/v1/products?id=eq." + id, { method: "DELETE" }); loadProducts(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+async function loadBrandLogo() {
+  const preview = document.getElementById("brandLogoPreview");
+  try {
+    const rows = await request("/rest/v1/site_settings?key=eq.brand_logo_url&select=value");
+    if (rows.length && rows[0].value) {
+      preview.innerHTML = `<img src="${escapeHtml(rows[0].value)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`;
+    } else {
+      preview.innerHTML = `<span style="color:#777;font-size:13px;">אין לוגו מוגדר</span>`;
+    }
+  } catch (e) {
+    preview.innerHTML = `<span style="color:#ff6666;font-size:13px;">שגיאה בטעינת הלוגו</span>`;
+  }
+}
+
+async function uploadBrandLogo() {
+  const fileInput = document.getElementById("brandLogoFile");
+  const status = document.getElementById("brandLogoStatus");
+  const file = fileInput.files[0];
+  if (!file) { status.textContent = "נא לבחור תמונה"; status.className = "status error"; return; }
+  status.textContent = "מעלה לוגו...";
+  status.className = "status";
+  const token = localStorage.getItem("ggd_access_token");
+  try {
+    const url = await uploadSingleFile(file, token);
+    await request("/rest/v1/site_settings", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ key: "brand_logo_url", value: url })
+    });
+    status.textContent = "הלוגו נשמר!";
+    status.className = "status success";
+    fileInput.value = "";
+    loadBrandLogo();
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בשמירת הלוגו";
+    status.className = "status error";
+  }
+}
+
+async function loadBlockedDates() {
+  const box = document.getElementById("blocked-dates-list");
+  try {
+    const list = await request("/rest/v1/blocked_dates?select=*&order=blocked_date.asc");
+    blockedDatesCache = Array.isArray(list) ? list : [];
+    if (!blockedDatesCache.length) { box.innerHTML = `<div class="empty">אין תאריכים חסומים</div>`; return; }
+    box.innerHTML = "";
+    blockedDatesCache.forEach(d => {
+      const div = document.createElement("div");
+      div.className = "msg-card";
+      div.innerHTML = `
+        <div class="row"><span class="label">📅 ${formatDate(d.blocked_date)}</span><span class="value">${escapeHtml(d.reason || "")}</span></div>
+        <button class="delete" style="margin-top:8px;" onclick="deleteBlockedDate('${d.blocked_date}')">🗑️ ביטול חסימה</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) { box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינה</div>`; }
+}
+
+async function addBlockedDate() {
+  const date = document.getElementById("blockDateInput").value;
+  const reason = document.getElementById("blockDateReason").value.trim();
+  const status = document.getElementById("blockDateStatus");
+  if (!date) { status.textContent = "נא לבחור תאריך"; status.className = "status error"; return; }
+  try {
+    await request("/rest/v1/blocked_dates", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ blocked_date: date, reason: reason || null })
+    });
+    document.getElementById("blockDateInput").value = "";
+    document.getElementById("blockDateReason").value = "";
+    status.textContent = "התאריך נחסם!";
+    status.className = "status success";
+    loadBlockedDates();
+    renderCalendarTable();
+  } catch (e) { status.textContent = "שגיאה בחסימת התאריך"; status.className = "status error"; }
+}
+
+async function deleteBlockedDate(date) {
+  if (!confirm("לבטל את חסימת התאריך?")) return;
+  try { await request("/rest/v1/blocked_dates?blocked_date=eq." + date, { method: "DELETE" }); loadBlockedDates(); renderCalendarTable(); }
+  catch (e) { alert("שגיאה בביטול החסימה"); }
+}
+
+async function loadBlockedRanges() {
+  const box = document.getElementById("blocked-ranges-list");
+  try {
+    const list = await request("/rest/v1/blocked_time_ranges?select=*&order=blocked_date.asc,start_time.asc");
+    blockedRangesCache = Array.isArray(list) ? list : [];
+    if (!blockedRangesCache.length) { box.innerHTML = `<div class="empty">אין שעות חסומות</div>`; return; }
+    box.innerHTML = "";
+    blockedRangesCache.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "msg-card";
+      div.innerHTML = `
+        <div class="row"><span class="label">📅 ${formatDate(r.blocked_date)}</span><span class="value">${formatTime(r.start_time)}-${formatTime(r.end_time)}</span></div>
+        ${r.reason ? `<div style="color:#888;font-size:13px;">${escapeHtml(r.reason)}</div>` : ""}
+        <button class="delete" style="margin-top:8px;" onclick="deleteBlockedRange(${Number(r.id)})">🗑️ ביטול חסימה</button>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) { box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינה</div>`; }
+}
+
+async function addBlockedRange() {
+  const date = document.getElementById("blockRangeDate").value;
+  const start = document.getElementById("blockRangeStart").value;
+  const end = document.getElementById("blockRangeEnd").value;
+  const reason = document.getElementById("blockRangeReason").value.trim();
+  const status = document.getElementById("blockRangeStatus");
+  if (!date || !start || !end) { status.textContent = "נא למלא תאריך ושעות"; status.className = "status error"; return; }
+  if (start >= end) { status.textContent = "שעת ההתחלה חייבת להיות לפני שעת הסיום"; status.className = "status error"; return; }
+  try {
+    await request("/rest/v1/blocked_time_ranges", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ blocked_date: date, start_time: start, end_time: end, reason: reason || null })
+    });
+    document.getElementById("blockRangeDate").value = "";
+    document.getElementById("blockRangeStart").value = "";
+    document.getElementById("blockRangeEnd").value = "";
+    document.getElementById("blockRangeReason").value = "";
+    status.textContent = "השעות נחסמו!";
+    status.className = "status success";
+    loadBlockedRanges();
+    renderCalendarTable();
+  } catch (e) { status.textContent = "שגיאה בחסימת השעות"; status.className = "status error"; }
+}
+
+async function deleteBlockedRange(id) {
+  if (!confirm("לבטל את חסימת השעות?")) return;
+  try { await request("/rest/v1/blocked_time_ranges?id=eq." + id, { method: "DELETE" }); loadBlockedRanges(); renderCalendarTable(); }
+  catch (e) { alert("שגיאה בביטול החסימה"); }
+}
+
+async function loadBotRules() {
+  const box = document.getElementById("bot-rules-list");
+  try {
+    const list = await request("/rest/v1/bot_keyword_responses?select=*&order=id.desc");
+    if (!list.length) { box.innerHTML = `<div class="empty">אין חוקים עדיין</div>`; return; }
+    box.innerHTML = "";
+    list.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "msg-card";
+      div.innerHTML = `
+        <div class="row"><span class="label">מילות מפתח</span><span class="value">${escapeHtml(r.keywords)}</span></div>
+        <div style="margin-top:6px;color:#ccc;">${escapeHtml(r.response)}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button style="flex:1;margin:0;padding:10px;background:${r.is_active ? '#9e6a22' : '#2a6b3f'};color:#fff;" onclick="toggleBotRule(${Number(r.id)}, ${r.is_active ? 'false' : 'true'})">${r.is_active ? '⏸️ השבת' : '▶️ הפעל'}</button>
+          <button class="delete" style="flex:1;margin:0;padding:10px;" onclick="deleteBotRule(${Number(r.id)})">🗑️ מחק</button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת החוקים</div>`;
+  }
+}
+
+async function addBotRule() {
+  const keywords = document.getElementById("botKeywords").value.trim();
+  const response = document.getElementById("botResponse").value.trim();
+  const status = document.getElementById("botRuleStatus");
+  if (!keywords || !response) { status.textContent = "נא למלא מילות מפתח ותשובה"; status.className = "status error"; return; }
+  try {
+    await request("/rest/v1/bot_keyword_responses", {
+      method: "POST",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ keywords, response })
+    });
+    document.getElementById("botKeywords").value = "";
+    document.getElementById("botResponse").value = "";
+    status.textContent = "החוק נוסף!";
+    status.className = "status success";
+    loadBotRules();
+  } catch (e) {
+    status.textContent = "שגיאה בהוספת החוק";
+    status.className = "status error";
+  }
+}
+
+async function toggleBotRule(id, active) {
+  try {
+    await request(`/rest/v1/bot_keyword_responses?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ is_active: active })
+    });
+    loadBotRules();
+  } catch (e) { alert("שגיאה בעדכון החוק"); }
+}
+
+async function deleteBotRule(id) {
+  if (!confirm("למחוק את החוק?")) return;
+  try { await request("/rest/v1/bot_keyword_responses?id=eq." + id, { method: "DELETE" }); loadBotRules(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+async function loadMessages() {
+  const box = document.getElementById("messages-list");
+  const badge = document.getElementById("messagesUnreadBadge");
+  try {
+    const list = await request("/rest/v1/customer_messages?select=*&order=created_at.desc");
+    const unreadCount = list.filter(m => !m.is_read).length;
+    if (unreadCount > 0) { badge.textContent = unreadCount; badge.classList.remove("hidden"); }
+    else { badge.classList.add("hidden"); }
+
+    if (!list.length) { box.innerHTML = `<div class="empty">אין הודעות</div>`; return; }
+    box.innerHTML = "";
+    list.forEach(m => {
+      const div = document.createElement("div");
+      div.className = "msg-card" + (m.is_read ? "" : " unread");
+      const when = new Date(m.created_at).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+      div.innerHTML = `
+        <div class="row"><span class="label">${m.is_read ? "" : "🟢 "}${escapeHtml(m.customer_name || "")}</span><span class="value" style="font-weight:normal;color:#888;">${when}</span></div>
+        <div class="row"><span class="label">📞</span><span class="value"><a class="phone" href="tel:${escapeHtml(m.phone || "")}">${escapeHtml(m.phone || "")}</a></span></div>
+        <div style="margin-top:8px;color:#eee;">${escapeHtml(m.message || "")}</div>
+        ${m.bot_reply ? `<div style="margin-top:8px;background:#0c1f14;border:1px solid #234;border-radius:10px;padding:8px;color:#9fe6bb;font-size:13px;">🤖 ${escapeHtml(m.bot_reply)}</div>` : ""}
+        ${m.admin_reply ? `<div style="margin-top:8px;background:#101c2a;border:1px solid #234a6b;border-radius:10px;padding:8px;color:#9fc7ff;font-size:13px;">👤 ${escapeHtml(m.admin_reply)}</div>` : ""}
+        <textarea id="reply-${Number(m.id)}" placeholder="כתוב תשובה ללקוח..." style="width:100%;padding:10px;margin-top:8px;border-radius:10px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:14px;min-height:50px;">${escapeHtml(m.admin_reply || "")}</textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button style="flex:1;margin:0;padding:10px;background:#245a9e;color:#fff;" onclick="replyToMessage(${Number(m.id)})">📩 שליחת תשובה</button>
+          ${m.is_read ? "" : `<button style="flex:1;margin:0;padding:10px;background:#2a6b3f;color:#fff;" onclick="markMessageRead(${Number(m.id)})">✅ סמן כנקרא</button>`}
+          <button class="delete" style="flex:1;margin:0;padding:10px;" onclick="deleteMessage(${Number(m.id)})">🗑️ מחק</button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת ההודעות</div>`;
+  }
+}
+
+async function replyToMessage(id) {
+  const textEl = document.getElementById(`reply-${id}`);
+  const text = textEl.value.trim();
+  if (!text) { alert("נא לכתוב תשובה"); return; }
+  try {
+    await request(`/rest/v1/customer_messages?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ admin_reply: text, admin_replied_at: new Date().toISOString(), is_read: true })
+    });
+    loadMessages();
+  } catch (e) { alert("שגיאה בשליחת התשובה"); }
+}
+
+async function markMessageRead(id) {
+  try {
+    await request(`/rest/v1/customer_messages?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ is_read: true })
+    });
+    loadMessages();
+  } catch (e) { alert("שגיאה בעדכון ההודעה"); }
+}
+
+async function deleteMessage(id) {
+  if (!confirm("למחוק את ההודעה?")) return;
+  try { await request("/rest/v1/customer_messages?id=eq." + id, { method: "DELETE" }); loadMessages(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+async function loadCustomers() {
+  const box = document.getElementById("customers-list");
+  try {
+    const list = await request("/rest/v1/customers?select=id,name,phone,birth_date,created_at,is_blocked,notes,no_show_unblocked&order=created_at.desc");
+    allCustomersCache = list;
+    if (!list.length) { box.innerHTML = `<div class="empty">אין לקוחות רשומים עדיין</div>`; return; }
+    box.innerHTML = "";
+    list.forEach(c => {
+      const div = document.createElement("div");
+      div.style.cssText = "background:#101010;border:1px solid #303030;border-radius:14px;padding:12px;margin-bottom:8px;";
+      div.innerHTML = `
+        <div class="row"><span class="label">👤 שם</span><span class="value">${escapeHtml(c.name || "")}${c.is_blocked ? ' 🚫' : ''}${c.no_show_unblocked ? ' 🔓' : ''}</span></div>
+        <div class="row"><span class="label">📞 טלפון</span><span class="value"><a class="phone" href="tel:${escapeHtml(c.phone || "")}">${escapeHtml(c.phone || "")}</a></span></div>
+        ${c.birth_date ? `<div class="row"><span class="label">🎂 תאריך לידה</span><span class="value">${formatDate(c.birth_date)}</span></div>` : ""}
+        <textarea id="note-${Number(c.id)}" placeholder="הערה אישית (למשל: מעדיף פייד קל)..." style="width:100%;padding:8px;margin-top:8px;border-radius:10px;border:1px solid #333;background:#0c0c0c;color:#fff;font-size:13px;min-height:44px;">${escapeHtml(c.notes || "")}</textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button style="flex:1;margin:0;padding:10px;background:#245a9e;color:#fff;" onclick="saveCustomerNote(${Number(c.id)})">📝 שמירת הערה</button>
+          <button style="flex:1;margin:0;padding:10px;background:${c.is_blocked ? '#2a6b3f' : '#9e6a22'};color:#fff;" onclick="toggleBlockCustomer(${Number(c.id)}, ${c.is_blocked ? 'false' : 'true'})">${c.is_blocked ? '✅ בטל חסימה' : '🚫 חסום'}</button>
+          <button class="delete" style="flex:1;margin:0;padding:10px;" onclick="deleteCustomer(${Number(c.id)})">🗑️ מחק</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button style="flex:1;margin:0;padding:10px;background:${c.no_show_unblocked ? '#4a4a4a' : '#6b3f2a'};color:#fff;font-size:13px;" onclick="toggleNoShowUnblock(${Number(c.id)}, ${c.no_show_unblocked ? 'false' : 'true'})">
+            ${c.no_show_unblocked ? '🔒 החזר חסימת no-show אוטומטית' : '🔓 בטל חסימת no-show'}
+          </button>
+          <button style="flex:0 0 auto;width:auto;margin:0;padding:10px 14px;background:#1f8a4c;color:#fff;font-size:13px;white-space:nowrap;" onclick="sendNoShowWhatsapp('${escapeHtml(c.phone || "")}', '${escapeHtml(c.name || "")}')" title="שליחת הודעת WhatsApp מוכנה">
+            💬 WhatsApp
+          </button>
+        </div>
+      `;
+      box.appendChild(div);
+    });
+  } catch (e) {
+    box.innerHTML = `<div class="empty" style="color:#ff6666;">שגיאה בטעינת הלקוחות</div>`;
+  }
+}
+
+async function saveCustomerNote(id) {
+  const notes = document.getElementById(`note-${id}`).value.trim();
+  try {
+    await request(`/rest/v1/customers?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ notes })
+    });
+  } catch (e) { alert("שגיאה בשמירת ההערה"); }
+}
+
+async function toggleBlockCustomer(id, block) {
+  try {
+    await request(`/rest/v1/customers?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ is_blocked: block })
+    });
+    loadCustomers();
+  } catch (e) { alert("שגיאה בעדכון החסימה"); }
+}
+
+function toIntlWhatsappPhone(phone) {
+  let digits = (phone || "").replace(/[^\d]/g, "");
+  if (digits.startsWith("972")) return digits;
+  if (digits.startsWith("0")) return "972" + digits.slice(1);
+  return digits;
+}
+
+function sendNoShowWhatsapp(phone, name) {
+  if (!phone) { alert("אין מספר טלפון ללקוח הזה"); return; }
+  const intlPhone = toIntlWhatsappPhone(phone);
+  const firstName = (name || "").trim().split(" ")[0] || "";
+  const message = `היי ${firstName}, מדברים מ-GGD Barber 💈\nשמנו לב שיש לך חסימה זמנית מהזמנת תורים אונליין בעקבות תור קודם שלא הגעת אליו.\nנשמח שתחזור/י אלינו כדי לסגור את הנושא ולשחרר את החסימה 🙏`;
+  const url = `https://wa.me/${intlPhone}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+
+async function toggleNoShowUnblock(id, unblock) {
+  try {
+    await request(`/rest/v1/customers?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { "Prefer": "return=minimal" },
+      body: JSON.stringify({ no_show_unblocked: unblock })
+    });
+    loadCustomers();
+  } catch (e) { alert("שגיאה בעדכון"); }
+}
+
+async function deleteCustomer(id) {
+  if (!confirm("למחוק את הלקוח לצמיתות?")) return;
+  try { await request("/rest/v1/customers?id=eq." + id, { method: "DELETE" }); loadCustomers(); }
+  catch (e) { alert("שגיאה במחיקה"); }
+}
+
+function setSmsTarget(target) {
+  smsTarget = target;
+  document.getElementById("smsTargetSingleBtn").classList.toggle("active", target === "single");
+  document.getElementById("smsTargetAllBtn").classList.toggle("active", target === "all");
+  document.getElementById("smsPhone").classList.toggle("hidden", target === "all");
+}
+
+async function sendCustomSms() {
+  const status = document.getElementById("smsStatus");
+  const message = document.getElementById("smsMessage").value.trim();
+  if (!message) { status.textContent = "נא לכתוב הודעה"; status.className = "status error"; return; }
+
+  let recipients = [];
+  if (smsTarget === "single") {
+    const phone = document.getElementById("smsPhone").value.trim();
+    if (!phone) { status.textContent = "נא להזין מספר טלפון"; status.className = "status error"; return; }
+    recipients = [phone];
+  } else {
+    recipients = allCustomersCache.map(c => c.phone).filter(Boolean);
+    if (!recipients.length) { status.textContent = "אין לקוחות רשומים"; status.className = "status error"; return; }
+    if (!confirm(`לשלוח הודעה ל-${recipients.length} לקוחות?`)) return;
+  }
+
+  status.textContent = "שולח...";
+  status.className = "status";
+  try {
+    const token = localStorage.getItem("ggd_access_token");
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-custom-sms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, "apikey": SUPABASE_KEY },
+      body: JSON.stringify({ recipients, message })
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) throw new Error(data.message || "שגיאה");
+    status.textContent = `נשלחו ${data.sent} הודעות בהצלחה!`;
+    status.className = "status success";
+    document.getElementById("smsMessage").value = "";
+  } catch (e) {
+    console.error(e);
+    status.textContent = "שגיאה בשליחת ההודעות";
+    status.className = "status error";
+  }
+}
+
+function formatDate(val) { if (!val) return ""; const p = String(val).split("-"); return p.length !== 3 ? val : `${p[2]}/${p[1]}/${p[0]}`; }
+function formatTime(val) { return !val ? "" : String(val).substring(0, 5); }
+function escapeHtml(val) { return String(val ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+function logout() {
+  localStorage.removeItem("ggd_access_token");
+  localStorage.removeItem("ggd_refresh_token");
+  document.getElementById("adminPanel").classList.add("hidden");
+  document.getElementById("loginCard").classList.remove("hidden");
+}
+
+if (localStorage.getItem("ggd_access_token")) showAdmin();
+</script>
+</body>
+</html>
